@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/admin.controller");
-const db = require("../config/db");
+const db = require('../config/database');
 
 
 router.get("/demandes", adminController.getDemandes);
@@ -39,4 +39,5 @@ router.put("/users/:id/grade-simple", async (req, res) => {
 });
 
 module.exports = router;
+
 

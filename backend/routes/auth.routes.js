@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require("../controllers/auth.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
-const db = require("../config/db");
+const db = require('../config/database');
 
 
 router.post("/login", authController.login);
@@ -32,5 +32,6 @@ router.get("/me", authMiddleware(), async (req,res)=>{
   }
 
 });
+
 
 module.exports = router;

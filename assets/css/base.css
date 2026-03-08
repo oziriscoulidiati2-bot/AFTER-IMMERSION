@@ -1,0 +1,25 @@
+:root {
+  --red: #c1121f;
+  --green: #006400;
+  --yellow: #fca311;
+  --dark: #0d0d0d;
+  --light: #f5f5f5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial Black", sans-serif;
+  background: var(--dark);
+  color: var(--light);
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

@@ -1,0 +1,97 @@
+
+
+/* =========================
+   HERO VAGUE EFFECT
+========================= */
+
+.hero {
+  position: relative;
+  min-height: 75vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  padding: 2rem;
+  overflow: hidden;
+
+  background:
+    linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+    url("../images/burkina-flag.png") center/cover no-repeat;
+}
+
+/* Couche animée pour effet vague */
+.wave-layer {
+  position: absolute;
+  inset: -20px;
+  background: url("../images/burkina-flag.png") center/cover no-repeat;
+  opacity: 0.15;
+  animation: waveMove 8s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+/* Animation vague */
+@keyframes waveMove {
+  0% {
+    transform: scale(1) translateX(0px);
+  }
+  50% {
+    transform: scale(1.03) translateX(-10px);
+  }
+  100% {
+    transform: scale(1.05) translateX(10px);
+  }
+}
+
+/* =========================
+   ANIMATION TEXTE
+========================= */
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 1s ease forwards;
+}
+
+.delay-1 {
+  animation-delay: 0.5s;
+}
+
+.delay-2 {
+  animation-delay: 1s;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* TITRE STYLE MILITAIRE */
+.hero h1 {
+  font-size: 1.8rem;
+  color: #FFD700;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+.hero p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  display: inline-block;
+  background: rgba(206,17,38,0.9);
+  padding: 0.7rem 1.2rem;
+  border-radius: 4px;
+  font-weight: bold;
+}

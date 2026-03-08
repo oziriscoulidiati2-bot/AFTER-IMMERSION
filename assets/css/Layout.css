@@ -1,0 +1,283 @@
+/* NAVBAR */
+
+.navbar {
+  position: fixed;
+  width: 100%;
+  background: black;
+  padding: 0.8rem 1rem;
+  border-bottom: 3px solid var(--yellow);
+  z-index: 1000;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  position: fixed;
+  top: 60px;
+  right: -100%;
+  width: 70%;
+  height: 100vh;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  transition: right 0.4s ease;
+}
+
+.nav-links.active {
+  right: 0;
+}
+
+.nav-links a {
+  font-size: 1.2rem;
+  color: var(--light);
+  text-decoration: none;
+}
+
+.nav-actions {
+  display: none;
+}
+
+.burger {
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+/* HERO */
+
+.hero {
+  padding-top: 100px;
+  padding-bottom: 60px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: center;
+  background: linear-gradient(to bottom, var(--red), var(--green));
+}
+
+.hero h1 {
+  font-size: 1.8rem;
+}
+
+.hero p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+
+.hero-stats span {
+  font-size: 2rem;
+}
+
+/* SECTIONS */
+
+.section {
+  padding: 50px 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  padding: 2rem;
+  background: black;
+}
+
+/* DESKTOP */
+
+@media (min-width: 768px) {
+
+  .nav-links {
+    position: static;
+    flex-direction: row;
+    height: auto;
+    width: auto;
+    background: none;
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .burger {
+    display: none;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+  }
+
+  .hero-stats span {
+    font-size: 4rem;
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.main-header {
+  background: #1b1b1b;
+  padding: 1rem 0;
+  border-bottom: 3px solid #c00;
+}
+
+
+/*partie dedier aux images*/
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.hero-slider {
+  position: relative;
+  overflow: hidden;
+  height: 60vh;
+}
+
+.slides {
+  position: relative;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.section-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 3rem 0;
+}
+
+.section-grid img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.partners {
+  padding: 3rem 0;
+  background: #111;
+  text-align: center;
+}
+
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.partners-grid img {
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  transition: 0.3s;
+}
+
+.partners-grid img:hover {
+  filter: grayscale(0%);
+}
+
+/*partie dedier au drapeau*/
+
+/* =========================
+   HERO - DRAPEAU BURKINA
+========================= */
+
+.hero {
+  position: relative;
+  min-height: 70vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  padding: 2rem;
+
+  /* Background drapeau */
+  background:
+    url("../images/burkina-flag.png") center/cover no-repeat;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero h1 {
+  font-size: 1.8rem;
+  color: #FFD700; 
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+.hero p {
+  font-size: 1rem;
+  color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  display: inline-block;
+  background: rgba(206, 17, 38, 0.9); 
+  padding: 0.7rem 1.2rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 2.8rem;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+  }
+}

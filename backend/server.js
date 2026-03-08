@@ -1,4 +1,3 @@
-require("dotenv").config();
 
 process.on("uncaughtException", err => {
   console.error("❌ UNCAUGHT:", err);
@@ -18,6 +17,7 @@ const PORT = process.env.PORT || 5000;
     });
 
 console.log("🔥 BON BACKEND ACTIF");
+
 
 
 

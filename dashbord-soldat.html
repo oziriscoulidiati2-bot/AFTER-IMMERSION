@@ -462,7 +462,7 @@ const requestMessage = document.getElementById("requestMessage");
 // VARIABLES
 // =============================
 let currentUser = "vendeur";
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://https://after-immersion-api.onrender.com/api/auth";
 
 // =============================
 // NOTIFICATION
@@ -521,7 +521,7 @@ const token = localStorage.getItem("token");
 
 try{
 
-const res = await fetch("http://localhost:5000/api/auth/me",{
+const res = await fetch("http://https://after-immersion-api.onrender.com/api/auth/me",{
 headers:{
 Authorization:`Bearer ${token}`
 }
@@ -569,7 +569,7 @@ document.getElementById("nextGradeText").innerText =
 
 async function downloadCertificate(){
 
- const res = await fetch("/api/pdf/generate",{
+ const res = await fetch("https://after-immersion-api.onrender.com/api/pdf/generate",{
   method:"POST",
   credentials:"include"
  });
@@ -674,5 +674,6 @@ loadSoldatProfile();
 
 </body>
 </html>
+
 
 

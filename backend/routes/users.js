@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const db = require('../config/database');
 
 // Lister tous les utilisateurs
 router.get("/", (req, res) => {
@@ -65,4 +65,5 @@ router.post("/login", (req, res) => {
     });
   });
 });
+
  

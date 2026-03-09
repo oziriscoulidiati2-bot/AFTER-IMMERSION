@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --gold: #C9A227;
+  --green: #0B3D2E;
+  --burgundy: #6A1B1A;
+  --beige: #F5E9D3;
+  --black: #0A0A0A;
+  --bg: #f9f3e8;
+}
+
+/* =======================
+   RESET & BASE
+======================= */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background-color: var(--bg); color: var(--black); }
+
+/* =======================
+   LOGIN PAGE
+======================= */
+#login-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#login-form {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+  width: 320px;
+  text-align: center;
+}
+#login-form h2 {
+  margin-bottom: 20px;
+  color: var(--green);
+}
+#login-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+#login-form button {
+  width: 100%;
+  padding: 12px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+#login-form button:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+#login-form p { color: var(--burgundy); font-size: 14px; display: none; margin-top: 10px; }
+
+/* =======================
+   DASHBOARD CONTAINER
+======================= */
+.container { 
+  padding: 20px; 
+  padding-bottom: 70px; 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  display: none; 
+}
+
+h2 { margin-bottom: 15px; color: var(--green); }
+
+.card {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+table th { background-color: var(--beige); }
+table td button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 12px;
+  transition: 0.3s;
+}
+.btn-approve { background: var(--green); color: white; }
+.btn-approve:hover { background: var(--gold); color: var(--black); }
+.btn-reject { background: var(--burgundy); color: white; }
+.btn-reject:hover { background: var(--gold); color: var(--black); }
+.btn-block { background: var(--gold); color: var(--black); }
+.btn-delete { background: #888; color: white; }
+
+/* =======================
+   STATS CARDS
+======================= */
+.stats-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+.stat-card {
+  flex: 1 1 150px;
+  background: var(--green);
+  color: white;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+.stat-card:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+.stat-card h3 { font-size: 24px; margin-bottom: 5px; }
+.stat-card p { font-size: 14px; }
+
+/* =======================
+   NOTIFICATIONS
+======================= */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--green);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+  z-index: 2000;
+}
+.notification.show { opacity: 1; transform: translateY(0); }
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 768px) {
+  table th, table td { font-size: 12px; padding: 8px; }
+  .card { padding: 15px; }
+  .stats-container { flex-direction: column; gap: 15px; }
+}
+
+/* =======================
+   MOBILE NAV BAR
+======================= */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--green);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  z-index: 1000;
+  color: white;
+  display: none;
+  box-shadow: 0 -6px 15px rgba(0,0,0,0.1);
+}
+.mobile-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.mobile-nav button.active {
+  font-weight: 700;
+  color: var(--gold);
+}
+.mobile-nav button:hover {
+  color: var(--gold);
+}
+</style>
+  
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-container">
+ <form id="login-form">
+  <input
+    type="text"
+    id="nom"
+    name="nom"
+    placeholder="Nom admin"
+    autocomplete="username"
+    required
+  />
+
+  <input
+    type="password"
+    id="password"
+    name="password"
+    placeholder="Mot de passe"
+    autocomplete="current-password"
+    required
+  />
+
+  <button type="submit">Connexion</button>
+
+  <p id="error-msg" style="display:none;color:red">
+    Identifiants incorrects
+  </p>
+</form>
+</div>
+
+<!-- DASHBOARD -->
+<div class="container" id="dashboard">
+
+  <!-- SECTION 1: COMPTES -->
+  <div id="section-comptes" class="card">
+    <h2>Gestion des comptes</h2>
+    <p>LISTE DES DEMANDES EN ATTENTE </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Téléphone</th>
+          <th>Lieu</th>
+          <th>Type de compte</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="demandes-table"></tbody>
+    </table>
+  <br> 
+  <br>
+  <br>
+    <p>COMPTES EXISTANTS </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Téléphone</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="comptes-table"></tbody>
+    </table>
+  </div>
+
+  <div id="grade-modal" style="display:none;">
+  <h3>Changer le grade de <span id="modal-username"></span></h3>
+
+  <!-- stocker l'ID utilisateur -->
+  <input type="hidden" id="modal-user-id">
+
+  <select id="grade-select">
+    <option value="Recrue">Recrue</option>
+    <option value="Soldat">Soldat</option>
+    <option value="Caporal">Caporal</option>
+    <option value="Sergent">Sergent</option>
+    <option value="Sergent-chef">Sergent-chef</option>
+    <option value="Adjudant">Adjudant</option>
+    <option value="Sous-lieutenant">Sous-lieutenant</option>
+    <option value="Lieutenant">Lieutenant</option>
+    <option value="Capitaine">Capitaine</option>
+    <option value="Commandant">Commandant</option>
+  </select>
+  <button onclick="submitGradeSimple()">Valider</button>
+  <button onclick="closeModal()">Annuler</button>
+</div>
+
+  <!-- SECTION 2: ANNONCES -->
+  <div id="section-annonces" class="card">
+    <h2>Gestion des annonces</h2>
+    <div class="stats-container">
+      <div class="stat-card"><h3 id="total-permanentes">0</h3><p>Annonces permanentes</p></div>
+      <div class="stat-card"><h3 id="total-temporelles">0</h3><p>Annonces promotionnelles</p></div>
+      <div class="stat-card"><h3 id="annonces-7jours">0</h3><p>Créées 7 derniers jours</p></div>
+      <div class="stat-card"><h3 id="annonces-30jours">0</h3><p>Créées 30 derniers jours</p></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: COMMANDES -->
+  <div id="section-commandes" class="card">
+    <h2>Commandes</h2>
+    <div class="stats-container">
+      <div class="stat-card"><h3 id="total-commandes">0</h3><p>Total commandes</p></div>
+      <div class="stat-card"><h3 id="total-livraisons">0</h3><p>Total des livraisons reçues</p></div>
+      <div class="stat-card"><h3 id="commandes-7jours">0</h3><p>Les commandes des 7 derniers jours</p></div>
+      <div class="stat-card"><h3 id="commandes-30jours">0</h3><p>Les commandes des 30 derniers jours</p></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SECTION FOURNISSEURS -->
+<div id="section-fournisseurs" class="card">
+  <h2>Gestion des fournisseurs</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Ville</th>
+        <th>Fournisseur</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="fournisseurs-table"></tbody>
+  </table>
+</div>
+
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="active" onclick="showSection('section-comptes')">MIssions</button>
+  <button onclick="showSection('section-annonces')">Grades</button>
+  <button onclick="showSection('section-commandes')">Academie</button>
+  <button onclick="showSection('section-fournisseurs')">Réussite</button>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<script>
+function showSection(id) {
+  const sections = [
+    'section-comptes',
+    'section-annonces',
+    'section-commandes',
+    'section-fournisseurs'
+  ];
+
+  sections.forEach(sec => {
+    const el = document.getElementById(sec);
+    if (el) el.style.display = (sec === id) ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.mobile-nav button')
+    .forEach(btn => btn.classList.remove('active'));
+}
+
+
+const loginForm = document.getElementById("login-form");
+const loginContainer = document.getElementById("login-container");
+const dashboard = document.getElementById("dashboard");
+const mobileNav = document.getElementById("mobile-nav");
+const errorMsg = document.getElementById("error-msg");
+
+
+ loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nom = document.getElementById("nom").value;
+  const password = document.getElementById("password").value;
+ 
+  console.log("submit déclenché");
+  console.log("nom:", nom);
+  console.log("password:", password);
+  
+  
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nom, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.role !== "admin") {
+      errorMsg.style.display = "block";
+      return;
+    }
+
+    // ✅ SAUVEGARDE TOKEN
+    localStorage.setItem("token", data.token);
+
+    loginContainer.style.display = "none";
+    dashboard.style.display = "block";
+    mobileNav.style.display = "flex";
+
+    initDashboard();
+
+  } catch (err) {
+    errorMsg.style.display = "block";
+  }
+});
+
+//init Dashboad
+async function initDashboard() {
+  await loadDemandes();
+  await loadComptes();
+  loadStats();
+  showSection("section-comptes");
+}
+
+//Demandes
+async function loadDemandes() {
+  const res = await fetch("http://localhost:5000/api/admin/demandes", {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    }
+  });
+
+  const demandes = await res.json();
+
+  const demandesTable = document.getElementById("demandes-table");
+  demandesTable.innerHTML = "";
+
+  demandes.forEach(d => {
+    demandesTable.innerHTML += `
+      <tr>
+        <td>${d.nom}</td>
+        <td>${d.telephone}</td>
+        <td>${d.ville}</td>
+        <td>${d.role}</td>
+        <td>
+          <button onclick="approve(${d.id})">Approuver</button>
+          <button onclick="reject(${d.id})">Rejeter</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+
+//Approuver ou rejeter un compte
+async function approve(id) {
+  await fetch(`http://localhost:5000/api/admin/demandes/${id}/approve`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    }
+  });
+  initDashboard();
+}
+
+async function reject(id) {
+  await fetch(`http://localhost:5000/api/admin/demandes/${id}/reject`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    }
+  });
+  initDashboard();
+}
+
+// comptes
+async function loadComptes() {
+  const res = await fetch("http://localhost:5000/api/admin/users", {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    }
+  });
+
+  const comptes = await res.json();
+  const comptesTable = document.getElementById("comptes-table");
+  comptesTable.innerHTML = "";
+
+  comptes.forEach(c => {
+    comptesTable.innerHTML += `
+      <tr>
+        <td>${c.nom}</td>
+        <td>${c.telephone}</td>
+        <td>${c.status}</td>
+        <td>
+          <button onclick="toggleUser(${c.id})">
+            ${c.actif ? "Bloquer" : "Débloquer"}
+          </button>
+          <button onclick="deleteUser(${c.id})">Supprimer</button>
+          <button onclick="openGradeModal(${c.id}, '${c.nom}')">Changer grade</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// Bloquer / Débloquer un utilisateur
+async function toggleUser(id) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/admin/users/${id}/toggle`, {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token")
+      }
+    });
+    if (!res.ok) throw new Error("Erreur modification utilisateur");
+
+    await loadComptes(); // recharge la table
+  } catch (err) {
+    console.error(err);
+    showNotification("Erreur lors de la modification du compte");
+  }
+}
+
+// Supprimer un utilisateur
+async function deleteUser(id) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token")
+      }
+    });
+    if (!res.ok) throw new Error("Erreur suppression utilisateur");
+
+    await loadComptes(); // recharge la table
+  } catch (err) {
+    console.error(err);
+    showNotification("Erreur lors de la suppression du compte");
+  }
+}
+
+
+//statistiques
+function loadStats() {
+  fetch("http://localhost:5000/api/admin/stats", {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("total-permanentes").textContent = data.produits.total;
+    document.getElementById("annonces-7jours").textContent = data.produits.last7days;
+    document.getElementById("annonces-30jours").textContent = data.produits.last30days;
+
+    document.getElementById("total-temporelles").textContent = data.promotions.total;
+
+    document.getElementById("total-commandes").textContent = data.commandes.total;
+    document.getElementById("total-livraisons").textContent = data.commandes.livrees;
+    document.getElementById("commandes-7jours").textContent = data.commandes.last7days;
+    document.getElementById("commandes-30jours").textContent = data.commandes.last30days;
+  });
+}
+
+
+//soldats
+
+function openGradeModal(userId, username){
+  document.getElementById("grade-modal").style.display = "block";
+  document.getElementById("modal-user-id").value = userId;
+  document.getElementById("modal-username").innerText = username;
+}
+
+
+function openGradeModal(userId, username){
+
+  document.getElementById("grade-modal").style.display = "block"
+
+  document.getElementById("modal-user-id").value = userId
+
+  document.getElementById("modal-username").innerText = username
+
+}
+
+// Fermer la modal
+function closeModal(){
+  document.getElementById("grade-modal").style.display = "none"
+}
+
+
+// Fonction notification 
+function showNotification(message, isError = false) {
+  const notif = document.getElementById("notification");
+  notif.textContent = message;
+  notif.style.background = isError ? "#6A1B1A" : "var(--green)";
+  notif.classList.add("show");
+
+  setTimeout(() => {
+    notif.classList.remove("show");
+  }, 3000);
+}
+
+async function submitGradeSimple(){
+
+  const userId = document.getElementById("modal-user-id").value
+  const grade = document.getElementById("grade-select").value
+
+   try {
+    const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/grade-simple`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ grade })
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    
+    closeModal();
+
+  } catch (error) {
+    console.error(error);
+    alert("Erreur serveur");
+  }
+} 
+
+</script>
+</body>
+</html>

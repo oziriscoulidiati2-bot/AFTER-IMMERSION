@@ -449,7 +449,7 @@ async function loadDemandes() {
 
 //Approuver ou rejeter un compte
 async function approve(id) {
-  await fetch(`http://localhost:5000/api/admin/demandes/${id}/approve`, {
+  await fetch(`http://"https://after-immersion-api.onrender.com/api/admin/demandes/${id}/approve`, {
     method: "PUT",
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
@@ -459,7 +459,7 @@ async function approve(id) {
 }
 
 async function reject(id) {
-  await fetch(`http://localhost:5000/api/admin/demandes/${id}/reject`, {
+  await fetch(`http://"https://after-immersion-api.onrender.com/api/admin/demandes/${id}/reject`, {
     method: "PUT",
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
@@ -470,7 +470,7 @@ async function reject(id) {
 
 // comptes
 async function loadComptes() {
-  const res = await fetch("http://localhost:5000/api/admin/users", {
+  const res = await fetch("http://after-immersion-api.onrender.com/api/admin/users", {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
     }
@@ -501,7 +501,7 @@ async function loadComptes() {
 // Bloquer / Débloquer un utilisateur
 async function toggleUser(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/admin/users/${id}/toggle`, {
+    const res = await fetch(`https://after-immersion-api.onrender.com/api/admin/users/${id}/toggle`, {
       method: "PUT",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
@@ -519,7 +519,7 @@ async function toggleUser(id) {
 // Supprimer un utilisateur
 async function deleteUser(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+    const res = await fetch(`https://after-immersion-api.onrender.com/api/admin/users/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
@@ -537,7 +537,7 @@ async function deleteUser(id) {
 
 //statistiques
 function loadStats() {
-  fetch("http://localhost:5000/api/admin/stats", {
+  fetch("https://after-immersion-api.onrender.com/api/admin/stats", {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
     }
@@ -601,7 +601,7 @@ async function submitGradeSimple(){
   const grade = document.getElementById("grade-select").value
 
    try {
-    const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/grade-simple`, {
+    const res = await fetch(`https://after-immersion-api.onrender.com/api/admin/users/${userId}/grade-simple`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ grade })
@@ -622,3 +622,4 @@ async function submitGradeSimple(){
 </script>
 </body>
 </html>
+

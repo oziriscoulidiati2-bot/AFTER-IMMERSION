@@ -1,18 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+// CORS configuration
+app.use(cors({
+  origin: [
+    "https://after-immersion-game-bf.pages.dev",
+    "http://localhost:5000",
+    "http://127.0.0.1:5500"
+  ],
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
+}));
 
-app.use(express.json());   
+app.use(express.json());
+   
 app.use(express.urlencoded({ extended: true }));
 
 const authRoutes = require("./routes/auth.routes");
 const adminRoutes = require("./routes/admin.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
-
-
-// ===== MIDDLEWARES =====
-app.use(cors());
-app.use(express.json());
 
 // ===== ROUTES =====
 app.use("/api/auth", authRoutes);
@@ -27,3 +33,4 @@ app.get("/", (req, res) => {
 
 
 module.exports = app;
+

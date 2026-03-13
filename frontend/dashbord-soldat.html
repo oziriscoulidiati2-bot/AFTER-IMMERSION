@@ -478,6 +478,34 @@ function notify(msg){
 // =============================
 // LOGIN
 // =============================
+async function loadSoldatProfile(){
+
+const token = localStorage.getItem("token");
+
+try{
+
+const res = await fetch("https://after-immersion-api.onrender.com/api/auth/me",{
+headers:{
+Authorization:`Bearer ${token}`
+}
+});
+
+const user = await res.json();
+
+document.getElementById("soldatPoints").innerText = user.points || 0;
+document.getElementById("soldatGrade").innerText = user.grade || "Recrue";
+
+updateProgress(user.points);
+
+}catch(err){
+
+notify("Impossible de charger le profil");
+
+}
+
+}
+
+	
 formLogin.onsubmit = async (e) => {
   e.preventDefault();
 
@@ -515,32 +543,7 @@ formLogin.onsubmit = async (e) => {
     
 
 
-    async function loadSoldatProfile(){
-
-const token = localStorage.getItem("token");
-
-try{
-
-const res = await fetch("https://after-immersion-api.onrender.com/api/auth/me",{
-headers:{
-Authorization:`Bearer ${token}`
-}
-});
-
-const user = await res.json();
-
-document.getElementById("soldatPoints").innerText = user.points || 0;
-document.getElementById("soldatGrade").innerText = user.grade || "Recrue";
-
-updateProgress(user.points);
-
-}catch(err){
-
-notify("Impossible de charger le profil");
-
-}
-
-}
+    
 
 function updateProgress(points){
 

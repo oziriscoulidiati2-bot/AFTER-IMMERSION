@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Commandants Dashboards</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -295,21 +295,21 @@ table td button {
   <div id="section-annonces" class="card">
     <h2>Gestion des annonces</h2>
     <div class="stats-container">
-      <div class="stat-card"><h3 id="total-permanentes">0</h3><p>Annonces permanentes</p></div>
-      <div class="stat-card"><h3 id="total-temporelles">0</h3><p>Annonces promotionnelles</p></div>
-      <div class="stat-card"><h3 id="annonces-7jours">0</h3><p>Créées 7 derniers jours</p></div>
-      <div class="stat-card"><h3 id="annonces-30jours">0</h3><p>Créées 30 derniers jours</p></div>
+      <div class="stat-card"><h3 id="total-permanentes">0</h3><p>permanentes</p></div>
+      <div class="stat-card"><h3 id="total-temporelles">0</h3><p> promotionnelles</p></div>
+      <div class="stat-card"><h3 id="annonces-7jours">0</h3><p> 7 derniers jours</p></div>
+      <div class="stat-card"><h3 id="annonces-30jours">0</h3><p>30 derniers jours</p></div>
     </div>
   </div>
 
   <!-- SECTION 3: COMMANDES -->
   <div id="section-commandes" class="card">
-    <h2>Commandes</h2>
+    <h2>Troupes disponibles</h2>
     <div class="stats-container">
-      <div class="stat-card"><h3 id="total-commandes">0</h3><p>Total commandes</p></div>
-      <div class="stat-card"><h3 id="total-livraisons">0</h3><p>Total des livraisons reçues</p></div>
-      <div class="stat-card"><h3 id="commandes-7jours">0</h3><p>Les commandes des 7 derniers jours</p></div>
-      <div class="stat-card"><h3 id="commandes-30jours">0</h3><p>Les commandes des 30 derniers jours</p></div>
+      <div class="stat-card"><h3 id="total-commandes">0</h3><p>Total </p></div>
+      <div class="stat-card"><h3 id="total-livraisons">0</h3><p>Total des nouveaux</p></div>
+      <div class="stat-card"><h3 id="commandes-7jours">0</h3><p> 7 derniers jours</p></div>
+      <div class="stat-card"><h3 id="commandes-30jours">0</h3><p> 30 derniers jours</p></div>
     </div>
   </div>
 
@@ -317,7 +317,7 @@ table td button {
 
 <!-- SECTION FOURNISSEURS -->
 <div id="section-fournisseurs" class="card">
-  <h2>Gestion des fournisseurs</h2>
+  <h2>PRIERE DE RESPECTER LES PROCEDURES !</h2>
 
   <table>
     <thead>
@@ -444,7 +444,7 @@ async function loadDemandes() {
 
 //Approuver ou rejeter un compte
 async function approve(id) {
-  await fetch(`http://"https://after-immersion-api.onrender.com/api/admin/demandes/${id}/approve`, {
+  await fetch(`https://after-immersion-api.onrender.com/api/admin/demandes/${id}/approve`, {
     method: "PUT",
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
@@ -454,7 +454,7 @@ async function approve(id) {
 }
 
 async function reject(id) {
-  await fetch(`http://"https://after-immersion-api.onrender.com/api/admin/demandes/${id}/reject`, {
+  await fetch(`https://after-immersion-api.onrender.com/api/admin/demandes/${id}/reject`, {
     method: "PUT",
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
@@ -465,7 +465,7 @@ async function reject(id) {
 
 // comptes
 async function loadComptes() {
-  const res = await fetch("http://after-immersion-api.onrender.com/api/admin/users", {
+  const res = await fetch("https://after-immersion-api.onrender.com/api/admin/users", {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token")
     }

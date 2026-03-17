@@ -489,8 +489,8 @@ Authorization:`Bearer ${token}`
 
 const user = await res.json();
 
-document.getElementById("soldatPoints").innerText = user.points || 0;
-document.getElementById("soldatGrade").innerText = user.grade || "Recrue";
+document.getElementById("soldatPoints").innerText = users.points || 0;
+document.getElementById("soldatGrade").innerText = users.grade || "Recrue";
 
 updateProgress(user.points);
 
@@ -533,64 +533,12 @@ formLogin.onsubmit = async (e) => {
     
      document.getElementById("soldatNom").innerText = data.nom;
 
-    //soldat dashboard fonctionnality
-    switchUser(data.role);
-    loadSoldatProfile();
-    notify("Connexion réussie");
-    
-
-
-    
-
-function updateProgress(points){
-
-let percent = 0;
-let nextGrade = "Caporal";
-
-if(points < 100){
-percent = points;
-nextGrade = "Caporal";
-}
-else if(points < 300){
-percent = (points - 100)/2;
-nextGrade = "Sergent";
-}
-else{
-percent = 100;
-nextGrade = "Officier";
-}
-
-document.getElementById("progressBar").style.width = percent + "%";
-
-document.getElementById("nextGradeText").innerText =
-"Prochain grade : " + nextGrade;
-
-}
-
-async function downloadCertificate(){
-
- const res = await fetch("/api/pdf/generate",{
-  method:"POST",
-  credentials:"include"
- });
-
- const data = await res.json();
-
- if(data.url){
-
-  window.open(data.url);
-
- }
-
-}
-
-//fin des fonctionnality
-
   } catch (err) {
     notify("Identifiants incorrects");
   }
 };
 
+console.log(user);	
 // =============================
 // DEMANDE DE COMPTE
 // =============================

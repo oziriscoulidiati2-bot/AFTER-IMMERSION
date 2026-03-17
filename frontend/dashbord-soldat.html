@@ -408,12 +408,12 @@ Télécharger mon certificat
 
 <!-- PROMOTIONS -->
 <div class="zone vendeur-only">
-  <h2>Roles </h2>
-     Gouverner et rendre l'experience des utilisateurs cool et genial</p>
+  <h2>le role de cette plateforme </h2>
+     L'objectif est que chacun vive une experience cool et génial</p>
    <br>
-     Faire rayer une ambiance de camaraderie
+     L'ambiance de camaraderie militaire est de mise 
    <br>
-     Faire respecter l'ordre et la discipline 
+     Valoriser  l'ordre et la discipline 
 </div>
 
 <div class="mobile-bar">
@@ -488,9 +488,10 @@ Authorization:`Bearer ${token}`
 });
 
 const user = await res.json();
+console.log(user);
 
-document.getElementById("soldatPoints").innerText = users.points || 0;
-document.getElementById("soldatGrade").innerText = users.grade || "Recrue";
+document.getElementById("soldatPoints").innerText = user.points || 0;
+document.getElementById("soldatGrade").innerText = user.grade || "Recrue";
 
 updateProgress(user.points);
 
@@ -538,7 +539,7 @@ formLogin.onsubmit = async (e) => {
   }
 };
 
-console.log(user);	
+	
 // =============================
 // DEMANDE DE COMPTE
 // =============================

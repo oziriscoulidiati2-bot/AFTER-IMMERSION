@@ -475,33 +475,6 @@ function notify(msg){
 // =============================
 // LOGIN
 // =============================
-async function loadSoldatProfile(){
-
-const token = localStorage.getItem("token");
-
-try{
-
-const res = await fetch("https://after-immersion-api.onrender.com/api/auth/me",{
-headers:{
-Authorization:`Bearer ${token}`
-}
-});
-
-const user = await res.json();
-console.log(user);
-
-document.getElementById("soldatPoints").innerText = user.points || 0;
-document.getElementById("soldatGrade").innerText = user.grade || "Recrue";
-
-updateProgress(user.points);
-
-}catch(err){
-
-notify("Impossible de charger le profil");
-
-}
-
-}
 
 	
 formLogin.onsubmit = async (e) => {
@@ -539,7 +512,47 @@ formLogin.onsubmit = async (e) => {
   }
 };
 
-	
+async function loadSoldatProfile(){
+
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    notify("Pas de token");
+    return;
+  }
+
+  try {
+
+    const res = await fetch("https://after-immersion-api.onrender.com/api/auth/me", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if(!res.ok){
+      throw new Error("Erreur API");
+    }
+
+    const user = await res.json();
+
+    console.log("USER:", user);
+
+    //  ACCÈS DIRECT
+    document.getElementById("soldatPoints").innerText = user.points;
+    document.getElementById("soldatGrade").innerText = user.grade;
+
+    // sécurité
+    if(!user.grade){
+      document.getElementById("soldatGrade").innerText = "Recrue";
+    }
+
+    updateProgress(user.points);
+
+  } catch (err) {
+    console.error(err);
+    notify("Erreur chargement profil");
+  }
+}	
 // =============================
 // DEMANDE DE COMPTE
 // =============================

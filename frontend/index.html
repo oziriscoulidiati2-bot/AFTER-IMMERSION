@@ -3,216 +3,537 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>After Immersion Learning (Auto)</title>
+<title>After Immersion - Game Platform</title>
+
 <style>
-body{font-family:Arial;background:#0d0d0d;color:#fff;margin:0}
-header{padding:1rem;background:#000;text-align:center;border-bottom:3px solid orange}
-.container{padding:1rem;max-width:1100px;margin:auto}
-h2{color:orange}
-.level{margin-bottom:2rem}
-.video-card{background:#1a1a1a;padding:1rem;margin-bottom:1rem;border-left:5px solid red;border-radius:6px}
-iframe{width:100%;height:240px;border:none;margin-bottom:1rem}
-.qcm button{display:block;width:100%;margin:6px 0;padding:10px;border:none;cursor:pointer;background:#333;color:#fff;border-radius:4px}
-.qcm button.correct{background:green}
-.qcm button.wrong{background:red}
-.locked{opacity:.35;pointer-events:none}
-#progressBar{background:#333;height:20px;margin:10px 0;border-radius:10px;overflow:hidden}
-#progressFill{height:100%;width:0%;background:linear-gradient(90deg,#00c853,#64dd17)}
-.dashboard{background:#111;padding:1rem;margin-bottom:1rem;border-radius:6px}
-.badges span{background:#222;padding:.4rem .6rem;margin-right:.4rem;border-radius:4px;border:1px solid #333}
+/* ================= SOCIAL BAR ================= */
+
+.social-bar{
+position:fixed;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+display:flex;
+flex-direction:column;
+gap:10px;
+z-index:6000;
+}
+
+.social-btn{
+background:#1c1c25;
+border:1px solid #333;
+padding:10px;
+border-radius:12px;
+color:white;
+text-decoration:none;
+font-size:14px;
+text-align:center;
+transition:0.3s;
+}
+
+.social-btn:hover{
+background:#00c853;
+color:black;
+transform:scale(1.1);
+}
+
+
+body{
+margin:0;
+font-family:Arial;
+background:#0b0b0f;
+color:white;
+overflow-x:hidden;
+}
+
+.topbar{
+position:fixed;
+top:0;
+left:0;
+right:0;
+z-index:1000;
+background:#0f0f14;
+padding:10px;
+border-bottom:1px solid #222;
+}
+
+.progress-container{
+background:#222;
+height:6px;
+border-radius:20px;
+overflow:hidden;
+margin-top:6px;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00c853,#64dd17);
+transition:0.3s;
+}
+
+.badges{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-top:6px;
+font-size:12px;
+}
+
+.badge{
+background:#1c1c25;
+padding:4px 8px;
+border-radius:20px;
+border:1px solid #333;
+}
+
+.container{padding-top:90px}
+
+.level-scroll{
+display:flex;
+overflow-x:auto;
+gap:12px;
+padding:10px;
+scroll-snap-type:x mandatory;
+}
+
+.level-card{
+min-width:280px;
+background:#141420;
+border-radius:16px;
+overflow:hidden;
+scroll-snap-align:start;
+position:relative;
+cursor:pointer;
+opacity:1;
+}
+
+.level-card.locked{
+opacity:0.3;
+pointer-events:none;
+}
+
+.level-image{
+width:100%;
+height:140px;
+object-fit:cover;
+background:#222;
+}
+
+.level-content{padding:10px}
+
+.lock-badge{
+position:absolute;
+top:10px;
+right:10px;
+background:red;
+padding:4px 8px;
+border-radius:10px;
+font-size:11px;
+}
+
+.level-page,.mission-view{
+position:fixed;
+inset:0;
+background:#0b0b0f;
+z-index:2000;
+overflow-y:auto;
+display:none;
+padding:15px;
+}
+
+.book-item{
+background:#151520;
+padding:10px;
+border-radius:10px;
+margin-top:8px;
+cursor:pointer;
+}
+
+.free-btn{
+margin-top:10px;
+padding:10px;
+background:#00c853;
+border:none;
+border-radius:8px;
+color:black;
+font-weight:bold;
+}
+
+.video{
+width:100%;
+height:220px;
+border:none;
+border-radius:12px;
+margin-top:10px;
+}
+
+.qcm button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:none;
+border-radius:8px;
+background:#1c1c25;
+color:white;
+cursor:pointer;
+}
+
+.closeBtn{
+background:#d50000;
+color:white;
+padding:10px;
+border:none;
+border-radius:8px;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#0f0f14;
+display:flex;
+justify-content:space-around;
+padding:10px;
+border-top:1px solid #222;
+z-index:4000;
+}
+
+.menu-dropdown{
+position:fixed;
+bottom:60px;
+left:0;
+right:0;
+background:#111;
+display:none;
+padding:10px;
+z-index:4500;
+}
 </style>
 </head>
-<body>
-<header>
-  <h1>🪖 After Immersion Business Training</h1>
-</header>
-<div class="container">
-  <div class="dashboard">
-    <p>⭐ Points: <span id="points">0</span></p>
-    <div id="progressBar"><div id="progressFill"></div></div>
-    <p>🎖️ Grade: <span id="grade">Recrue</span></p>
-    <div class="badges" id="badges"></div>
-  </div>
 
-  <div id="app"></div>
+<body>
+
+<div class="topbar">
+<div>Points: <span id="points">0</span> | Grade: <span id="grade">Recrue</span></div>
+<div class="progress-container">
+<div class="progress-fill" id="progress"></div>
+</div>
+<div class="badges" id="badges"></div>
 </div>
 
+<div class="container">
+<div class="level-scroll" id="levels"></div>
+</div>
+
+<div class="level-page" id="levelPage">
+<button class="closeBtn" onclick="closeLevel()">Fermer</button>
+<div id="levelContent"></div>
+</div>
+
+<div class="mission-view" id="missionView">
+<button class="closeBtn" onclick="closeMission()">Fermer</button>
+<div id="missionContent"></div>
+</div>
+
+<div class="bottom-nav">
+<button>Compte</button>
+<button>Business</button>
+<button onclick="toggleMenu()">Menu</button>
+</div>
+
+<div class="menu-dropdown" id="menu">
+<p>Accueil</p>
+<p>Profil</p>
+<p>Paramètres</p>
+
 <script>
-// ===================== DATA (EDIT ICI) =====================
+
+/* ================= DATA ================= */
+
 const DATA = [
-  {
-    id: 'n1',
-    title: 'Niveau 1 - Marketing',
-    unlockBy: [],
-    items: [
-      {
-        id: 'q1',
-        youtubeId: '3JZ_D3ELwOQ',
-        question: 'Quelle est la base du marketing ?',
-        answers: [
-          {text:'Vendre directement', correct:false},
-          {text:'Comprendre le client', correct:true},
-          {text:'Faire publicité', correct:false}
-        ]
-      },
-      {
-        id: 'q2',
-        youtubeId: '2Vv-BfVoq4g',
-        question: 'Le marketing digital concerne surtout ?',
-        answers: [
-          {text:'Internet', correct:true},
-          {text:'Radio', correct:false},
-          {text:'Télé', correct:false}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'n2',
-    title: 'Niveau 2 - Vente',
-    unlockBy: ['q1','q2'],
-    items: [
-      {
-        id: 'q3',
-        youtubeId: 'kJQP7kiw5Fk',
-        question: 'Quel est le but de la vente ?',
-        answers: [
-          {text:'Satisfaire le client', correct:true},
-          {text:'Forcer le client', correct:false},
-          {text:'Ignorer le besoin', correct:false}
-        ]
-      }
-    ]
-  }
+{
+id:'l1',
+name:'Marketing',
+img:'https://images.unsplash.com/photo-1556761175-4b46a572b786',
+missions:[
+{
+id:'m1',
+title:'Intro Marketing',
+videos:[
+{id:'3JZ_D3ELwOQ', qcm:{
+q:'C’est quoi le marketing ?',
+a:[
+{t:'Créer de la valeur pour le client', c:true},
+{t:'Vendre au hasard', c:false}
+]
+}}
+]
+},
+{
+id:'m2',
+title:'Stratégie',
+videos:[
+{id:'3JZ_D3ELwOQ', qcm:{
+q:'Objectif principal ?',
+a:[
+{t:'Satisfaire le client', c:true},
+{t:'Perdre de l’argent', c:false}
+]
+}}
+]
+}
+]
+},
+{
+id:'l2',
+name:'Success',
+img:'https://images.unsplash.com/photo-1556761175-4b46a572b786',
+missions:[
+{
+id:'m1',
+title:'Mindset',
+videos:[
+{id:'3JZ_D3ELwOQ', qcm:{
+q:'Le succès dépend de ?',
+a:[
+{t:'Discipline', c:true},
+{t:'Chance uniquement', c:false}
+]
+}}
+]
+}
+]
+}
 ];
 
-// ===================== STATE =====================
-let points = parseInt(localStorage.getItem('points')) || 0;
-let completed = JSON.parse(localStorage.getItem('completed')) || {}; // {q1:true,...}
+/* ================= STATE ================= */
 
-// ===================== HELPERS =====================
-function totalQCM(){
-  return DATA.reduce((acc, lvl)=> acc + lvl.items.length, 0);
+let points = +localStorage.getItem('points') || 0;
+let done = JSON.parse(localStorage.getItem('done')) || {};
+let doneLevels = JSON.parse(localStorage.getItem('doneLevels')) || {};
+let badges = JSON.parse(localStorage.getItem('badges')) || [];
+
+/* ================= NOTIFICATION SYSTEM ================= */
+
+function notify(msg){
+const n = document.createElement('div');
+n.innerText = msg;
+n.style.position = "fixed";
+n.style.top = "20px";
+n.style.right = "20px";
+n.style.background = "#1c1c25";
+n.style.color = "white";
+n.style.padding = "10px 15px";
+n.style.border = "1px solid #00c853";
+n.style.borderRadius = "10px";
+n.style.zIndex = 9999;
+n.style.boxShadow = "0 0 15px rgba(0,200,83,0.4)";
+document.body.appendChild(n);
+
+setTimeout(()=>n.remove(), 2000);
 }
 
-function isLevelUnlocked(level){
-  return level.unlockBy.every(id => completed[id]);
+/* ================= GAME LOGIC ================= */
+
+function isLevelUnlocked(index){
+return points >= index * 50;
 }
 
-function gradeFromPoints(p){
-  if(p >= 60) return 'Officier';
-  if(p >= 30) return 'Soldat';
-  return 'Recrue';
+function isLevelCompleted(level){
+return level.missions.every(m => done[m.id]);
 }
 
-function badgesFromState(){
-  const b = [];
-  if(completed['q1'] && completed['q2']) b.push('🎯 Marketing validé');
-  if(completed['q3']) b.push('💰 Vente validée');
-  if(Object.keys(completed).length === totalQCM()) b.push('🏆 Tout complété');
-  return b;
+function grade(){
+if(points >= 100) return "Officier";
+if(points >= 50) return "Soldat";
+return "Recrue";
 }
+
+/* ================= UPDATE ================= */
+
+function update(){
+document.getElementById('points').innerText = points;
+document.getElementById('grade').innerText = grade();
+updateProgress();
+renderBadges();
+save();
+}
+
+function updateProgress(){
+let max = 100;
+let pct = Math.min((points / max) * 100, 100);
+document.getElementById('progress').style.width = pct + '%';
+}
+
+/* ================= SAVE ================= */
 
 function save(){
-  localStorage.setItem('points', points);
-  localStorage.setItem('completed', JSON.stringify(completed));
+localStorage.setItem('points', points);
+localStorage.setItem('done', JSON.stringify(done));
+localStorage.setItem('doneLevels', JSON.stringify(doneLevels));
+localStorage.setItem('badges', JSON.stringify(badges));
 }
 
-// ===================== RENDER =====================
+/* ================= BADGES ================= */
+
+function addBadge(name){
+if(badges.includes(name)) return;
+badges.push(name);
+notify("🏅 Badge obtenu : " + name);
+}
+
+/* ================= RENDER BADGES ================= */
+
+function renderBadges(){
+const el = document.getElementById('badges');
+el.innerHTML = '';
+badges.forEach(b=>{
+let div = document.createElement('div');
+div.className='badge';
+div.innerText=b;
+el.appendChild(div);
+});
+}
+
+/* ================= LEVELS ================= */
+
 function render(){
-  const app = document.getElementById('app');
-  app.innerHTML = '';
+const el = document.getElementById('levels');
+el.innerHTML = '';
 
-  DATA.forEach(level => {
-    const section = document.createElement('div');
-    section.className = 'level' + (isLevelUnlocked(level) ? '' : ' locked');
+DATA.forEach((l,i)=>{
+const unlocked = isLevelUnlocked(i);
+const completed = isLevelCompleted(l);
 
-    const h2 = document.createElement('h2');
-    h2.textContent = level.title + (isLevelUnlocked(level) ? '' : ' 🔒');
-    section.appendChild(h2);
+const div = document.createElement('div');
 
-    level.items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'video-card';
+div.className =
+'level-card ' +
+(unlocked ? '' : 'locked ') +
+(completed ? 'completed' : '');
 
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube.com/embed/${item.youtubeId}`;
-      card.appendChild(iframe);
+div.innerHTML = `
+<img class="level-image" src="${l.img}">
+<div class="level-content">
+<h3>${l.name}</h3>
+</div>
+${completed ? '<div class="lock-badge" style="background:#00c853">🏁 TERMINÉ</div>'
+: (!unlocked ? '<div class="lock-badge">LOCK</div>' : '')}
+`;
 
-      const qcm = document.createElement('div');
-      qcm.className = 'qcm';
+div.onclick = () => openLevel(l.id);
 
-      const p = document.createElement('p');
-      p.textContent = item.question;
-      qcm.appendChild(p);
-
-      item.answers.forEach(ans => {
-        const btn = document.createElement('button');
-        btn.textContent = ans.text;
-
-        // restore state
-        if(completed[item.id]){
-          btn.disabled = true;
-          if(ans.correct) btn.classList.add('correct');
-        }
-
-        btn.onclick = () => handleAnswer(item.id, ans.correct, qcm, btn);
-        qcm.appendChild(btn);
-      });
-
-      card.appendChild(qcm);
-      section.appendChild(card);
-    });
-
-    app.appendChild(section);
-  });
-
-  updateDashboard();
+el.appendChild(div);
+});
 }
 
-function updateDashboard(){
-  document.getElementById('points').innerText = points;
-  const progress = (Object.keys(completed).length / totalQCM()) * 100;
-  document.getElementById('progressFill').style.width = progress + '%';
-  document.getElementById('grade').innerText = gradeFromPoints(points);
+/* ================= LEVEL PAGE ================= */
 
-  const badgesEl = document.getElementById('badges');
-  badgesEl.innerHTML = '';
-  badgesFromState().forEach(b => {
-    const span = document.createElement('span');
-    span.textContent = b;
-    badgesEl.appendChild(span);
-  });
+function openLevel(id){
+const level = DATA.find(l => l.id === id);
+
+document.getElementById('levelPage').style.display = 'block';
+
+let html = `<h2>${level.name}</h2>`;
+html += `<div class="book-item">Livre Business</div>`;
+
+level.missions.forEach(m=>{
+html += `<div class="book-item" onclick="openMission('${level.id}','${m.id}')">${m.title}</div>`;
+});
+
+document.getElementById('levelContent').innerHTML = html;
 }
 
-// ===================== LOGIC =====================
-function handleAnswer(id, isCorrect, qcmEl, clickedBtn){
-  if(completed[id]) return;
-
-  const buttons = qcmEl.querySelectorAll('button');
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    // mark clicked
-    if(btn === clickedBtn){
-      btn.classList.add(isCorrect ? 'correct' : 'wrong');
-    }
-  });
-
-  // mark the correct one
-  const idx = Array.from(buttons).findIndex((_,i)=>{
-    // we don't have direct mapping here; re-evaluate from DATA
-    return DATA.some(l => l.items.some(it => it.id===id && it.answers[i] && it.answers[i].correct));
-  });
-  if(idx >= 0 && buttons[idx]) buttons[idx].classList.add('correct');
-
-  completed[id] = true;
-  points += isCorrect ? 10 : 5;
-  save();
-  render();
+function closeLevel(){
+document.getElementById('levelPage').style.display = 'none';
 }
 
-// init
+/* ================= MISSION ================= */
+
+function openMission(lid, mid){
+const level = DATA.find(l => l.id === lid);
+const mission = level.missions.find(m => m.id === mid);
+
+let html = `<h2>${mission.title}</h2>`;
+
+mission.videos.forEach(v=>{
+html += `
+<iframe class="video" src="https://www.youtube.com/embed/${v.id}"></iframe>
+<div class="qcm">
+<p>${v.qcm.q}</p>
+`;
+
+v.qcm.a.forEach(a=>{
+html += `<button onclick="ans(this, ${a.c}, '${mid}', '${lid}')">${a.t}</button>`;
+});
+
+html += `</div>`;
+});
+
+document.getElementById('missionContent').innerHTML = html;
+document.getElementById('missionView').style.display = 'block';
+}
+
+function toggleMenu(){
+const menu = document.getElementById('menu');
+
+if(!menu) return;
+
+menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function closeMission(){
+document.getElementById('missionView').style.display = 'none';
+}
+
+/* ================= ANSWERS ================= */
+
+function ans(btn, correct, mid, lid){
+
+if(btn.dataset.done) return;
+btn.dataset.done = true;
+
+if(correct){
+btn.style.background = '#00c853';
+points += 10;
+done[mid] = true;
+
+notify("+10 points");
+
+if(points === 50) addBadge("Rookie 50");
+if(points === 100) addBadge("Pro 100");
+
+} else {
+btn.style.background = '#d50000';
+notify("Mauvaise réponse");
+}
+
+/* check level completion */
+const level = DATA.find(l => l.id === lid);
+if(isLevelCompleted(level)){
+doneLevels[lid] = true;
+notify("🏁 Niveau terminé !");
+addBadge("Level Completed");
+}
+
+update();
+}
+
+/* ================= INIT ================= */
+
+update();
 render();
+
 </script>
+  
+</div>
+<a href="https://tiktok.com" target="_blank" class="social-btn">🎵</a>
+<a href="https://facebook.com" target="_blank" class="social-btn">📘</a>
+<a href="https://youtube.com" target="_blank" class="social-btn">▶️</a>
+<a href="https://wa.me/22650854781" target="_blank" class="social-btn">💬</a>
+<a href="tel:+22650854781" class="social-btn">📞</a>
+</div>
 </body>
 </html>

@@ -1,1021 +1,519 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jeune§riche</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>COMMANDO — Apprends. Évolue. Conquiers.</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* ================= HEADER ================= */
-
-.app-header{
-position:fixed;
-top:10px;
-left:50%;
-transform:translateX(-50%);
-
-width:95%;
-max-width:500px;
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-padding:10px 14px;
-
-background:rgba(20,20,25,0.9);
-backdrop-filter:blur(10px);
-
-border-radius:50px;
-border:1px solid #222;
-
-z-index:6000;
+:root {
+  --bg:     #06060f;
+  --panel:  #0d0d1f;
+  --border: #1a1a3e;
+  --gold:   #f5a623;
+  --cyan:   #00e5ff;
+  --violet: #7c3aed;
+  --vio2:   #a855f7;
+  --green:  #00ff88;
+  --white:  #e8e8ff;
+  --muted:  #5a5a8a;
+  --gg: 0 0 18px #f5a62377, 0 0 50px #f5a62311;
+  --gc: 0 0 18px #00e5ff55, 0 0 50px #00e5ff11;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;overflow-x:hidden}
 
-/* left */
-.header-left{
-display:flex;
-align-items:center;
-gap:8px;
+/* BG effects */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+@keyframes gridMove{to{background-position:60px 60px}}
+.orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.1;animation:orbFloat 12s ease-in-out infinite}
+.orb1{width:350px;height:350px;background:var(--violet);top:-80px;left:-80px}
+.orb2{width:260px;height:260px;background:var(--cyan);top:50%;right:-60px;animation-delay:-4s}
+.orb3{width:300px;height:300px;background:var(--gold);bottom:-80px;left:35%;animation-delay:-8s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(25px,-35px)}}
+.scanline{position:fixed;inset:0;pointer-events:none;z-index:200;background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px)}
+
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;background:rgba(6,6,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:1200px;margin:0 auto;gap:12px}
+.logo{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:900;color:var(--gold);text-shadow:var(--gg);letter-spacing:3px;white-space:nowrap}
+.logo em{color:var(--cyan);font-style:normal}
+
+.hud{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+.pill{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:30px;padding:5px 14px;font-size:.8rem;font-weight:600;letter-spacing:1px;white-space:nowrap}
+.pill.g{border-color:#f5a62333;color:var(--gold)}
+.pill.c{border-color:#00e5ff33;color:var(--cyan)}
+.pill.v{border-color:#00ff8833;color:var(--green)}
+.xpw{display:flex;flex-direction:column;gap:3px;min-width:100px}
+.xpl{font-size:.6rem;letter-spacing:2px;color:var(--muted);font-family:'Orbitron',monospace}
+.xpb{height:5px;background:var(--border);border-radius:10px;overflow:hidden}
+.xpf{height:100%;width:62%;border-radius:10px;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+@media(max-width:640px){.pill.c,.pill.v,.xpw{display:none}}
+
+/* ── HERO (compact) ── */
+.hero{padding:40px 0 28px;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.4);border-radius:30px;padding:5px 18px;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;color:var(--vio2);margin-bottom:20px;animation:fd .6s ease both}
+@keyframes fd{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.6rem,5vw,3.2rem);font-weight:900;line-height:1.15;margin-bottom:14px;animation:fd .7s .1s ease both}
+.g1{color:var(--white)}
+.g2{background:linear-gradient(135deg,var(--gold),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:1rem;color:#7777aa;max-width:460px;margin:0 auto 24px;line-height:1.65;animation:fd .7s .2s ease both}
+.cta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;animation:fd .7s .3s ease both}
+.btn{font-family:'Orbitron',monospace;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;padding:11px 26px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;transition:all .3s;font-weight:700;display:inline-block}
+.btn-p{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;box-shadow:0 4px 24px rgba(124,58,237,.5)}
+.btn-p:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 36px rgba(0,229,255,.5)}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-g:hover{border-color:var(--gold);color:var(--gold);box-shadow:var(--gg);transform:translateY(-2px)}
+
+/* ── SECTION LABEL ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;padding:32px 20px 14px;max-width:1200px;margin:0 auto}
+.sec-label{font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--cyan);margin-bottom:4px}
+.sec-title{font-family:'Orbitron',monospace;font-size:clamp(1rem,3vw,1.5rem);font-weight:900}
+.sec-title span{color:var(--gold)}
+.scroll-btns{display:flex;gap:8px;flex-shrink:0}
+.sbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .3s;user-select:none}
+.sbtn:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:var(--gc)}
+
+/* ── HORIZONTAL CAROUSEL ── */
+.carousel-wrap{position:relative}
+.carousel{display:flex;gap:16px;overflow-x:auto;padding:8px 20px 20px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;cursor:grab}
+.carousel:active{cursor:grabbing}
+.carousel::-webkit-scrollbar{height:4px}
+.carousel::-webkit-scrollbar-track{background:var(--border);border-radius:4px}
+.carousel::-webkit-scrollbar-thumb{background:var(--violet);border-radius:4px}
+/* Fade edges */
+.carousel-wrap::before,.carousel-wrap::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none}
+.carousel-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.carousel-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+
+/* ── ADVANTAGE CARDS (horizontal) ── */
+.adv-card{flex:0 0 220px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:10px;transition:all .4s}
+.adv-card:hover{border-color:var(--cyan);box-shadow:var(--gc);transform:translateY(-4px)}
+.adv-ico{font-size:1.8rem}
+.adv-card h3{font-size:.95rem;font-weight:700}
+.adv-card p{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* ── DOMAIN CARDS (horizontal) ── */
+.domain-card{flex:0 0 230px;position:relative;overflow:hidden;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:26px 22px 22px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;transition:all .4s cubic-bezier(.25,.8,.25,1)}
+.domain-card::before{content:'';position:absolute;top:0;right:0;width:70px;height:70px;background:var(--ca,var(--cyan));opacity:.08;border-radius:0 18px 0 100%;transition:all .4s}
+.domain-card:hover{border-color:var(--ca,var(--cyan));box-shadow:0 0 24px color-mix(in srgb,var(--ca,var(--cyan)) 30%,transparent),0 16px 40px rgba(0,0,0,.5);transform:translateY(-5px) scale(1.02)}
+.domain-card:hover::before{opacity:.18;width:110px;height:110px}
+
+.ct{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.ce{font-size:2.2rem;filter:drop-shadow(0 0 8px var(--ca,var(--cyan)))}
+.clv{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:1.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--ca,var(--cyan));color:var(--ca,var(--cyan));text-transform:uppercase}
+.ctitle{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:700;line-height:1.3;position:relative;z-index:1}
+.cdesc{font-size:.82rem;color:var(--muted);line-height:1.55;position:relative;z-index:1}
+.cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid var(--border);position:relative;z-index:1}
+.cxp{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--gold);letter-spacing:.5px}
+.carr{width:28px;height:28px;border-radius:50%;border:1px solid var(--ca,var(--cyan));display:flex;align-items:center;justify-content:center;color:var(--ca,var(--cyan));font-size:.9rem;transition:all .3s}
+.domain-card:hover .carr{background:var(--ca,var(--cyan));color:#000;box-shadow:0 0 12px var(--ca,var(--cyan))}
+
+.c-svt {--ca:#00ff88}.c-math{--ca:#00e5ff}.c-cg{--ca:#f5a623}
+.c-fr{--ca:#ff6b6b}.c-en{--ca:#4fc3f7}.c-philo{--ca:#ce93d8}
+.c-droit{--ca:#ffb74d}.c-phy{--ca:#80cbc4}.c-chim{--ca:#f06292}
+
+/* ── COURS LIST (vertical scroll) ── */
+#tous-les-cours { padding-bottom: 60px; }
+
+.filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 0 20px 20px; max-width: 1200px; margin: 0 auto;
 }
-
-.logo{
-font-size:18px;
+.filter-btn {
+  font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:2px;
+  text-transform:uppercase; padding:7px 16px; border-radius:20px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--muted); cursor:pointer; transition:all .25s; white-space:nowrap;
 }
-
-.site-name{
-font-size:14px;
-font-weight:bold;
+.filter-btn:hover,.filter-btn.active {
+  border-color:var(--cyan); color:var(--cyan);
+  background:rgba(0,229,255,.08); box-shadow:var(--gc);
 }
-
-/* ================= BURGER ================= */
-
-.burger{
-width:40px;
-height:40px;
-
-border-radius:50%;
-border:none;
-
-background:#1c1c25;
-
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-gap:4px;
-
-cursor:pointer;
+.cours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+  gap: 14px;
+  padding: 0 20px;
+  max-width: 1200px; margin: 0 auto;
 }
+@media(max-width:500px){ .cours-grid{grid-template-columns:1fr} }
 
-.burger span{
-width:18px;
-height:2px;
-background:white;
-border-radius:2px;
+.cours-card {
+  display:flex; gap:16px; align-items:center;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:16px 18px;
+  text-decoration:none; color:inherit;
+  transition:all .3s ease; position:relative; overflow:hidden;
 }
-
-.burger:active{
-transform:scale(0.9);
+.cours-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--ca,var(--cyan)); border-radius:3px 0 0 3px;
+  opacity:.7; transition:all .3s;
 }
-/* ================= MENU ================= */
-
-.menu-overlay{
-position:fixed;
-inset:0;
-
-background:rgba(0,0,0,0.6);
-
-display:none;
-justify-content:center;
-align-items:center;
-
-z-index:7000;
-}
-
-.menu-box{
-width:80%;
-max-width:400px;
-
-height:50%;
-max-height:400px;
-
-background:#141420;
-
-border-radius:20px;
-padding:20px;
-
-display:flex;
-flex-direction:column;
-gap:12px;
-
-animation:fadeIn 0.3s ease;
-}
-
-.menu-box a{
-text-decoration:none;
-color:white;
-padding:10px;
-border-radius:10px;
-background:#1c1c25;
-}
-
-.menu-box a:hover{
-background:#00c853;
-color:black;
-}
-
-/* animation */
-@keyframes fadeIn{
-from{
-opacity:0;
-transform:scale(0.9);
-}
-to{
-opacity:1;
-transform:scale(1);
-}
-}
-
-/* ================= DESKTOP ================= */
-
-@media(min-width:768px){
-
-.app-header{
-max-width:700px;
-}
-
-.menu-box{
-width:400px;
-height:400px;
-}
-
-}
-/* ================= SOCIAL BAR ================= */
-
-.social-bar{
-position:fixed;
-right:10px;
-top:50%;
-transform:translateY(-50%);
-display:flex;
-flex-direction:column;
-gap:10px;
-z-index:6000;
-}
-
-.social-btn{
-background:#1c1c25;
-border:1px solid #333;
-padding:10px;
-border-radius:12px;
-color:white;
-text-decoration:none;
-font-size:14px;
-text-align:center;
-transition:0.3s;
-}
-
-.social-btn:hover{
-background:#00c853;
-color:black;
-transform:scale(1.1);
-}
-
-
-body{
-margin:0;
-font-family:Arial;
-background:#0b0b0f;
-color:white;
-overflow-x:hidden;
-}
-
-.topbar{
-position:fixed;
-top:70px;
-left:0;
-right:0;
-z-index:500;
-background:#0f0f14;
-padding:10px;
-border-bottom:1px solid #222;
-}
-
-.progress-container{
-background:#222;
-height:6px;
-border-radius:20px;
-overflow:hidden;
-margin-top:6px;
-}
-
-.progress-fill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#00c853,#64dd17);
-transition:0.3s;
-}
-
-.badges{
-display:flex;
-gap:6px;
-flex-wrap:wrap;
-margin-top:6px;
-font-size:12px;
-}
-
-.badge{
-background:#1c1c25;
-padding:4px 8px;
-border-radius:20px;
-border:1px solid #333;
-}
-
-.container{padding-top:90px}
-
-.level-scroll{
-display:flex;
-overflow-x:auto;
-gap:12px;
-padding:10px;
-scroll-snap-type:x mandatory;
-}
-
-.level-card{
-min-width:280px;
-background:#141420;
-border-radius:16px;
-overflow:hidden;
-scroll-snap-align:start;
-position:relative;
-cursor:pointer;
-opacity:1;
-}
-
-.level-card.locked{
-opacity:0.3;
-pointer-events:none;
-}
-
-.level-image{
-width:100%;
-height:140px;
-object-fit:cover;
-background:#222;
-}
-
-.level-content{padding:10px}
-
-.lock-badge{
-position:absolute;
-top:10px;
-right:10px;
-background:red;
-padding:4px 8px;
-border-radius:10px;
-font-size:11px;
-}
-
-.level-page,.mission-view{
-position:fixed;
-inset:0;
-background:#0b0b0f;
-z-index:2000;
-overflow-y:auto;
-display:none;
-padding:15px;
-}
-
-.book-item{
-background:#151520;
-padding:10px;
-border-radius:10px;
-margin-top:8px;
-cursor:pointer;
-}
-
-.free-btn{
-margin-top:10px;
-padding:10px;
-background:#00c853;
-border:none;
-border-radius:8px;
-color:black;
-font-weight:bold;
-}
-
-.video{
-width:100%;
-height:220px;
-border:none;
-border-radius:12px;
-margin-top:10px;
-}
-
-.qcm button{
-width:100%;
-padding:10px;
-margin-top:8px;
-border:none;
-border-radius:8px;
-background:#1c1c25;
-color:white;
-cursor:pointer;
-}
-
-.closeBtn{
-background:#d50000;
-color:white;
-padding:10px;
-border:none;
-border-radius:8px;
-}
-
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#0f0f14;
-display:flex;
-justify-content:space-around;
-padding:10px;
-border-top:1px solid #222;
-z-index:4000;
-}
-
-.menu-dropdown{
-position:fixed;
-bottom:60px;
-left:0;
-right:0;
-background:#111;
-display:none;
-padding:10px;
-z-index:4500;
-}
-
-.social-bar{
-position:fixed;
-right:15px;
-bottom:80px; /* mobile first */
-display:flex;
-flex-direction:column;
-gap:12px;
-z-index:6000;
-}
-
-/* version desktop */
-@media(min-width:768px){
-.social-bar{
-top:50%;
-bottom:auto;
-transform:translateY(-50%);
-}
-}
-
-.social-btn{
-width:50px;
-height:50px;
-display:flex;
-align-items:center;
-justify-content:center;
-
-background:rgba(28,28,37,0.8);
-backdrop-filter:blur(10px);
-
-border:1px solid #333;
-border-radius:20%; /* rond parfait */
-
-color:white;
-text-decoration:none;
-font-size:20px;
-
-transition:0.3s;
-box-shadow:0 5px 15px rgba(0,0,0,0.3);
-}
-
-.social-btn:hover{
-background:#00c853;
-color:black;
-transform:scale(1.15);
-}
-
-.social-btn i{
-font-size:20px;
-}
-
-/* ================= MOBILE FIRST (BASE) ================= */
-
-.floating-dock{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-
-display:flex;
-gap:10px;
-
-background:rgba(20,20,25,0.9);
-backdrop-filter:blur(10px);
-
-padding:10px;
-border-radius:50px;
-
-box-shadow:0 10px 25px rgba(0,0,0,0.4);
-z-index:5000;
-
-/* important mobile fix */
-max-width:95%;
-overflow-x:auto;
-white-space:nowrap;
-scrollbar-width:none;
-}
-
-/* hide scrollbar mobile */
-.floating-dock::-webkit-scrollbar{
-display:none;
-}
-
-.dock-item{
-display:flex;
-align-items:center;
-gap:6px;
-
-padding:10px 14px;
-border-radius:30px;
-
-text-decoration:none;
-color:white;
-font-size:14px;
-
-transition:0.2s;
-
-flex:0 0 auto; /* important mobile scroll */
-white-space:nowrap;
-}
-
-.dock-item:hover{
-background:#00c853;
-color:black;
-transform:scale(1.05);
-}
-
-.dock-item.active{
-background:#00c853;
-color:black;
-}
-
-@media(min-width:768px){
-
-.floating-dock{
-left:50%;
-transform:translateX(-50%);
-bottom:20px;
-
-max-width:none;
-overflow:visible;
-}
-
-}
-
-.qcm button{
-transition:0.2s;
-}
+.cours-card:hover { border-color:var(--ca,var(--cyan)); box-shadow:0 0 18px color-mix(in srgb,var(--ca,var(--cyan)) 20%,transparent); transform:translateX(4px); }
+.cours-card:hover::before { opacity:1; width:5px; }
+
+.cours-ico { font-size:1.8rem; flex-shrink:0; filter:drop-shadow(0 0 6px var(--ca,var(--cyan))); }
+.cours-body { flex:1; min-width:0; }
+.cours-matiere { font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--ca,var(--cyan)); margin-bottom:3px; }
+.cours-titre { font-size:.95rem; font-weight:700; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cours-meta { display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+.cours-xp { font-family:'Orbitron',monospace; font-size:.6rem; color:var(--gold); }
+.cours-diff { font-size:.65rem; font-weight:600; letter-spacing:1px; padding:2px 8px; border-radius:10px; text-transform:uppercase; }
+.diff-fac { background:rgba(0,255,136,.1); color:var(--green); border:1px solid rgba(0,255,136,.3); }
+.diff-moy { background:rgba(245,166,35,.1); color:var(--gold); border:1px solid rgba(245,166,35,.3); }
+.diff-dif { background:rgba(255,107,107,.1); color:#ff6b6b; border:1px solid rgba(255,107,107,.3); }
+.cours-arrow { color:var(--muted); font-size:.9rem; flex-shrink:0; transition:all .3s; }
+.cours-card:hover .cours-arrow { color:var(--ca,var(--cyan)); transform:translateX(4px); }
+.no-result { text-align:center; padding:40px 20px; color:var(--muted); font-family:'Orbitron',monospace; font-size:.8rem; letter-spacing:2px; grid-column:1/-1; }
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--muted);font-size:.82rem;letter-spacing:1px;margin-top:20px}
+footer span{color:var(--gold)}
 </style>
 </head>
-
 <body>
+<div class="scanline"></div>
+<div class="grid-bg"></div>
+<div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
-<header class="app-header">
-
-<div class="header-left">
-<div class="logo">🎮</div>
-<span class="site-name">Jeune§riche</span>
-</div>
-
-<button class="burger" onclick="toggleMenu()">
-<span></span>
-<span></span>
-<span></span>
-</button>
-
+<!-- HEADER -->
+<header>
+  <div class="topbar">
+    <div class="logo">COMM<em>ANDO</em></div>
+    <div class="hud">
+      <div class="pill g">⚡ <span id="xpv">0</span> XP</div>
+      <div class="pill v">🔥 7 jours</div>
+      <div class="pill c">🏆 Niv. 5</div>
+      <div class="xpw">
+        <div class="xpl">Progression</div>
+        <div class="xpb"><div class="xpf"></div></div>
+      </div>
+    </div>
+  </div>
 </header>
 
-<!-- MENU POPUP -->
-<div class="menu-overlay" id="menuOverlay" onclick="closeMenu(event)">
-<div class="menu-box">
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="badge">⚔️ &nbsp;Rejoins l'aventure du savoir</div>
+    <h1><span class="g1">Apprends. Évolue.</span><br><span class="g2">Conquiers.</span></h1>
+    <p>Des cours gratuits, des certificats réels, une progression gamifiée. Chaque leçon te rapproche du sommet.</p>
+    <div class="cta">
+      <a href="#domaines" class="btn btn-p">🗺️ &nbsp;Choisir un domaine</a>
+      <a href="#avantages" class="btn btn-g">Avantages</a>
+    </div>
+  </div>
+</section>
 
-<h3>Menu</h3>
+<!-- AVANTAGES -->
+<section id="avantages">
+  <div class="sec-header">
+    <div>
+      <div class="sec-label">// Pourquoi nous choisir</div>
+      <div class="sec-title">Tes <span>super-pouvoirs</span></div>
+    </div>
+    <div class="scroll-btns">
+      <button class="sbtn" onclick="scroll('adv-row',-1)">‹</button>
+      <button class="sbtn" onclick="scroll('adv-row',1)">›</button>
+    </div>
+  </div>
+  <div class="carousel-wrap">
+    <div class="carousel" id="adv-row">
+      <div class="adv-card"><div class="adv-ico">🎓</div><h3>Cours 100% gratuits</h3><p>Accède à tout le contenu sans abonnement ni frais cachés.</p></div>
+      <div class="adv-card"><div class="adv-ico">📜</div><h3>Certificats officiels</h3><p>Valide tes compétences avec un certificat reconnu.</p></div>
+      <div class="adv-card"><div class="adv-ico">⚡</div><h3>À ton rythme</h3><p>Apprends quand tu veux, où tu veux, sans contrainte.</p></div>
+      <div class="adv-card"><div class="adv-ico">🏆</div><h3>Système XP & Badges</h3><p>Gagne des points, débloque des badges et monte de niveau.</p></div>
+      <div class="adv-card"><div class="adv-ico">🔥</div><h3>Streaks quotidiens</h3><p>Garde la flamme allumée : reviens chaque jour pour booster ta série.</p></div>
+      <div class="adv-card"><div class="adv-ico">🌐</div><h3>Communauté active</h3><p>Échange avec d'autres apprenants et progresse ensemble.</p></div>
+    </div>
+  </div>
+</section>
 
-<a href="index.html">Accueil</a>
-<a href="propos.html">A propos</a>
-<a href="business.html">Business</a>
-<a href="dashbord-soldat.html">Profil</a>
+<!-- DOMAINES -->
+<section id="domaines">
+  <div class="sec-header">
+    <div>
+      <div class="sec-label">// Choisir ton domaine</div>
+      <div class="sec-title">Les <span>Royaumes</span> du Savoir</div>
+    </div>
+    <div class="scroll-btns">
+      <button class="sbtn" onclick="scroll('dom-row',-1)">‹</button>
+      <button class="sbtn" onclick="scroll('dom-row',1)">›</button>
+    </div>
+  </div>
+  <div class="carousel-wrap">
+    <div class="carousel" id="dom-row">
 
+      <a href="svt_tle.html" class="domain-card c-svt">
+        <div class="ct"><div class="ce">🧬</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">SVT</div>
+        <div class="cdesc">Génétique, évolution, corps humain et écosystèmes.</div>
+        <div class="cfoot"><div class="cxp">+250 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-</div>
+      <a href="math_tle.html" class="domain-card c-math">
+        <div class="ct"><div class="ce">📐</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">Mathématiques</div>
+        <div class="cdesc">Analyse, probabilités, géométrie et algèbre.</div>
+        <div class="cfoot"><div class="cxp">+300 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-</div>
+      <a href="culture_generale.html" class="domain-card c-cg">
+        <div class="ct"><div class="ce">🌍</div><div class="clv">Tout niveau</div></div>
+        <div class="ctitle">Culture Générale</div>
+        <div class="cdesc">Histoire, géopolitique, actualités et arts.</div>
+        <div class="cfoot"><div class="cxp">+180 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<div class="topbar">
-<div>Points: <span id="points">0</span> | Grade: <span id="grade">Recrue</span></div>
-<div class="progress-container">
-<div class="progress-fill" id="progress"></div>
-</div>
-<div class="badges" id="badges"></div>
-</div>
+      <a href="francais.html" class="domain-card c-fr">
+        <div class="ct"><div class="ce">✍️</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">Français</div>
+        <div class="cdesc">Littérature, dissertation, commentaire de texte.</div>
+        <div class="cfoot"><div class="cxp">+220 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<br>
-<br>
-<br>
-<br>
+      <a href="anglais.html" class="domain-card c-en">
+        <div class="ct"><div class="ce">🇬🇧</div><div class="clv">Tous niveaux</div></div>
+        <div class="ctitle">Anglais</div>
+        <div class="cdesc">Grammaire, vocabulaire, expression orale et écrite.</div>
+        <div class="cfoot"><div class="cxp">+200 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<div class="container">
-<div class="level-scroll" id="levels"></div>
+      <a href="philo.html" class="domain-card c-philo">
+        <div class="ct"><div class="ce">🦉</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">Philosophie</div>
+        <div class="cdesc">Grands auteurs, notions clés, méthode dissertation.</div>
+        <div class="cfoot"><div class="cxp">+230 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<br>
+      <a href="droit.html" class="domain-card c-droit">
+        <div class="ct"><div class="ce">⚖️</div><div class="clv">Tout niveau</div></div>
+        <div class="ctitle">Droit</div>
+        <div class="cdesc">Droit civil, pénal, constitutionnel.</div>
+        <div class="cfoot"><div class="cxp">+260 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<div style="padding:10px;">
+      <a href="physique_tle.html" class="domain-card c-phy">
+        <div class="ct"><div class="ce">⚛️</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">Physique</div>
+        <div class="cdesc">Mécanique, électricité, optique, thermodynamique.</div>
+        <div class="cfoot"><div class="cxp">+280 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<div class="level-card" onclick="openImmersion()">
-<img class="level-image" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
+      <a href="chimie_tle.html" class="domain-card c-chim">
+        <div class="ct"><div class="ce">🧪</div><div class="clv">Terminale</div></div>
+        <div class="ctitle">Chimie</div>
+        <div class="cdesc">Liaisons chimiques, réactions, solutions et dosages.</div>
+        <div class="cfoot"><div class="cxp">+270 XP / ch.</div><div class="carr">→</div></div>
+      </a>
 
-<div class="level-content">
-<h3>Immersion Patriotique </h3>
-<p>Promotion 2025</p>
-</div>
+    </div>
+  </div>
+</section>
 
-</div>
+<!-- TOUS LES COURS -->
+<section id="tous-les-cours">
+  <div class="sec-header">
+    <div>
+      <div class="sec-label">// Bibliothèque complète</div>
+      <div class="sec-title">Tous les <span>Cours</span></div>
+    </div>
+  </div>
 
-</div>
-</div>
+  <!-- FILTRES -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="tous">Tous</button>
+    <button class="filter-btn" data-filter="svt">🧬 SVT</button>
+    <button class="filter-btn" data-filter="math">📐 Maths</button>
+    <button class="filter-btn" data-filter="cg">🌍 Culture G.</button>
+    <button class="filter-btn" data-filter="fr">✍️ Français</button>
+    <button class="filter-btn" data-filter="en">🇬🇧 Anglais</button>
+    <button class="filter-btn" data-filter="philo">🦉 Philo</button>
+    <button class="filter-btn" data-filter="droit">⚖️ Droit</button>
+    <button class="filter-btn" data-filter="phy">⚛️ Physique</button>
+    <button class="filter-btn" data-filter="chim">🧪 Chimie</button>
+  </div>
 
-<div class="level-page" id="levelPage">
-<div id="levelContent"></div>
-<br>
-<button class="closeBtn" onclick="closeLevel()">Fermer</button>
-</div>
+  <div class="cours-grid" id="cours-grid">
+    <!-- SVT -->
+    <a href="svt_tle.html#genetique" class="cours-card c-svt" data-cat="svt"><div class="cours-ico">🧬</div><div class="cours-body"><div class="cours-matiere">SVT</div><div class="cours-titre">La génétique et l'hérédité</div><div class="cours-meta"><span class="cours-xp">+80 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="svt_tle.html#evolution" class="cours-card c-svt" data-cat="svt"><div class="cours-ico">🦕</div><div class="cours-body"><div class="cours-matiere">SVT</div><div class="cours-titre">Évolution des espèces</div><div class="cours-meta"><span class="cours-xp">+70 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="svt_tle.html#systeme-nerveux" class="cours-card c-svt" data-cat="svt"><div class="cours-ico">🧠</div><div class="cours-body"><div class="cours-matiere">SVT</div><div class="cours-titre">Le système nerveux</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="svt_tle.html#ecosystemes" class="cours-card c-svt" data-cat="svt"><div class="cours-ico">🌿</div><div class="cours-body"><div class="cours-matiere">SVT</div><div class="cours-titre">Écosystèmes et biodiversité</div><div class="cours-meta"><span class="cours-xp">+75 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="svt_tle.html#immunologie" class="cours-card c-svt" data-cat="svt"><div class="cours-ico">🛡️</div><div class="cours-body"><div class="cours-matiere">SVT</div><div class="cours-titre">Immunologie et défenses</div><div class="cours-meta"><span class="cours-xp">+100 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
 
-<div class="mission-view" id="missionView">
-<br>
-<br>
-<br>
-<div id="missionContent"></div>
-<br>
-<button class="closeBtn" onclick="closeMission()">Fermer</button>
-</div>
-<br>
-<br>
-<br>
-<div class="floating-dock">
+    <!-- MATHS -->
+    <a href="math_tle.html#limites" class="cours-card c-math" data-cat="math"><div class="cours-ico">📈</div><div class="cours-body"><div class="cours-matiere">Maths</div><div class="cours-titre">Limites et continuité</div><div class="cours-meta"><span class="cours-xp">+110 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="math_tle.html#derivees" class="cours-card c-math" data-cat="math"><div class="cours-ico">📉</div><div class="cours-body"><div class="cours-matiere">Maths</div><div class="cours-titre">Dérivées et applications</div><div class="cours-meta"><span class="cours-xp">+95 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="math_tle.html#probabilites" class="cours-card c-math" data-cat="math"><div class="cours-ico">🎲</div><div class="cours-body"><div class="cours-matiere">Maths</div><div class="cours-titre">Probabilités et loi normale</div><div class="cours-meta"><span class="cours-xp">+105 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="math_tle.html#suites" class="cours-card c-math" data-cat="math"><div class="cours-ico">🔢</div><div class="cours-body"><div class="cours-matiere">Maths</div><div class="cours-titre">Suites numériques</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="math_tle.html#geometrie" class="cours-card c-math" data-cat="math"><div class="cours-ico">📐</div><div class="cours-body"><div class="cours-matiere">Maths</div><div class="cours-titre">Géométrie dans l'espace</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
 
-<a href="propos.html" class="dock-item active" onclick="setActiveDock(this)">
-🏠 <span>A propos</span>
-</a>
+    <!-- CULTURE G -->
+    <a href="culture_generale.html#histoire" class="cours-card c-cg" data-cat="cg"><div class="cours-ico">🏛️</div><div class="cours-body"><div class="cours-matiere">Culture G.</div><div class="cours-titre">Histoire contemporaine</div><div class="cours-meta"><span class="cours-xp">+60 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="culture_generale.html#geopolitique" class="cours-card c-cg" data-cat="cg"><div class="cours-ico">🗺️</div><div class="cours-body"><div class="cours-matiere">Culture G.</div><div class="cours-titre">Géopolitique mondiale</div><div class="cours-meta"><span class="cours-xp">+70 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="culture_generale.html#arts" class="cours-card c-cg" data-cat="cg"><div class="cours-ico">🎨</div><div class="cours-body"><div class="cours-matiere">Culture G.</div><div class="cours-titre">Arts et littérature</div><div class="cours-meta"><span class="cours-xp">+55 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="culture_generale.html#sciences" class="cours-card c-cg" data-cat="cg"><div class="cours-ico">🔬</div><div class="cours-body"><div class="cours-matiere">Culture G.</div><div class="cours-titre">Grandes découvertes scientifiques</div><div class="cours-meta"><span class="cours-xp">+65 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
 
-<a href="business.html" class="dock-item" onclick="openImmersion(); setActiveDock(this)">
-💰 <span>Business</span>
-</a>
+    <!-- FRANÇAIS -->
+    <a href="francais.html#dissertation" class="cours-card c-fr" data-cat="fr"><div class="cours-ico">📝</div><div class="cours-body"><div class="cours-matiere">Français</div><div class="cours-titre">Méthode de la dissertation</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="francais.html#commentaire" class="cours-card c-fr" data-cat="fr"><div class="cours-ico">📖</div><div class="cours-body"><div class="cours-matiere">Français</div><div class="cours-titre">Commentaire de texte</div><div class="cours-meta"><span class="cours-xp">+80 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="francais.html#figures" class="cours-card c-fr" data-cat="fr"><div class="cours-ico">🖊️</div><div class="cours-body"><div class="cours-matiere">Français</div><div class="cours-titre">Figures de style</div><div class="cours-meta"><span class="cours-xp">+60 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="francais.html#mouvements" class="cours-card c-fr" data-cat="fr"><div class="cours-ico">🎭</div><div class="cours-body"><div class="cours-matiere">Français</div><div class="cours-titre">Mouvements littéraires</div><div class="cours-meta"><span class="cours-xp">+65 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
 
-<a href="dashbord-soldat.html" class="dock-item" onclick="setActiveDock(this)">
-👤 <span>compte</span>
-  
-  <a href="admin.html" class="dock-item" onclick="setActiveDock(this)">
-👤 <span>Manage</span>
-</a>
+    <!-- ANGLAIS -->
+    <a href="anglais.html#grammaire" class="cours-card c-en" data-cat="en"><div class="cours-ico">📚</div><div class="cours-body"><div class="cours-matiere">Anglais</div><div class="cours-titre">Grammaire avancée</div><div class="cours-meta"><span class="cours-xp">+75 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="anglais.html#vocabulaire" class="cours-card c-en" data-cat="en"><div class="cours-ico">🔤</div><div class="cours-body"><div class="cours-matiere">Anglais</div><div class="cours-titre">Vocabulaire thématique</div><div class="cours-meta"><span class="cours-xp">+60 XP</span><span class="cours-diff diff-fac">Facile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="anglais.html#expression" class="cours-card c-en" data-cat="en"><div class="cours-ico">🗣️</div><div class="cours-body"><div class="cours-matiere">Anglais</div><div class="cours-titre">Expression orale & compréhension</div><div class="cours-meta"><span class="cours-xp">+80 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
 
-</div>
+    <!-- PHILO -->
+    <a href="philo.html#auteurs" class="cours-card c-philo" data-cat="philo"><div class="cours-ico">📜</div><div class="cours-body"><div class="cours-matiere">Philosophie</div><div class="cours-titre">Les grands auteurs</div><div class="cours-meta"><span class="cours-xp">+80 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="philo.html#notions" class="cours-card c-philo" data-cat="philo"><div class="cours-ico">💭</div><div class="cours-body"><div class="cours-matiere">Philosophie</div><div class="cours-titre">Notions clés du programme</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="philo.html#methode" class="cours-card c-philo" data-cat="philo"><div class="cours-ico">🦉</div><div class="cours-body"><div class="cours-matiere">Philosophie</div><div class="cours-titre">Méthode dissertation philo</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
 
-<div class="menu-dropdown" id="menu">
-<p>Accueil</p>
-<p>Profil</p>
-<p>Paramètres</p>
-</div>
+    <!-- DROIT -->
+    <a href="droit.html#civil" class="cours-card c-droit" data-cat="droit"><div class="cours-ico">📋</div><div class="cours-body"><div class="cours-matiere">Droit</div><div class="cours-titre">Droit civil — les contrats</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="droit.html#penal" class="cours-card c-droit" data-cat="droit"><div class="cours-ico">⚖️</div><div class="cours-body"><div class="cours-matiere">Droit</div><div class="cours-titre">Droit pénal et infractions</div><div class="cours-meta"><span class="cours-xp">+95 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="droit.html#constitutionnel" class="cours-card c-droit" data-cat="droit"><div class="cours-ico">🏛️</div><div class="cours-body"><div class="cours-matiere">Droit</div><div class="cours-titre">Droit constitutionnel</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
 
+    <!-- PHYSIQUE -->
+    <a href="physique_tle.html#mecanique" class="cours-card c-phy" data-cat="phy"><div class="cours-ico">⚙️</div><div class="cours-body"><div class="cours-matiere">Physique</div><div class="cours-titre">Mécanique newtonienne</div><div class="cours-meta"><span class="cours-xp">+100 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="physique_tle.html#electricite" class="cours-card c-phy" data-cat="phy"><div class="cours-ico">⚡</div><div class="cours-body"><div class="cours-matiere">Physique</div><div class="cours-titre">Électricité et circuits</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="physique_tle.html#optique" class="cours-card c-phy" data-cat="phy"><div class="cours-ico">🔭</div><div class="cours-body"><div class="cours-matiere">Physique</div><div class="cours-titre">Optique et lumière</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="physique_tle.html#thermodynamique" class="cours-card c-phy" data-cat="phy"><div class="cours-ico">🌡️</div><div class="cours-body"><div class="cours-matiere">Physique</div><div class="cours-titre">Thermodynamique</div><div class="cours-meta"><span class="cours-xp">+95 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
 
-<div class="social-bar">
+    <!-- CHIMIE -->
+    <a href="chimie_tle.html#liaisons" class="cours-card c-chim" data-cat="chim"><div class="cours-ico">🔗</div><div class="cours-body"><div class="cours-matiere">Chimie</div><div class="cours-titre">Liaisons chimiques</div><div class="cours-meta"><span class="cours-xp">+85 XP</span><span class="cours-diff diff-moy">Moyen</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="chimie_tle.html#reactions" class="cours-card c-chim" data-cat="chim"><div class="cours-ico">⚗️</div><div class="cours-body"><div class="cours-matiere">Chimie</div><div class="cours-titre">Réactions chimiques</div><div class="cours-meta"><span class="cours-xp">+90 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="chimie_tle.html#solutions" class="cours-card c-chim" data-cat="chim"><div class="cours-ico">🧪</div><div class="cours-body"><div class="cours-matiere">Chimie</div><div class="cours-titre">Solutions et dosages</div><div class="cours-meta"><span class="cours-xp">+95 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+    <a href="chimie_tle.html#organique" class="cours-card c-chim" data-cat="chim"><div class="cours-ico">🧫</div><div class="cours-body"><div class="cours-matiere">Chimie</div><div class="cours-titre">Chimie organique</div><div class="cours-meta"><span class="cours-xp">+100 XP</span><span class="cours-diff diff-dif">Difficile</span></div></div><div class="cours-arrow">›</div></a>
+  </div>
+</section>
 
-<a href="https://tiktok.com" target="_blank" class="social-btn">
-<i class="fa-brands fa-tiktok"></i>
-</a>
-
-<a href="https://facebook.com" target="_blank" class="social-btn">
-<i class="fa-brands fa-facebook-f"></i>
-</a>
-
-<a href="https://www.youtube.com/@immerg%C3%A9s" target="_blank" class="social-btn">
-<i class="fa-brands fa-youtube"></i>
-</a>
-
-<a href="https://wa.me/22650854781" target="_blank" class="social-btn">
-<i class="fa-brands fa-whatsapp"></i>
-</a>
-
-<a href="tel:+22650854781" class="social-btn">
-<i class="fa-solid fa-phone"></i>
-</a>
-
-</div>
-
-<div class="level-page" id="immersionPage">
-<button class="closeBtn" onclick="closeImmersion()">Fermer</button>
-<div id="immersionContent"></div>
-</div>
-
-<script async src="https://www.tiktok.com/embed.js"></script>
+<footer><p>© 2026 <span>COMMANDO</span> — Apprends. Évolue. Conquiers.</p></footer>
 
 <script>
-
-/* ================= DATA ================= */
-
-const DATA = [
-
-{
-id:'l1',
-name:'Marketing',
-img:'https://images.unsplash.com/photo-1556761175-4b46a572b786',
-missions:[
-{
-id:'m1',
-title:'Intro Marketing',
-videos:[
-{id:'3JZ_D3ELwOQ', qcm:{
-q:'C’est quoi le marketing ?',
-a:[
-{t:'Créer de la valeur pour le client', c:true},
-{t:'Vendre au hasard', c:false},{t:'Créer de la valeur pour le client', c:false} ,{t:'Créer de la valeur pour le client', c:false}
-]
-}}
-]
-},
-{
-id:'m2',
-title:'Stratégie',
-videos:[
-{id:'3JZ_D3ELwOQ', qcm:{
-q:'Objectif principal ?',
-a:[
-{t:'Satisfaire le client', c:true},
-{t:'Perdre de l’argent', c:false}
-]
-}}
-]
-}
-]
-},
-{
-id:'l2',
-name:'Success',
-img:'https://images.unsplash.com/photo-1556761175-4b46a572b786',
-missions:[
-{
-id:'m1',
-title:'Mindset',
-videos:[
-{id:'3JZ_D3ELwOQ', qcm:{
-q:'Le succès dépend de ?',
-a:[
-{t:'Discipline', c:true},
-{t:'Chance uniquement', c:false}
-]
-}}
-]
-}
-]
-}
-];
-
-const IMMERSION = {
-
-tiktoks:[
-'https://www.tiktok.com/@scout2015/video/6718335390845095173'
-],
-
-posts:[
-{
-img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620',
-desc:'La discipline est la base d’une nation forte.'
-},
-{
-img:'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-desc:'hhoijpokop.'
-}
-]
-
-};
-
-/* ================= STATE ================= */
-
-let points = +localStorage.getItem('points') || 0;
-let done = JSON.parse(localStorage.getItem('done')) || {};
-let doneLevels = JSON.parse(localStorage.getItem('doneLevels')) || {};
-let badges = JSON.parse(localStorage.getItem('badges')) || [];
-
-/* ================= NOTIFICATION SYSTEM ================= */
-
-function notify(msg){
-const n = document.createElement('div');
-n.innerText = msg;
-n.style.position = "fixed";
-n.style.top = "20px";
-n.style.right = "20px";
-n.style.background = "#1c1c25";
-n.style.color = "white";
-n.style.padding = "10px 15px";
-n.style.border = "1px solid #00c853";
-n.style.borderRadius = "10px";
-n.style.zIndex = 9999;
-n.style.boxShadow = "0 0 15px rgba(0,200,83,0.4)";
-document.body.appendChild(n);
-
-setTimeout(()=>n.remove(), 2000);
+/* ── Carousel scroll helper (fast: 3 cards at once) ── */
+function scroll(id, dir) {
+  const el = document.getElementById(id);
+  const card = el.querySelector('.domain-card, .adv-card');
+  const step = card ? (card.offsetWidth + 16) * 3 : 780;
+  el.scrollBy({ left: dir * step, behavior: 'smooth' });
 }
 
-/* ================= GAME LOGIC ================= */
-
-function isLevelUnlocked(index){
-return points >= index * 50;
-}
-
-function isLevelCompleted(level){
-return level.missions.every(m => done[m.id]);
-}
-
-function grade(){
-if(points >= 100) return "Officier";
-if(points >= 50) return "Soldat";
-return "Recrue";
-}
-
-/* ================= UPDATE ================= */
-
-function update(){
-document.getElementById('points').innerText = points;
-document.getElementById('grade').innerText = grade();
-updateProgress();
-renderBadges();
-save();
-}
-
-function updateProgress(){
-let max = 100;
-let pct = Math.min((points / max) * 100, 100);
-document.getElementById('progress').style.width = pct + '%';
-}
-
-/* ================= SAVE ================= */
-
-function save(){
-localStorage.setItem('points', points);
-localStorage.setItem('done', JSON.stringify(done));
-localStorage.setItem('doneLevels', JSON.stringify(doneLevels));
-localStorage.setItem('badges', JSON.stringify(badges));
-}
-
-/* ================= BADGES ================= */
-
-function addBadge(name){
-if(badges.includes(name)) return;
-badges.push(name);
-notify("🏅 Badge obtenu : " + name);
-}
-
-/* ================= RENDER BADGES ================= */
-
-function renderBadges(){
-const el = document.getElementById('badges');
-el.innerHTML = '';
-badges.forEach(b=>{
-let div = document.createElement('div');
-div.className='badge';
-div.innerText=b;
-el.appendChild(div);
-});
-}
-
-/* ================= LEVELS ================= */
-
-function render(){
-const el = document.getElementById('levels');
-el.innerHTML = '';
-
-DATA.forEach((l,i)=>{
-const unlocked = isLevelUnlocked(i);
-const completed = isLevelCompleted(l);
-
-const div = document.createElement('div');
-
-div.className =
-'level-card ' +
-(unlocked ? '' : 'locked ') +
-(completed ? 'completed' : '');
-
-div.innerHTML = `
-<img class="level-image" src="${l.img}">
-<div class="level-content">
-<h3>${l.name}</h3>
-</div>
-${completed ? '<div class="lock-badge" style="background:#00c853">🏁 TERMINÉ</div>'
-: (!unlocked ? '<div class="lock-badge">LOCK</div>' : '')}
-`;
-
-div.onclick = () => openLevel(l.id);
-
-el.appendChild(div);
-});
-}
-
-/* ================= LEVEL PAGE ================= */
-
-function openLevel(id){
-const level = DATA.find(l => l.id === id);
-
-document.getElementById('levelPage').style.display = 'block';
-
-let html = `<h2>${level.name}</h2>`;
-html += `<div class="book-item">Livre Business</div>`;
-
-level.missions.forEach(m=>{
-html += `<div class="book-item" onclick="openMission('${level.id}','${m.id}')">${m.title}</div>`;
+/* ── Drag to scroll (faster multiplier) ── */
+document.querySelectorAll('.carousel').forEach(c => {
+  let down = false, startX, scrollLeft;
+  c.addEventListener('mousedown', e => {
+    down = true; startX = e.pageX - c.offsetLeft; scrollLeft = c.scrollLeft;
+    c.style.userSelect = 'none';
+  });
+  document.addEventListener('mouseup', () => { down = false; });
+  c.addEventListener('mousemove', e => {
+    if (!down) return;
+    e.preventDefault();
+    const x = e.pageX - c.offsetLeft;
+    c.scrollLeft = scrollLeft - (x - startX) * 2.2;
+  });
+  /* Touch swipe (faster) */
+  let tx;
+  c.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive:true });
+  c.addEventListener('touchmove', e => {
+    const dx = tx - e.touches[0].clientX;
+    c.scrollLeft += dx * 1.8;
+    tx = e.touches[0].clientX;
+  }, { passive:true });
 });
 
-document.getElementById('levelContent').innerHTML = html;
-}
+/* ── Vertical scrollbar at bottom ── */
+(function() {
+  const bar = document.createElement('div');
+  const thumb = document.createElement('div');
+  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:6px;background:rgba(26,26,62,.7);z-index:300;';
+  thumb.style.cssText = 'height:100%;border-radius:4px;background:linear-gradient(90deg,#7c3aed,#00e5ff);box-shadow:0 0 8px #00e5ff88;transition:width .1s;position:absolute;top:0;left:0;min-width:40px;';
+  bar.appendChild(thumb);
+  document.body.appendChild(bar);
 
-function closeLevel(){
-document.getElementById('levelPage').style.display = 'none';
-}
+  function update() {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? scrolled / total : 0;
+    const barW = bar.offsetWidth;
+    const thumbW = Math.max(40, barW * (window.innerHeight / document.documentElement.scrollHeight));
+    thumb.style.width = thumbW + 'px';
+    thumb.style.left = (pct * (barW - thumbW)) + 'px';
+  }
+  window.addEventListener('scroll', update, { passive:true });
+  window.addEventListener('resize', update);
+  update();
 
-/* ================= MISSION ================= */
+  /* Click/drag on scrollbar */
+  bar.addEventListener('pointerdown', e => {
+    const barW = bar.offsetWidth;
+    const thumbW = parseFloat(thumb.style.width);
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    function move(ev) {
+      const ratio = Math.max(0, Math.min(1, (ev.clientX - thumbW/2) / (barW - thumbW)));
+      window.scrollTo({ top: ratio * total, behavior: 'auto' });
+    }
+    move(e);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', () => window.removeEventListener('pointermove', move), { once:true });
+  });
+})();
 
-function openMission(lid, mid){
-const level = DATA.find(l => l.id === lid);
-const mission = level.missions.find(m => m.id === mid);
-
-let html = `<h2>${mission.title}</h2>`;
-
-mission.videos.forEach(v=>{
-html += `
-<iframe class="video" src="https://www.youtube.com/embed/${v.id}"></iframe>
-<div class="qcm">
-<p>${v.qcm.q}</p>
-`;
-
-v.qcm.a.forEach(a=>{
-html += `<button onclick="ans(this, ${a.c}, '${mid}', '${lid}')">${a.t}</button>`;
+/* ── Filtre cours ── */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    const cards = document.querySelectorAll('#cours-grid .cours-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const show = f === 'tous' || card.dataset.cat === f;
+      card.style.display = show ? 'flex' : 'none';
+      if (show) visible++;
+    });
+    // show/hide empty state
+    let noRes = document.getElementById('no-result');
+    if (!noRes) {
+      noRes = document.createElement('p');
+      noRes.id = 'no-result';
+      noRes.className = 'no-result';
+      noRes.textContent = 'Aucun cours trouvé.';
+      document.getElementById('cours-grid').appendChild(noRes);
+    }
+    noRes.style.display = visible === 0 ? 'block' : 'none';
+  });
 });
 
-html += `</div>`;
+/* ── XP counter ── */
+let xp = 0, target = 1240;
+const xpEl = document.getElementById('xpv');
+const iv = setInterval(() => {
+  xp = Math.min(xp + 30, target);
+  xpEl.textContent = xp.toLocaleString('fr');
+  if (xp >= target) clearInterval(iv);
+}, 16);
+
+/* ── Orb parallax ── */
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth - .5) * 28;
+  const y = (e.clientY / window.innerHeight - .5) * 28;
+  document.querySelectorAll('.orb').forEach((o, i) => {
+    const f = (i + 1) * .35;
+    o.style.transform = `translate(${x*f}px,${y*f}px)`;
+  });
 });
-
-document.getElementById('missionContent').innerHTML = html;
-document.getElementById('missionView').style.display = 'block';
-}
-
-function toggleMenu(){
-const menu = document.getElementById('menu');
-
-if(!menu) return;
-
-menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-}
-
-function closeMission(){
-document.getElementById('missionView').style.display = 'none';
-}
-
-/* ================= ANSWERS ================= */
-
-function ans(btn, correct, mid, lid){
-
-const box = btn.closest('.qcm');
-const allBtns = box.querySelectorAll('button');
-
-/* éviter double clic */
-if(box.dataset.locked) return;
-box.dataset.locked = true;
-
-/* désactiver tous les boutons */
-allBtns.forEach(b=>{
-b.style.pointerEvents = "none";
-});
-
-/* trouver la bonne réponse */
-let correctBtn = null;
-
-/* si clic correct */
-if(correct){
-
-btn.style.background = "#00c853";
-btn.style.color = "black";
-
-points += 10;
-done[mid] = true;
-
-notify("+10 points");
-
-} 
-else {
-
-/* clic faux */
-btn.style.background = "#d50000";
-
-/* chercher la bonne réponse */
-allBtns.forEach(b=>{
-if(b.onclick && b.onclick.toString().includes("true")){
-correctBtn = b;
-}
-});
-
-/* afficher bonne réponse en vert */
-if(correctBtn){
-correctBtn.style.background = "#00c853";
-correctBtn.style.color = "black";
-}
-
-notify("Mauvaise réponse");
-}
-
-/* check level completion */
-const level = DATA.find(l => l.id === lid);
-
-if(isLevelCompleted(level) && !doneLevels[lid]){
-doneLevels[lid] = true;
-notify("🏁 Niveau terminé !");
-addBadge("Level Completed");
-}
-
-update();
-}
-
-/* ================= INIT ================= */
-
-update();
-render();
-
-//section immersion fonction 
-function openImmersion(){
-
-document.getElementById('immersionPage').style.display = 'block';
-
-let html = `<h2>🇧🇫 Immersion Patriotique</h2>`;
-
-/* ===== TIKTOK ===== */
-IMMERSION.tiktoks.forEach(link=>{
-html += `
-<blockquote class="tiktok-embed" cite="${link}"></blockquote>
-`;
-});
-
-/* ===== POSTS ===== */
-IMMERSION.posts.forEach(p=>{
-html += `
-<div class="book-item">
-<img src="${p.img}" style="width:100%;border-radius:10px;">
-<p>${p.desc}</p>
-</div>
-`;
-});
-
-document.getElementById('immersionContent').innerHTML = html;
-}
-
-function closeImmersion(){
-document.getElementById('immersionPage').style.display = 'none';
-}
-
-function setActiveDock(el){
-
-document.querySelectorAll('.dock-item').forEach(item=>{
-item.classList.remove('active');
-});
-
-el.classList.add('active');
-}
-
-//menu
-function toggleMenu(){
-const menu = document.getElementById('menuOverlay');
-menu.style.display = 'flex';
-}
-
-function closeMenu(e){
-if(e.target.id === 'menuOverlay'){
-document.getElementById('menuOverlay').style.display = 'none';
-}
-}
-
-document.addEventListener("keydown", e=>{
-if(e.key === "Escape"){
-document.getElementById('menuOverlay').style.display = 'none';
-}
-});
-
 </script>
-
 </body>
 </html>

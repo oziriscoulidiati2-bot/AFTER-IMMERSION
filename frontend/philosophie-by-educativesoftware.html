@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> L'ultime pécheur </title>
+
+<style>
+  
+  #notif-container{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:9999;
+  pointer-events:none;
+}
+
+.notif{
+  min-width:250px;
+  max-width:360px;
+  padding:12px 15px;
+  border-radius:14px;
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  animation:slideDown 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+}
+
+.notif.success{ background:#22c55e; }
+.notif.error{ background:#ef4444; }
+.notif.info{ background:#3b82f6; }
+
+@keyframes slideDown{
+  from{transform:translateY(-20px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+
+@keyframes fadeOut{
+  to{opacity:0;transform:translateY(-10px);}
+}
+  
+:root{
+--bg:#020617;
+--card:#0f172a;
+--accent:#3b82f6;
+--good:#22c55e;
+--bad:#ef4444;
+--glass:rgba(15,23,42,0.6);
+}
+
+*{box-sizing:border-box;font-family:Arial;}
+
+body{
+margin:0;
+background:radial-gradient(circle at top,#1e293b,#020617);
+color:white;
+}
+
+.topbar{
+position:fixed;
+top:10px;
+left:50%;
+transform:translateX(-50%);
+width:92%;
+max-width:420px;
+padding:12px;
+text-align:center;
+font-weight:bold;
+border-radius:20px;
+background:var(--glass);
+}
+
+.container{padding:80px 15px 110px;}
+
+.card{
+background:var(--card);
+padding:15px;
+border-radius:18px;
+margin-top:15px;
+}
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:var(--accent);
+color:white;
+font-weight:bold;
+margin-top:10px;
+}
+
+textarea{
+width:100%;
+height:180px;
+margin-top:10px;
+padding:10px;
+border-radius:10px;
+background:#1e293b;
+color:white;
+border:none;
+}
+
+.option{
+padding:12px;
+margin:8px 0;
+background:#1e293b;
+border-radius:12px;
+cursor:pointer;
+}
+
+.option.good{background:var(--good)!important;}
+.option.bad{background:var(--bad)!important;}
+
+.bar{
+height:10px;
+background:#1e293b;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:10px;
+}
+
+.fill{
+height:100%;
+background:var(--accent);
+}
+</style>
+</head>
+
+<body>
+
+  <div id="notif-container"></div>
+  
+<div class="topbar">🧠 Mode commando </div>
+<div class="container" id="app"></div>
+  <p classs=evelopper par educative sofware </p>
+<script>
+
+  function shuffle(array){
+  let arr = [...array];
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+  
+/* ================= STATE ================= */
+
+let state = {
+  xp: parseInt(localStorage.getItem("xp")) || 0,
+  level: parseInt(localStorage.getItem("level")) || 1,
+  essay: null,
+  timer: 0,
+  interval: null,
+  qIndex: 0
+};
+
+/* ================= CHAPITRE I (ELITE MODE) ================= */
+
+const chapter1 = {
+  title: "Psychologie",
+
+  qcm: [
+
+/* 🔵 BASE */
+
+{
+  question: "La psychologie du développement étudie :",
+  options: [
+    "Les animaux uniquement",
+    "Le développement mental de l’individu",
+    "Les maladies",
+    "Les entreprises"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 10
+},
+
+{
+  question: "La psychologie sociale étudie :",
+  options: [
+    "Le cerveau",
+    "Les influences sociales sur l’individu",
+    "Les plantes",
+    "Les réflexes"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 10
+},
+
+{
+  question: "La psychologie différentielle étudie :",
+  options: [
+    "Les rêves",
+    "Les différences entre individus",
+    "Les muscles",
+    "Les animaux"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 10
+},
+
+{
+  question: "La psychologie clinique se base sur :",
+  options: [
+    "Observation et analyse des cas",
+    "Hasard",
+    "Biologie uniquement",
+    "Mathématiques"
+  ],
+  answer: 0,
+  difficulty: "facile",
+  xp: 12
+},
+
+{
+  question: "La psychopathologie étudie :",
+  options: [
+    "Les comportements sportifs",
+    "Les troubles mentaux",
+    "Les plantes",
+    "La physique"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 12
+},
+
+{
+  question: "La psychologie animale s’intéresse :",
+  options: [
+    "Aux humains",
+    "Aux comportements des animaux",
+    "À l’économie",
+    "À la politique"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 10
+},
+
+{
+  question: "L’éthologie étudie :",
+  options: [
+    "Les animaux en laboratoire uniquement",
+    "Les animaux dans leur milieu naturel",
+    "Les plantes",
+    "Les machines"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 12
+},
+
+{
+  question: "La psychologie de l’éducation étudie :",
+  options: [
+    "L’école et les apprentissages",
+    "La météo",
+    "Les virus",
+    "Les animaux"
+  ],
+  answer: 0,
+  difficulty: "facile",
+  xp: 10
+},
+
+{
+  question: "La psychologie de l’enfant considère l’enfant comme :",
+  options: [
+    "Un adulte miniature",
+    "Un être en développement",
+    "Un animal",
+    "Un objet"
+  ],
+  answer: 1,
+  difficulty: "facile",
+  xp: 12
+},
+
+/* 🟡 MOYEN */
+
+{
+  question: "Le behaviorisme exclut :",
+  options: [
+    "Le comportement observable",
+    "La conscience et le ‘je’",
+    "Les réflexes",
+    "Les stimulus"
+  ],
+  answer: 1,
+  difficulty: "moyen",
+  xp: 15
+},
+
+{
+  question: "Freud explique le comportement par :",
+  options: [
+    "L’inconscient",
+    "Le hasard",
+    "Les muscles",
+    "Les mathématiques"
+  ],
+  answer: 0,
+  difficulty: "moyen",
+  xp: 15
+},
+
+{
+  question: "La psychologie cognitive s’intéresse à :",
+  options: [
+    "Le traitement de l’information",
+    "Les émotions uniquement",
+    "Les muscles",
+    "Les animaux"
+  ],
+  answer: 0,
+  difficulty: "moyen",
+  xp: 15
+},
+
+{
+  question: "La Gestalt insiste sur :",
+  options: [
+    "Les parties séparées",
+    "La forme globale",
+    "Le hasard",
+    "Le réflexe"
+  ],
+  answer: 1,
+  difficulty: "moyen",
+  xp: 18
+},
+
+{
+  question: "La cybernétique étudie :",
+  options: [
+    "Les rêves",
+    "Les systèmes d’autorégulation",
+    "Les émotions",
+    "Les plantes"
+  ],
+  answer: 1,
+  difficulty: "moyen",
+  xp: 18
+},
+
+{
+  question: "Carl Rogers défend :",
+  options: [
+    "Le libre arbitre",
+    "Le déterminisme total",
+    "Le comportement mécanique",
+    "Le hasard"
+  ],
+  answer: 0,
+  difficulty: "moyen",
+  xp: 18
+},
+
+{
+  question: "Skinner appartient au courant :",
+  options: [
+    "Cognitif",
+    "Behavioriste",
+    "Humaniste",
+    "Clinique"
+  ],
+  answer: 1,
+  difficulty: "moyen",
+  xp: 15
+},
+
+{
+  question: "La psychologie humaniste met l’accent sur :",
+  options: [
+    "La machine humaine",
+    "Le sujet et son vécu",
+    "Les réflexes",
+    "Les statistiques"
+  ],
+  answer: 1,
+  difficulty: "moyen",
+  xp: 18
+},
+
+/* 🔴 DIFFICILE (CONCOURS) */
+
+{
+  question: "La psychologie clinique repose sur :",
+  options: [
+    "Expérimentation uniquement",
+    "Observation des cas individuels",
+    "Mathématiques",
+    "Biologie animale"
+  ],
+  answer: 1,
+  difficulty: "difficile",
+  xp: 20
+},
+
+{
+  question: "La psychologie différentielle inclut :",
+  options: [
+    "Âge, sexe, milieu social",
+    "Uniquement le cerveau",
+    "Uniquement les émotions",
+    "Les plantes"
+  ],
+  answer: 0,
+  difficulty: "difficile",
+  xp: 20
+},
+
+{
+  question: "Le behaviorisme considère le comportement comme :",
+  options: [
+    "Libre",
+    "Réponse à un stimulus",
+    "Spirituel",
+    "Aléatoire"
+  ],
+  answer: 1,
+  difficulty: "difficile",
+  xp: 20
+},
+
+{
+  question: "La psychanalyse utilise :",
+  options: [
+    "Tests moteurs",
+    "Association libre et rêves",
+    "Physique",
+    "Chimie"
+  ],
+  answer: 1,
+  difficulty: "difficile",
+  xp: 20
+},
+
+{
+  question: "La psychologie cognitive est liée à :",
+  options: [
+    "L’ordinateur",
+    "La météo",
+    "La politique",
+    "La biologie animale"
+  ],
+  answer: 0,
+  difficulty: "difficile",
+  xp: 20
+},
+/* 🔵 BASE INTELLIGENCE */
+
+{
+  question: "Selon Binet et Simon, l’intelligence est :",
+  options: [
+    "La mémoire",
+    "Le bon sens et l’adaptation",
+    "La vitesse de lecture",
+    "La créativité uniquement"
+  ],
+  answer: 1,
+  xp: 10
+},
+
+{
+  question: "Pour Wechsler, l’intelligence est :",
+  options: [
+    "Une capacité fixe",
+    "Une capacité de compréhension et adaptation",
+    "Un instinct",
+    "Une émotion"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+{
+  question: "L’intelligence permet surtout de :",
+  options: [
+    "Dormir",
+    "S’adapter à l’environnement",
+    "Rêver",
+    "Oublier"
+  ],
+  answer: 1,
+  xp: 10
+},
+
+{
+  question: "Spearman propose :",
+  options: [
+    "QI uniquement",
+    "Facteur G et facteurs S",
+    "Trois intelligences",
+    "Intelligence sociale uniquement"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "Le facteur G correspond à :",
+  options: [
+    "Une aptitude spécifique",
+    "Une intelligence générale",
+    "La mémoire",
+    "La perception"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "Thurstone identifie combien d’aptitudes primaires ?",
+  options: ["5", "6", "7", "10"],
+  answer: 2,
+  xp: 15
+},
+
+{
+  question: "Quelle aptitude correspond au langage ?",
+  options: [
+    "Aptitude spatiale",
+    "Compréhension verbale",
+    "Mémoire musculaire",
+    "Vitesse motrice"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+{
+  question: "Guilford propose :",
+  options: [
+    "7 facteurs",
+    "120 facteurs",
+    "2 facteurs",
+    "1 facteur"
+  ],
+  answer: 1,
+  xp: 18
+},
+
+{
+  question: "L’intelligence fluide est :",
+  options: [
+    "Apprise",
+    "Innate et liée au raisonnement",
+    "Sociale",
+    "Émotionnelle"
+  ],
+  answer: 1,
+  xp: 18
+},
+
+{
+  question: "L’intelligence cristallisée dépend :",
+  options: [
+    "De l’âge uniquement",
+    "De l’apprentissage et expérience",
+    "Du hasard",
+    "Des émotions"
+  ],
+  answer: 1,
+  xp: 18
+},
+
+{
+  question: "Le QI est défini par :",
+  options: [
+    "AM/AC × 100",
+    "AC/AM × 100",
+    "AM + AC",
+    "AM - AC"
+  ],
+  answer: 0,
+  xp: 15
+},
+
+/* 🔴 PENSÉE */
+
+{
+  question: "La pensée est :",
+  options: [
+    "Un réflexe",
+    "Une activité de représentation mentale",
+    "Une émotion",
+    "Un comportement moteur"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+{
+  question: "L’incubation dans la pensée correspond à :",
+  options: [
+    "Résolution immédiate",
+    "Pause inconsciente du problème",
+    "Analyse logique",
+    "Erreur"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La phase d’inspiration est :",
+  options: [
+    "Analyse lente",
+    "Apparition soudaine de la solution",
+    "Oubli",
+    "Lecture"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La pensée convergente est :",
+  options: [
+    "Créative",
+    "Solution unique correcte",
+    "Aléatoire",
+    "Emotionnelle"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La pensée divergente est :",
+  options: [
+    "Unique solution",
+    "Plusieurs solutions possibles",
+    "Mémoire",
+    "Réflexe"
+  ],
+  answer: 1,
+  xp: 18
+},
+
+{
+  question: "La perception est :",
+  options: [
+    "Réflexe moteur",
+    "Interprétation des informations sensorielles",
+    "Émotion",
+    "Mémoire"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+{
+  question: "L’attention sélective signifie :",
+  options: [
+    "Tout voir",
+    "Choisir certains stimuli",
+    "Oublier tout",
+    "Dormir"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+{
+  question: "La distorsion sélective est :",
+  options: [
+    "Oublier",
+    "Déformer l’information",
+    "Analyser",
+    "Écouter"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La rétention sélective est :",
+  options: [
+    "Tout oublier",
+    "Mémoriser ce qui confirme ses idées",
+    "Créer des idées",
+    "Observer"
+  ],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La perception dépend :",
+  options: [
+    "Des sens uniquement",
+    "Des sens et de l’interprétation",
+    "Du hasard",
+    "Du sommeil"
+  ],
+  answer: 1,
+  xp: 12
+},
+
+/* 🔥 DIFFICILE CONCOURS */
+
+{
+  question: "Le test de Binet sert à mesurer :",
+  options: [
+    "Le poids",
+    "L’intelligence",
+    "La vitesse",
+    "La vision"
+  ],
+  answer: 1,
+  xp: 20
+},
+
+{
+  question: "Le facteur S chez Spearman correspond à :",
+  options: [
+    "Intelligence générale",
+    "Aptitudes spécifiques",
+    "Mémoire uniquement",
+    "Émotion"
+  ],
+  answer: 1,
+  xp: 18
+},
+
+{
+  question: "Le QI normal est :",
+  options: ["50", "100", "150", "200"],
+  answer: 1,
+  xp: 15
+},
+
+{
+  question: "La pensée systématique est :",
+  options: [
+    "Hasard",
+    "Méthodique et logique",
+    "Emotionnelle",
+    "Rapide sans analyse"
+  ],
+  answer: 1,
+  xp: 18
+}
+,
+    {
+      question: "Que signifie étymologiquement 'psychologie' ?",
+      options: ["Cerveau", "Âme / esprit", "Comportement", "Société"],
+      answer: 1,
+      xp: 10
+    },
+    {
+      question: "Pourquoi la notion d’esprit a été abandonnée ?",
+      options: [
+        "Trop religieux",
+        "Non observable et non mesurable",
+        "Trop ancien",
+        "Pas scientifique"
+      ],
+      answer: 1,
+      xp: 12
+    },
+    {
+      question: "La psychologie est aujourd’hui définie comme :",
+      options: [
+        "Science du comportement et des processus mentaux",
+        "Science de la religion",
+        "Science du cerveau uniquement",
+        "Philosophie moderne"
+      ],
+      answer: 0,
+      xp: 10
+    },
+    {
+      question: "Le comportement correspond à :",
+      options: [
+        "Pensées uniquement",
+        "Actions visibles, pensées et émotions",
+        "Réflexes uniquement",
+        "Langage uniquement"
+      ],
+      answer: 1,
+      xp: 10
+    },
+    {
+      question: "Le stimulus est :",
+      options: [
+        "Une réaction",
+        "Une influence de l’environnement",
+        "Une pensée",
+        "Une émotion"
+      ],
+      answer: 1,
+      xp: 12
+    },
+    {
+      question: "La réponse est :",
+      options: [
+        "Cause",
+        "Réaction au stimulus",
+        "Observation",
+        "Méthode"
+      ],
+      answer: 1,
+      xp: 12
+    },
+    {
+      question: "Le couple fondamental du comportement est :",
+      options: [
+        "Esprit-corps",
+        "Stimulus-réponse",
+        "Action-pensée",
+        "Cause-effet"
+      ],
+      answer: 1,
+      xp: 15
+    },
+    {
+      question: "Wundt a créé le premier laboratoire en :",
+      options: ["1879", "1890", "1900", "1850"],
+      answer: 0,
+      xp: 15
+    },
+    {
+      question: "Le behaviorisme est fondé par :",
+      options: ["Pavlov", "Watson", "Freud", "Wundt"],
+      answer: 1,
+      xp: 15
+    },
+    {
+      question: "Pavlov est connu pour :",
+      options: [
+        "Conditionnement classique",
+        "Psychanalyse",
+        "Mémoire",
+        "Langage"
+      ],
+      answer: 0,
+      xp: 15
+    }
+  ],
+
+  essays: [
+
+{
+  title: "Branches de la psychologie",
+  question: "Présente les principales branches de la psychologie.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychologie différentielle",
+  question: "Explique la psychologie différentielle et ses variables.",
+  time: 400,
+  xp: 45
+},
+
+{
+  title: "Psychologie du développement",
+  question: "Définis la psychologie génétique et son importance.",
+  time: 450,
+  xp: 45
+},
+
+{
+  title: "Psychologie clinique",
+  question: "Explique la psychologie clinique selon Lagache.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychopathologie",
+  question: "Définis la psychopathologie et ses objectifs.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychologie sociale",
+  question: "Explique l’influence sociale sur le comportement.",
+  time: 450,
+  xp: 45
+},
+
+{
+  title: "Psychologie animale",
+  question: "Présente la psychologie animale et ses débats.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Éthologie",
+  question: "Explique l’éthologie et son importance.",
+  time: 400,
+  xp: 40
+},
+
+{
+  title: "Psychologie de l’éducation",
+  question: "Donne les trois approches de la psychologie de l’éducation.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychologie de l’enfant",
+  question: "Explique la vision de Rousseau sur l’enfant.",
+  time: 450,
+  xp: 45
+},
+
+{
+  title: "Behaviorisme",
+  question: "Explique les principes du behaviorisme.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychanalyse",
+  question: "Décris les méthodes d’exploration de l’inconscient.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Psychologie cognitive",
+  question: "Explique la théorie du traitement de l’information.",
+  time: 400,
+  xp: 60
+},
+
+{
+  title: "Humanisme",
+  question: "Présente la psychologie humaniste selon Rogers.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Comparaison des courants",
+  question: "Compare behaviorisme, cognitivisme et psychanalyse.",
+  time: 400,
+  xp: 70
+},
+{
+  title: "Nature de l’intelligence",
+  question: "Définis l’intelligence selon Binet et Wechsler.",
+  time: 400,
+  xp: 40
+},
+
+{
+  title: "Structure de l’intelligence",
+  question: "Explique les facteurs G et S de Spearman.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Aptitudes mentales",
+  question: "Présente les aptitudes primaires de Thurstone.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Théorie de Guilford",
+  question: "Explique la structure tridimensionnelle de Guilford.",
+  time: 400,
+  xp: 60
+},
+
+{
+  title: "Types d’intelligence",
+  question: "Compare intelligence concrète et abstraite.",
+  time: 400,
+  xp: 40
+},
+
+{
+  title: "Intelligence fluide et cristallisée",
+  question: "Explique la théorie de Cattell.",
+  time: 500,
+  xp: 50
+},
+
+{
+  title: "Mesure de l’intelligence",
+  question: "Explique le rôle du test de Binet et du QI.",
+  time: 500,
+  xp: 50
+},
+
+{
+  title: "Processus de pensée",
+  question: "Décris les étapes de résolution de problème.",
+  time: 400,
+  xp: 60
+},
+
+{
+  title: "Types de pensée",
+  question: "Compare pensée convergente et divergente.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Perception",
+  question: "Explique la perception et ses mécanismes.",
+  time: 400,
+  xp: 60
+},
+
+{
+  title: "Attention sélective",
+  question: "Explique les 3 mécanismes de perception.",
+  time: 400,
+  xp: 50
+},
+
+{
+  title: "Sensation vs perception",
+  question: "Fais la différence entre sensation et perception.",
+  time: 400,
+  xp: 40
+},
+    {
+      title: "Définition de la psychologie",
+      question: "Explique la psychologie comme science du comportement et des processus mentaux.",
+      time: 400,
+      xp: 40
+    },
+    {
+      title: "Évolution de la psychologie",
+      question: "Explique le passage de la philosophie à la psychologie scientifique.",
+      time: 400,
+      xp: 60
+    }
+  ]
+};
+
+/* ================= CHAPTERS ================= */
+
+const chapters = {
+  "Chapitre 1": chapter1
+};
+
+/* ================= HOME ================= */
+
+function home(){
+  app.innerHTML = `
+  <div class="card">
+    <h2>Philosophie  </h2>
+
+    <button onclick="startQCM()">🧪 QCM psychologie </button>
+    <button onclick="essayMenu()">✍️ Devoirs écrits psychologie</button>
+
+    <p>XP: ${state.xp} | Niveau: ${state.level}</p>
+  </div>`;
+}
+
+/* ================= QCM ================= */
+
+function startQCM(){
+  state.qIndex = 0;
+  showQCM();
+}
+
+function showQCM(){
+
+  const qcm = chapters["Chapitre 1"].qcm;
+  const q = qcm[state.qIndex];
+
+  // 🔥 on mélange les options MAIS on garde la bonne réponse
+  const shuffled = shuffle(
+    q.options.map((text, index) => ({
+      text,
+      index
+    }))
+  );
+
+  // on stocke la bonne réponse mélangée
+  state.currentCorrect = shuffled.findIndex(o => o.index === q.answer);
+
+  app.innerHTML = `
+  <div class="card">
+
+    <h3>Q${state.qIndex + 1}: ${q.question}</h3>
+
+    ${shuffled.map((o,i)=>`
+      <div class="option" onclick="answer(${i})">
+        ${o.text}
+      </div>
+    `).join("")}
+
+    <p>XP: +${q.xp}</p>
+
+  </div>`;
+}
+
+/* ================= ANSWER ================= */
+
+function answer(choice){
+
+  const qcm = chapters["Chapitre 1"].qcm;
+  const q = qcm[state.qIndex];
+
+  const options = document.querySelectorAll(".option");
+
+  if(choice === state.currentCorrect){
+    options[choice].classList.add("good");
+    addXP(q.xp);
+  }
+  else {
+    options[choice].classList.add("bad");
+    options[q.answer].classList.add("good");
+  }
+
+  setTimeout(()=>{
+    state.qIndex++;
+
+    if(state.qIndex >= qcm.length){
+      notify("Chapitre terminé 🎉");
+      home();
+    } else {
+      showQCM();
+    }
+
+  }, 800);
+ 
+}
+
+  
+  
+/* ================= XP SYSTEM ================= */
+
+function addXP(points){
+
+  state.xp += points;
+
+  if(state.xp >= state.level * 100){
+    state.level++;
+    notify("🔥 LEVEL UP !", "success");
+  }
+
+  localStorage.setItem("xp", state.xp);
+  localStorage.setItem("level", state.level);
+}
+/* ================= ESSAYS ================= */
+
+function getEssayProgress(){
+  return JSON.parse(localStorage.getItem("essayProgress")) || {};
+}
+
+function saveEssayProgress(title, content){
+
+  const progress = getEssayProgress();
+
+  progress[title] = {
+    content: content,
+    done: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+}
+
+function essayMenu(){
+
+  const essays = chapters["Chapitre 1"].essays;
+  const progress = getEssayProgress();
+
+  app.innerHTML = `
+  <div class="card">
+
+    <h2>✍️ Devoirs</h2>
+
+    ${essays.map((e,i)=>{
+
+      const done = progress[e.title];
+
+      return `
+      <button
+        onclick="startEssay(${i})"
+        style="
+          background:${done ? '#22c55e' : '#3b82f6'};
+        "
+      >
+        ${done ? '✅' : '📝'}
+        ${e.title}
+      </button>
+      `;
+    }).join("")}
+
+  <br>
+  
+  <br>
+  <button onclick="home()">
+      ⬅️ Retour
+    </button>
+
+  </div>`;
+}
+
+function startEssay(i){
+
+  const essay = chapters["Chapitre 1"].essays[i];
+
+  state.essay = essay;
+  state.timer = essay.time;
+
+  clearInterval(state.interval);
+
+  state.interval = setInterval(()=>{
+
+    state.timer--;
+
+    if(state.timer <= 0){
+
+      clearInterval(state.interval);
+
+      autoSaveEssay();
+
+      notify("⏰ Temps écoulé !");
+    }
+
+    updateTimer();
+
+  },1000);
+
+  renderEssay();
+}
+
+function autoSaveEssay(){
+
+  const textarea = document.getElementById("essayText");
+
+  if(!textarea) return;
+
+  saveEssayProgress(
+    state.essay.title,
+    textarea.value
+  );
+}
+
+function liveSaveEssay(){
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+}
+
+function finishEssay(){
+
+  clearInterval(state.interval);
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+
+  addXP(state.essay.xp);
+
+  notify("Devoir enregistré !");
+
+  essayMenu();
+}
+
+function resetEssay(){
+
+  const progress = getEssayProgress();
+
+  delete progress[state.essay.title];
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+
+  renderEssay();
+}
+
+function updateTimer(){
+
+  const timer = document.getElementById("timer");
+  const fill = document.getElementById("fill");
+
+  const minutes =
+    Math.floor(state.timer / 60);
+
+  const seconds =
+    state.timer % 60;
+
+  const formatted =
+    `${minutes}:${seconds
+      .toString()
+      .padStart(2,"0")}`;
+
+  if(timer){
+    timer.innerHTML = `⏱️ ${formatted}`;
+  }
+
+  if(fill){
+    fill.style.width =
+      `${(state.timer/state.essay.time)*100}%`;
+  }
+}
+/* ================= ESSAY UI ================= */
+
+function renderEssay(){
+
+  const progress = getEssayProgress();
+
+  const oldAnswer =
+    progress[state.essay.title]?.content || "";
+
+  app.innerHTML = `
+  
+  
+  <div class="card">
+
+    <h3>${state.essay.title}</h3>
+
+    <div class="bar">
+      <div
+        class="fill"
+        id="fill"
+        style="
+          width:${(state.timer/state.essay.time)*100}%
+        ">
+      </div>
+    </div>
+
+    <p id="timer"></p>
+
+    <p>
+      ${state.essay.question}
+    </p>
+
+    <textarea
+      id="essayText"
+      placeholder="Rédige ta réponse..."
+      oninput="liveSaveEssay()"
+    >${oldAnswer}</textarea>
+
+  <button onclick="sendEssay()">
+    🤖 Corriger avec IA
+  </button>
+  
+    <button onclick="finishEssay()">
+      Enregister le devoir
+    </button>
+
+    <button onclick="resetEssay()">
+       Refaire le devoir 
+    </button>
+  
+  <br>
+  
+  <br>
+  
+  <br>
+    <button onclick="essayMenu()">
+      ⬅️ Retour
+    </button>
+
+  </div>`;
+}
+
+
+
+/* ================= SEND IA ================= */
+
+function sendEssay(){
+
+  const text = document.getElementById("essayText").value;
+
+  if(!text.trim()){
+    alert("Écris quelque chose !");
+    return;
+  }
+
+  const prompt = `
+Corrige ce devoir :
+
+QUESTION:
+${state.essay.question}
+
+REPONSE:
+${text}
+
+Donne:
+- note /20
+- erreurs
+- correction
+`;
+
+  window.open("https://chatgpt.com/?q=" + encodeURIComponent(prompt));
+}
+
+/* ================= INIT ================= */
+
+home();
+  
+  function notify(message, type="info", duration=3500){
+
+  const container = document.getElementById("notif-container");
+
+  const div = document.createElement("div");
+  div.className = `notif ${type}`;
+  div.innerText = message;
+
+  container.appendChild(div);
+
+  setTimeout(()=>{
+    div.remove();
+  }, duration);
+}
+
+  
+  
+  function quitQCM(){
+  state.qIndex = 0;
+  home();
+}
+  
+</script>
+
+</body>
+</html>

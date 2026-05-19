@@ -1,0 +1,7678 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> L'ultime pécheur </title>
+
+<style>
+  
+  .quit-btn{
+
+  background:#ef4444;
+  color:white;
+
+  border:none;
+
+  padding:10px 14px;
+
+  border-radius:12px;
+
+  font-weight:bold;
+
+  margin-bottom:15px;
+
+  cursor:pointer;
+
+  transition:0.3s;
+}
+
+.quit-btn:hover{
+  transform:scale(1.05);
+  opacity:0.9;
+}
+  
+  #notif-container{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:9999;
+  pointer-events:none;
+}
+
+.notif{
+  min-width:250px;
+  max-width:360px;
+  padding:12px 15px;
+  border-radius:14px;
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  animation:slideDown 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+}
+
+.notif.success{ background:#22c55e; }
+.notif.error{ background:#ef4444; }
+.notif.info{ background:#3b82f6; }
+
+@keyframes slideDown{
+  from{transform:translateY(-20px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+
+@keyframes fadeOut{
+  to{opacity:0;transform:translateY(-10px);}
+}
+  
+:root{
+--bg:#020617;
+--card:#0f172a;
+--accent:#3b82f6;
+--good:#22c55e;
+--bad:#ef4444;
+--glass:rgba(15,23,42,0.6);
+}
+
+*{box-sizing:border-box;font-family:Arial;}
+
+body{
+margin:0;
+background:radial-gradient(circle at top,#1e293b,#020617);
+color:white;
+}
+
+.topbar{
+  position:fixed;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:420px;
+  padding:10px 15px;
+  border-radius:20px;
+  background:var(--glass);
+  backdrop-filter:blur(10px);
+  z-index:999;
+}
+
+.topbar-title{
+  text-align:center;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.xp-bar-bg{
+  height:12px;
+  background:#1e293b;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
+
+.xp-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  border-radius:10px;
+  transition:width 0.5s ease;
+  box-shadow:0 0 8px #3b82f6;
+}
+
+.xp-bar-info{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:3px;
+}
+
+.container{padding:80px 15px 110px;}
+
+.card{
+background:var(--card);
+padding:15px;
+border-radius:18px;
+margin-top:15px;
+}
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:var(--accent);
+color:white;
+font-weight:bold;
+margin-top:10px;
+}
+
+textarea{
+width:100%;
+height:180px;
+margin-top:10px;
+padding:10px;
+border-radius:10px;
+background:#1e293b;
+color:white;
+border:none;
+}
+
+.option{
+padding:12px;
+margin:8px 0;
+background:#1e293b;
+border-radius:12px;
+cursor:pointer;
+}
+
+.option.good{background:var(--good)!important;}
+.option.bad{background:var(--bad)!important;}
+
+.bar{
+height:10px;
+background:#1e293b;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:10px;
+}
+
+.fill{
+height:100%;
+background:var(--accent);
+}
+  
+  .mission-btn{
+  background:linear-gradient(135deg,#dc2626,#7c3aed);
+  font-size:16px;
+  letter-spacing:1px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}
+  50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}
+}
+
+.mission-timer{
+  font-size:32px;
+  font-weight:bold;
+  text-align:center;
+  color:#f87171;
+  margin:10px 0;
+}
+
+.mission-progress{
+  text-align:center;
+  color:#94a3b8;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.score-card{
+  text-align:center;
+  padding:20px;
+}
+
+.score-note{
+  font-size:64px;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+.score-good{color:#22c55e;}
+.score-mid{color:#f59e0b;}
+.score-bad{color:#ef4444;}
+</style>
+</head>
+
+<body>
+
+  <div id="notif-container"></div>
+  
+  <div class="topbar" id="topbar">
+  <div class="topbar-title">🧠 Mode commando</div>
+  <div class="xp-bar-bg">
+    <div class="xp-bar-fill" id="xpFill" style="width:0%"></div>
+  </div>
+  <div class="xp-bar-info">
+    <span id="xpLabel">XP: 0</span>
+    <span id="levelLabel">Niveau 1</span>
+  </div>
+</div>
+  
+<div class="container" id="app"></div>
+  <p classs=evelopper par educative sofware </p>
+<script>
+
+  function shuffle(array){
+  let arr = [...array];
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+  
+/* ================= STATE ================= */
+
+let state = {
+  xp: parseInt(localStorage.getItem("xp")) || 0,
+  level: parseInt(localStorage.getItem("level")) || 1,
+  essay: null,
+  timer: 0,
+  interval: null,
+  qIndex: 0 ,
+  currentChapter:"Lesson 1",
+  qcmTimer:null,
+  qcmTimeLeft:15
+};
+
+/* ================= CHAPITRE I (ELITE MODE) ================= */
+
+
+  const chapter1={
+
+title:"Lesson 1 : Conditionals",
+
+qcm:[
+
+/* =========================================================
+   🔵 CONDITIONAL TYPE 1 — FACILE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If it rains, I will stay home.",
+"If it will rain, I stay home.",
+"If it raining, I stay home.",
+"If rain, I will stay home."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If she studies hard, she ___ the exam.",
+options:[
+"pass",
+"passes",
+"will pass",
+"passed"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure of conditional type 1.",
+options:[
+"If + simple present + future",
+"If + future + future",
+"If + past + conditional",
+"If + present perfect + future"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If I see him, I ___ him the truth.",
+options:[
+"tell",
+"told",
+"will tell",
+"would tell"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If they hurry, they ___ the bus.",
+options:[
+"catch",
+"caught",
+"will catch",
+"would catch"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the negative form.",
+options:[
+"If he doesn't study, he will fail.",
+"If he not study, he fails.",
+"If he won't study, he fail.",
+"If he didn't study, he will fail."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"If you heat water, it ___.",
+options:[
+"boils",
+"boiled",
+"will boils",
+"boil"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"If we arrive early, we ___ dinner.",
+options:[
+"will prepare",
+"prepared",
+"would prepare",
+"prepare"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 CONDITIONAL TYPE 1 — MOYEN
+========================================================= */
+
+{
+question:"Choose the interrogative form.",
+options:[
+"Will you help me if I ask?",
+"Do you will help me if I ask?",
+"Will help you me if I ask?",
+"Would you help me if I ask?"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If she ___ late, we will start without her.",
+options:[
+"arrives",
+"arrived",
+"will arrive",
+"would arrive"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"If it rains, we will stay home.",
+"If I study, I will succeed.",
+"If she comes, we eat together.",
+"If they hurry, they will win."
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If you don't water plants, they ___.",
+options:[
+"die",
+"will die",
+"died",
+"would die"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If my mother cooks, we ___ happy.",
+options:[
+"are",
+"will be",
+"were",
+"would be"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If he calls me, I answer.",
+"If he calls me, I will answer.",
+"If he will call me, I answer.",
+"If he called me, I will answer."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 CONDITIONAL TYPE 1 — DIFFICILE
+========================================================= */
+
+{
+question:"If you ___ hard, you will eventually succeed.",
+options:[
+"work",
+"worked",
+"will work",
+"would work"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the best sentence.",
+options:[
+"If she studies, she passes.",
+"If she studies, she will pass.",
+"If she will study, she pass.",
+"If studied, she will pass."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If the teacher ___ absent, the class will stop.",
+options:[
+"is",
+"was",
+"will be",
+"would be"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct interrogative conditional.",
+options:[
+"What will you do if you fail?",
+"What you will do if you fail?",
+"What do you will do if you fail?",
+"What would you do if you fail?"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔵 CONDITIONAL TYPE 2 — FACILE
+========================================================= */
+
+{
+question:"If I were rich, I ___ a big house.",
+options:[
+"buy",
+"will buy",
+"would buy",
+"bought"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If I had money, I would travel.",
+"If I have money, I would travel.",
+"If I had money, I will travel.",
+"If I had money, I travel."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If she ___ harder, she would pass.",
+options:[
+"worked",
+"works",
+"will work",
+"would work"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If I ___ you, I would apologize.",
+options:[
+"am",
+"was",
+"were",
+"be"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 CONDITIONAL TYPE 2 — MOYEN
+========================================================= */
+
+{
+question:"Choose the negative form.",
+options:[
+"If he didn't smoke, he would feel better.",
+"If he doesn't smoke, he would feel better.",
+"If he won't smoke, he feels better.",
+"If he not smoke, he would feel better."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"What ___ you do if you won the lottery?",
+options:[
+"will",
+"would",
+"do",
+"did"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If they lived near us, we ___ them often.",
+options:[
+"visit",
+"visited",
+"would visit",
+"will visit"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 CONDITIONAL TYPE 2 — DIFFICILE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If I knew the answer, I would tell you.",
+"If I know the answer, I would tell you.",
+"If I knew the answer, I will tell you.",
+"If I knew the answer, I tell you."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If she ___ more confident, she would speak English.",
+options:[
+"is",
+"was",
+"were",
+"will be"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔵 CONDITIONAL TYPE 3 — FACILE
+========================================================= */
+
+{
+question:"If she had studied, she ___ the exam.",
+options:[
+"would pass",
+"would have passed",
+"passed",
+"will pass"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"If + past perfect + past conditional",
+"If + present + future",
+"If + past + conditional",
+"If + future + future"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If they had left earlier, they ___ the train.",
+options:[
+"would catch",
+"would have caught",
+"caught",
+"will catch"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 CONDITIONAL TYPE 3 — MOYEN
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If I had seen him, I would have spoken to him.",
+"If I saw him, I would have spoken.",
+"If I had seen him, I would speak.",
+"If I have seen him, I would have spoken."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If he had studied harder, he ___ failed.",
+options:[
+"wouldn't have",
+"won't have",
+"wouldn't",
+"didn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 CONDITIONAL TYPE 3 — DIFFICILE
+========================================================= */
+
+{
+question:"If we had known, we ___ earlier.",
+options:[
+"would come",
+"would have come",
+"came",
+"will come"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the negative form.",
+options:[
+"If she hadn't forgotten, she would have come.",
+"If she didn't forget, she would have come.",
+"If she hasn't forgotten, she would have come.",
+"If she not forgotten, she would have come."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+}
+
+]
+
+};
+  
+  const chapter2={
+
+title:"Lesson 2 : If Clauses",
+
+qcm:[
+
+/* =========================================================
+   🔵 CONCORDANCE — FACILE
+========================================================= */
+
+{
+question:"If you study hard, you ___ the exam.",
+options:[
+"pass",
+"will pass",
+"would pass",
+"passed"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"If + simple present → simple future",
+"If + simple past → simple future",
+"If + past perfect → simple present",
+"If + future → future"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If it rains, we ___ at home.",
+options:[
+"stay",
+"stayed",
+"will stay",
+"would stay"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If she calls me, I ___ her.",
+options:[
+"help",
+"will help",
+"would help",
+"helped"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If I see him, I ___ him the news.",
+options:[
+"tell",
+"would tell",
+"will tell",
+"told"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"If they arrive early, we ___ dinner together.",
+options:[
+"have",
+"had",
+"will have",
+"would have"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"If you don't hurry, you ___ the bus.",
+options:[
+"miss",
+"will miss",
+"would miss",
+"missed"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If he studies, he will succeed.",
+"If he will study, he succeeds.",
+"If he studied, he will succeed.",
+"If he study, he will succeeds."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 SIMPLE PAST → CONDITIONAL
+========================================================= */
+
+{
+question:"If I had money, I ___ a car.",
+options:[
+"buy",
+"will buy",
+"would buy",
+"bought"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If she studied more, she ___ better marks.",
+options:[
+"gets",
+"would get",
+"will get",
+"got"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If we lived in London, we ___ English every day.",
+options:[
+"speak",
+"would speak",
+"will speak",
+"spoke"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"If + simple past → simple conditional",
+"If + simple present → future",
+"If + past perfect → present",
+"If + future → conditional"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If he were taller, he ___ basketball.",
+options:[
+"plays",
+"would play",
+"will play",
+"played"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If I ___ you, I would apologize.",
+options:[
+"am",
+"was",
+"were",
+"will be"
+],
+answer:2,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If she knew the answer, she would tell us.",
+"If she knows the answer, she would tell us.",
+"If she knew the answer, she will tell us.",
+"If she known the answer, she would tell us."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 PAST PERFECT → PAST CONDITIONAL
+========================================================= */
+
+{
+question:"If they had left earlier, they ___ the train.",
+options:[
+"would catch",
+"would have caught",
+"caught",
+"will catch"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If she had studied harder, she ___ the exam.",
+options:[
+"would pass",
+"would have passed",
+"passed",
+"will pass"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"If + past perfect → past conditional",
+"If + present → future",
+"If + past → conditional",
+"If + future → future"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If I had known the truth, I ___ angry.",
+options:[
+"would be",
+"would have been",
+"was",
+"will be"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"If he had called me, I would have answered.",
+"If he called me, I would have answered.",
+"If he had called me, I would answer.",
+"If he has called me, I would have answered."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If we had arrived earlier, we ___ them.",
+options:[
+"would see",
+"would have seen",
+"saw",
+"will see"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"If she hadn't forgotten her keys, she ___ inside.",
+options:[
+"would get",
+"would have gotten",
+"got",
+"gets"
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔵 POSITION OF IF CLAUSE
+========================================================= */
+
+{
+question:"Choose the sentence where the IF clause is at the beginning.",
+options:[
+"If it rains, we will stay home.",
+"We will stay home if it rains.",
+"They will travel if they save money.",
+"We eat if she cooks."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the sentence where the IF clause is at the end.",
+options:[
+"If I study, I will pass.",
+"If she comes, we will eat.",
+"We will travel if we have money.",
+"If they hurry, they will win."
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which punctuation is correct?",
+options:[
+"If it rains we will stay home.",
+"If it rains, we will stay home.",
+"We will stay home, if it rains.",
+"If it rains; we will stay home."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"We will go out if the weather is good.",
+"We will go out if the weather will be good.",
+"We go out if the weather is good.",
+"We would go out if the weather is good."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"If clause can be placed :",
+options:[
+"Only at the beginning",
+"Only at the end",
+"At the beginning or at the end",
+"Only in questions"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"If she ___ more careful, she would not have failed.",
+options:[
+"is",
+"was",
+"had been",
+"would be"
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"If you heat ice, it ___.",
+options:[
+"melt",
+"melts",
+"would melt",
+"will melts"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"If I were rich, I would travel.",
+"If she studies, she will pass.",
+"If they had left earlier, they would have arrived on time.",
+"If he will call me, I will answer."
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"If I had enough time, I ___ French every day.",
+options:[
+"study",
+"would study",
+"will study",
+"studied"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+}
+
+]
+
+};
+  
+  
+  const chapter3={
+
+title:"Lesson 3 : The Defectives And Equivalents",
+
+qcm:[
+
+/* =========================================================
+   🔵 CAN — FACILE
+========================================================= */
+
+{
+question:"She ___ swim very well.",
+options:[
+"must",
+"can",
+"may",
+"should"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"___ you help me please?",
+options:[
+"Can",
+"Must",
+"Need",
+"Had better"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The preterit form of CAN is :",
+options:[
+"must",
+"could",
+"may",
+"should"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"When I was young, I ___ run very fast.",
+options:[
+"can",
+"could",
+"must",
+"may"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"CAN generally expresses :",
+options:[
+"obligation",
+"ability",
+"prohibition",
+"regret"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 MUST — FACILE
+========================================================= */
+
+{
+question:"You ___ wear a seatbelt.",
+options:[
+"can",
+"must",
+"may",
+"could"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"MUST expresses :",
+options:[
+"ability",
+"obligation",
+"permission",
+"habit"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Students ___ cheat during exams.",
+options:[
+"mustn't",
+"can",
+"may",
+"could"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"You ___ finish your homework before going out.",
+options:[
+"must",
+"can",
+"may",
+"needn't"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"MUSTN'T expresses :",
+options:[
+"permission",
+"obligation",
+"prohibition",
+"ability"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🔵 MAY — FACILE
+========================================================= */
+
+{
+question:"___ I come in?",
+options:[
+"Must",
+"May",
+"Need",
+"Had better"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"It ___ rain tomorrow.",
+options:[
+"must",
+"may",
+"can",
+"had better"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"MAY generally expresses :",
+options:[
+"possibility or permission",
+"obligation",
+"certainty",
+"habit"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"You ___ leave now if you want.",
+options:[
+"must",
+"may",
+"needn't",
+"can't"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 SHOULD / OUGHT TO
+========================================================= */
+
+{
+question:"You ___ study harder.",
+options:[
+"should",
+"mustn't",
+"can't",
+"may"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"SHOULD expresses :",
+options:[
+"advice",
+"ability",
+"permission",
+"prohibition"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"You ___ apologize to your teacher.",
+options:[
+"ought to",
+"can't",
+"mustn't",
+"needn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The equivalent of SHOULD is :",
+options:[
+"ought to",
+"needn't",
+"can't",
+"mustn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 HAD BETTER
+========================================================= */
+
+{
+question:"You ___ see a doctor.",
+options:[
+"had better",
+"can",
+"may",
+"needn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"HAD BETTER expresses :",
+options:[
+"strong advice",
+"permission",
+"ability",
+"possibility"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"You had better ___ late again.",
+options:[
+"not be",
+"don't be",
+"not to be",
+"won't be"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🟡 NEED / NEEDN'T
+========================================================= */
+
+{
+question:"You ___ bring your book tomorrow.",
+options:[
+"need to",
+"mustn't",
+"can't",
+"may not"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"You ___ come if you are busy.",
+options:[
+"needn't",
+"must",
+"had better",
+"can"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"NEEDN'T expresses :",
+options:[
+"necessity",
+"absence of necessity",
+"obligation",
+"certainty"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 FIND THE RIGHT MODAL VERB
+========================================================= */
+
+{
+question:"You ___ stop smoking. It is dangerous.",
+options:[
+"can",
+"must",
+"may",
+"could"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"___ I use your phone please?",
+options:[
+"Must",
+"May",
+"Need",
+"Had better"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She ___ speak three languages.",
+options:[
+"must",
+"can",
+"may",
+"need"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Drivers ___ respect traffic laws.",
+options:[
+"must",
+"may",
+"could",
+"can"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"It is cloudy. It ___ rain later.",
+options:[
+"must",
+"may",
+"can't",
+"need"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"When he was younger, he ___ climb trees easily.",
+options:[
+"can",
+"could",
+"must",
+"may"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"You ___ talk during the exam.",
+options:[
+"mustn't",
+"may",
+"can",
+"could"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We ___ leave now or we will be late.",
+options:[
+"must",
+"may",
+"could",
+"needn't"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"You ___ eat more vegetables.",
+options:[
+"should",
+"can't",
+"mustn't",
+"needn't"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"You ___ forget your passport.",
+options:[
+"had better not",
+"can",
+"may",
+"need"
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 MUST OR CAN'T
+========================================================= */
+
+{
+question:"She studied all night. She ___ be tired.",
+options:[
+"must",
+"can't"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He is in Paris now. He ___ be in London.",
+options:[
+"must",
+"can't"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"This answer is perfect. You ___ understand the lesson.",
+options:[
+"must",
+"can't"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The baby is sleeping. He ___ be making noise.",
+options:[
+"must",
+"can't"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She got 100%. She ___ have studied very hard.",
+options:[
+"must",
+"can't"
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"He never studied. He ___ know the answer.",
+options:[
+"must",
+"can't"
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 EXAM LEVEL
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"You must to study.",
+"You must study.",
+"You must studying.",
+"You must studied."
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"May I open the window?",
+"May open the window?",
+"I may to open the window?",
+"May I to open the window?"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She can swim.",
+"You must obey.",
+"He may comes later.",
+"We should help."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"The equivalent of CAN in the future is often :",
+options:[
+"be able to",
+"must",
+"should",
+"ought to"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter4={
+
+title:"Lesson 4 : Simple Present",
+
+qcm:[
+
+/* =========================================================
+   🔵 BASE — USE OF SIMPLE PRESENT
+========================================================= */
+
+{
+question:"The simple present is mainly used for :",
+options:[
+"past actions",
+"future plans only",
+"habits and general truths",
+"imaginary situations"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She go to school every day.",
+"She goes to school every day.",
+"She going to school every day.",
+"She gone to school every day."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"I ___ football every weekend.",
+options:[
+"play",
+"plays",
+"played",
+"playing"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"He ___ TV at night.",
+options:[
+"watch",
+"watches",
+"watched",
+"watching"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Water ___ at 100°C.",
+options:[
+"boil",
+"boils",
+"boiled",
+"boiling"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct affirmative sentence.",
+options:[
+"They works hard.",
+"They work hard.",
+"They working hard.",
+"They worked hard."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The sun ___ in the east.",
+options:[
+"rise",
+"rises",
+"rose",
+"rising"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question:"Choose the correct negative sentence.",
+options:[
+"He don't like coffee.",
+"He doesn't likes coffee.",
+"He doesn't like coffee.",
+"He not like coffee."
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ meat.",
+options:[
+"doesn't eat",
+"don't eat",
+"not eat",
+"doesn't eats"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"I ___ to school on Sunday.",
+options:[
+"don't go",
+"doesn't go",
+"not go",
+"don't goes"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She doesn't speaks English.",
+"She don't speak English.",
+"She doesn't speak English.",
+"She not speak English."
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The cat ___ milk.",
+options:[
+"don't like",
+"doesn't likes",
+"doesn't like",
+"not likes"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question:"___ you like music?",
+options:[
+"Do",
+"Does",
+"Did",
+"Are"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ she play basketball?",
+options:[
+"Do",
+"Does",
+"Did",
+"Is"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct question.",
+options:[
+"Does he likes football?",
+"Do he like football?",
+"Does he like football?",
+"He does like football?"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ they live in London?",
+options:[
+"Does",
+"Do",
+"Did",
+"Are"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct interrogative sentence.",
+options:[
+"Do she study English?",
+"Does she study English?",
+"Does she studies English?",
+"She does study English?"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 SPELLING RULES
+========================================================= */
+
+{
+question:"Choose the correct form.",
+options:[
+"watchs",
+"watches",
+"watchies",
+"watch"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He ___ to school every morning.",
+options:[
+"go",
+"goes",
+"gos",
+"going"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She ___ her homework after dinner.",
+options:[
+"study",
+"studies",
+"studys",
+"studied"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which verb takes -ES in the simple present?",
+options:[
+"play",
+"eat",
+"wash",
+"open"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct spelling.",
+options:[
+"flys",
+"flies",
+"flyes",
+"flis"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"My brother ___ in a bank.",
+options:[
+"work",
+"works",
+"working",
+"worked"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We ___ dinner at 8 PM every day.",
+options:[
+"has",
+"have",
+"having",
+"had"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She likes pizza.",
+"They play football.",
+"He don't study.",
+"We live here."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Dogs ___ loudly at night.",
+options:[
+"barks",
+"bark",
+"barking",
+"barked"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The teacher ___ the lesson clearly.",
+options:[
+"explain",
+"explains",
+"explaining",
+"explained"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I doesn't understand.",
+"I don't understands.",
+"I don't understand.",
+"I not understand."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"___ your parents work here?",
+options:[
+"Do",
+"Does",
+"Did",
+"Are"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He never ___ late.",
+options:[
+"arrive",
+"arrives",
+"arrived",
+"arriving"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence expressing a general truth.",
+options:[
+"I watched TV yesterday.",
+"Water freezes at 0°C.",
+"I will travel tomorrow.",
+"If I were rich..."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Simple present is often used with :",
+options:[
+"yesterday",
+"now only",
+"every day",
+"last year"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+}
+
+]
+
+};
+
+  const chapter5={
+
+title:"Lesson 5 : Present Progressive",
+
+qcm:[
+
+/* =========================================================
+   🔵 USE OF PRESENT PROGRESSIVE
+========================================================= */
+
+{
+question:"The present progressive is mainly used for :",
+options:[
+"past actions",
+"actions happening now",
+"permanent situations",
+"completed actions"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She is studying now.",
+"She studying now.",
+"She studies now.",
+"She study now."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"I ___ TV at the moment.",
+options:[
+"watch",
+"am watching",
+"watched",
+"watches"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"They ___ football now.",
+options:[
+"play",
+"are playing",
+"played",
+"plays"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We ___ dinner right now.",
+options:[
+"eat",
+"are eating",
+"eats",
+"ate"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"Subject + am/is/are + verb-ing",
+"Subject + do + verb",
+"Subject + verb-ed",
+"Subject + will + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"He ___ a book at the moment.",
+options:[
+"reads",
+"is reading",
+"read",
+"reading"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question:"Choose the correct negative sentence.",
+options:[
+"She isn't sleeping.",
+"She not sleeping.",
+"She doesn't sleeping.",
+"She don't sleep."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"I ___ working today.",
+options:[
+"am not",
+"don't",
+"doesn't",
+"not"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ listening to music.",
+options:[
+"aren't",
+"doesn't",
+"don't",
+"isn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He isn't studying now.",
+"He doesn't studying now.",
+"He not studying now.",
+"He don't study now."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ watching TV.",
+options:[
+"aren't",
+"isn't",
+"don't",
+"doesn't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question:"___ you studying now?",
+options:[
+"Do",
+"Are",
+"Does",
+"Did"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ she sleeping?",
+options:[
+"Do",
+"Does",
+"Is",
+"Are"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct question.",
+options:[
+"Are they playing football?",
+"Do they playing football?",
+"They are playing football?",
+"Are playing they football?"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ he working today?",
+options:[
+"Is",
+"Are",
+"Does",
+"Do"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct interrogative sentence.",
+options:[
+"Is she cooking dinner?",
+"Does she cooking dinner?",
+"She is cooking dinner?",
+"Is cooking she dinner?"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+   
+    {
+question:"Choose the correct form.",
+options:[
+"runing",
+"running",
+"runinging",
+"runsing"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He is ___ football.",
+options:[
+"play",
+"playing",
+"plays",
+"played"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct spelling.",
+options:[
+"swiming",
+"swimming",
+"swimmming",
+"swiming"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which verb doubles the consonant?",
+options:[
+"eat",
+"sleep",
+"run",
+"read"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct form.",
+options:[
+"writeing",
+"writting",
+"writing",
+"writteing"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"Listen! The baby ___ .",
+options:[
+"cries",
+"is crying",
+"cry",
+"cried"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"At the moment, my father ___ a car.",
+options:[
+"drive",
+"drives",
+"is driving",
+"drove"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"They are studying.",
+"He is eating.",
+"She are sleeping.",
+"We are working."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Why ___ you laughing?",
+options:[
+"is",
+"are",
+"do",
+"does"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"My friends ___ a movie now.",
+options:[
+"watch",
+"are watching",
+"watched",
+"watches"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The teacher ___ on the board now.",
+options:[
+"writes",
+"is writing",
+"write",
+"wrote"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence expressing an action happening now.",
+options:[
+"I go to school every day.",
+"She is talking on the phone.",
+"He played football yesterday.",
+"They will travel tomorrow."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"We ___ for the bus at the moment.",
+options:[
+"wait",
+"are waiting",
+"waited",
+"waiting"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"___ it raining outside?",
+options:[
+"Do",
+"Does",
+"Is",
+"Are"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Present progressive is often used with :",
+options:[
+"yesterday",
+"every year",
+"now / at the moment",
+"last week"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+}
+
+]
+
+};
+  
+  const chapter6={
+
+title:"Lesson 6 : Difference Between Simple Present And Present Progressive",
+
+qcm:[
+
+/* =========================================================
+   🔵 BASIC DIFFERENCE
+========================================================= */
+
+{
+question:"Simple present is mainly used for :",
+options:[
+"actions happening now",
+"habits and routines",
+"future predictions",
+"past actions"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Present progressive is mainly used for :",
+options:[
+"general truths",
+"habits",
+"actions happening now",
+"past situations"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence for a habit.",
+options:[
+"I am playing football every day.",
+"I play football every day.",
+"I played football every day.",
+"I will play football every day."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence for an action happening now.",
+options:[
+"She studies now.",
+"She is studying now.",
+"She studied now.",
+"She study now."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Water ___ at 100°C.",
+options:[
+"is boiling",
+"boils",
+"boiled",
+"boil"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Listen! The baby ___ .",
+options:[
+"cries",
+"is crying",
+"cry",
+"cried"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 CHOOSE THE CORRECT TENSE
+========================================================= */
+
+{
+question:"My father ___ to work every morning.",
+options:[
+"go",
+"goes",
+"is going",
+"going"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"My father ___ to work right now.",
+options:[
+"goes",
+"go",
+"is going",
+"went"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They usually ___ dinner at 8 PM.",
+options:[
+"have",
+"are having",
+"had",
+"having"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ dinner at the moment.",
+options:[
+"have",
+"has",
+"are having",
+"had"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She often ___ books.",
+options:[
+"reads",
+"is reading",
+"read",
+"reading"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ a book now.",
+options:[
+"reads",
+"read",
+"is reading",
+"reading"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We usually ___ by bus.",
+options:[
+"travel",
+"are travelling",
+"travelled",
+"travels"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ by bus today.",
+options:[
+"travel",
+"travels",
+"are travelling",
+"travelled"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 IDENTIFY THE TENSE
+========================================================= */
+
+{
+question:"'He plays football every Sunday' is in :",
+options:[
+"simple present",
+"present progressive",
+"past simple",
+"future"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"'He is playing football now' is in :",
+options:[
+"simple present",
+"future",
+"present progressive",
+"past perfect"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence expressing a routine.",
+options:[
+"They are eating now.",
+"I go to school every day.",
+"She is sleeping.",
+"We are watching TV."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence expressing an action happening now.",
+options:[
+"He works every day.",
+"She drinks coffee every morning.",
+"They are studying now.",
+"We travel every summer."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which signal word often goes with simple present?",
+options:[
+"now",
+"at the moment",
+"every day",
+"currently"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which signal word often goes with present progressive?",
+options:[
+"usually",
+"always",
+"now",
+"every week"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"The teacher ___ English every day.",
+options:[
+"teach",
+"teaches",
+"is teaching",
+"teaching"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The teacher ___ English right now.",
+options:[
+"teach",
+"teaches",
+"is teaching",
+"taught"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She goes to school every day.",
+"They are studying now.",
+"He is play football.",
+"We eat dinner at 7 PM."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Why ___ you laughing now?",
+options:[
+"do",
+"does",
+"are",
+"is"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"My brother usually ___ TV after school.",
+options:[
+"watch",
+"watches",
+"is watching",
+"watched"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"My brother ___ TV at the moment.",
+options:[
+"watch",
+"watches",
+"is watching",
+"watched"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct pair.",
+options:[
+"Every day → present progressive",
+"Now → simple present",
+"Usually → simple present",
+"At the moment → simple present"
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Cats usually ___ milk.",
+options:[
+"drink",
+"are drinking",
+"drinks",
+"drank"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Look! The cats ___ milk.",
+options:[
+"drink",
+"drinks",
+"are drinking",
+"drank"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Simple present = habits ; Present progressive = actions now",
+"Simple present = past ; Present progressive = future",
+"Both are exactly the same",
+"Present progressive is only for habits"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter7={
+
+title:"Lesson 7 : Present Perfect",
+
+qcm:[
+
+/* =========================================================
+   🔵 USE OF PRESENT PERFECT
+========================================================= */
+
+{
+question:"The present perfect is formed with :",
+options:[
+"have/has + past participle",
+"had + verb",
+"will + verb",
+"am/is/are + verb-ing"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have finished my homework.",
+"I has finished my homework.",
+"I have finish my homework.",
+"I finished have my homework."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"She ___ visited London.",
+options:[
+"have",
+"has",
+"had",
+"is"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We ___ eaten dinner already.",
+options:[
+"has",
+"have",
+"had",
+"are"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct past participle of GO.",
+options:[
+"goed",
+"gone",
+"went",
+"goes"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Present perfect often expresses :",
+options:[
+"a completed action linked to the present",
+"a future prediction",
+"a routine only",
+"a past action with exact time"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"He ___ lost his keys.",
+options:[
+"have",
+"has",
+"had",
+"is"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question:"Choose the correct negative sentence.",
+options:[
+"I haven't seen him.",
+"I not have seen him.",
+"I don't have seen him.",
+"I hasn't seen him."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ finished her work.",
+options:[
+"haven't",
+"hasn't",
+"don't",
+"isn't"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ visited Paris yet.",
+options:[
+"haven't",
+"hasn't",
+"didn't",
+"aren't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He hasn't eaten today.",
+"He doesn't eaten today.",
+"He not eaten today.",
+"He hasn't ate today."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ completed the exercise.",
+options:[
+"haven't",
+"hasn't",
+"didn't",
+"don't"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question:"___ you finished your homework?",
+options:[
+"Do",
+"Did",
+"Have",
+"Has"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ she called you?",
+options:[
+"Do",
+"Did",
+"Has",
+"Have"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct question.",
+options:[
+"Have they arrived?",
+"Did they arrived?",
+"They have arrived?",
+"Has they arrived?"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ your parents visited London?",
+options:[
+"Has",
+"Have",
+"Did",
+"Do"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct interrogative sentence.",
+options:[
+"Has he finished his work?",
+"Did he finished his work?",
+"He has finished his work?",
+"Have he finished his work?"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 JUST / ALREADY / YET
+========================================================= */
+
+{
+question:"I have ___ eaten lunch.",
+options:[
+"just",
+"yesterday",
+"last year",
+"ago"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She has ___ finished her homework.",
+options:[
+"already",
+"ago",
+"last night",
+"yesterday"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Have you finished your work ___ ?",
+options:[
+"already",
+"yet",
+"just",
+"ago"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have already seen this movie.",
+"I already have saw this movie.",
+"I have saw this movie already.",
+"I has already seen this movie."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"They haven't arrived ___ .",
+options:[
+"already",
+"yet",
+"just",
+"last week"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 FOR / SINCE
+========================================================= */
+
+{
+question:"I have lived here ___ 2019.",
+options:[
+"for",
+"since",
+"ago",
+"during"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She has studied English ___ three years.",
+options:[
+"since",
+"for",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have known him since 2020.",
+"I know him since 2020.",
+"I have knew him since 2020.",
+"I knew him since 2020."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"We have been friends ___ many years.",
+options:[
+"since",
+"for",
+"ago",
+"from"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She has eaten breakfast.",
+"They have finished.",
+"He have gone home.",
+"We have seen this film."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"My brother ___ never visited Canada.",
+options:[
+"have",
+"has",
+"had",
+"is"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"I ___ my keys, so I can't open the door.",
+options:[
+"lost",
+"have lost",
+"am losing",
+"lose"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence linked to the present.",
+options:[
+"I visited Paris in 2018.",
+"I have visited Paris.",
+"I was visiting Paris.",
+"I will visit Paris."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"___ you ever been to London?",
+options:[
+"Did",
+"Have",
+"Has",
+"Do"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She has ___ her homework yet.",
+options:[
+"finish",
+"finished",
+"finishing",
+"finishes"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Present perfect is often used with :",
+options:[
+"yesterday",
+"last year",
+"already / just / yet",
+"ago"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Present perfect links past actions to the present.",
+"Present perfect is only for future.",
+"Present perfect is the same as past simple.",
+"Present perfect only describes habits."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter8={
+
+title:"Lesson 8 : Simple Past",
+
+qcm:[
+
+/* =========================================================
+   🔵 USE OF SIMPLE PAST
+========================================================= */
+
+{
+question:"The simple past is mainly used for :",
+options:[
+"future actions",
+"actions completed in the past",
+"actions happening now",
+"habits in the future"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I visited Paris last year.",
+"I visit Paris last year.",
+"I have visit Paris last year.",
+"I am visiting Paris last year."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"She ___ to school yesterday.",
+options:[
+"go",
+"goes",
+"went",
+"gone"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We ___ football after class.",
+options:[
+"play",
+"played",
+"playing",
+"plays"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"Subject + verb-ed / past form",
+"Subject + am/is/are + verb-ing",
+"Subject + have + past participle",
+"Subject + will + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"They ___ dinner at 8 PM yesterday.",
+options:[
+"have",
+"had",
+"has",
+"having"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Simple past is often used with :",
+options:[
+"now",
+"every day",
+"yesterday",
+"at the moment"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question:"Choose the correct negative sentence.",
+options:[
+"I didn't go to school.",
+"I don't went to school.",
+"I didn't went to school.",
+"I not go to school."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ the movie yesterday.",
+options:[
+"didn't watch",
+"doesn't watched",
+"didn't watched",
+"not watched"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ football last weekend.",
+options:[
+"didn't play",
+"don't played",
+"didn't played",
+"not play"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He didn't eat breakfast.",
+"He didn't ate breakfast.",
+"He doesn't ate breakfast.",
+"He not eat breakfast."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ at home yesterday.",
+options:[
+"weren't",
+"didn't were",
+"don't were",
+"not were"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question:"___ you visit your grandmother yesterday?",
+options:[
+"Do",
+"Did",
+"Have",
+"Were"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ she call you last night?",
+options:[
+"Did",
+"Does",
+"Has",
+"Is"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct question.",
+options:[
+"Did they finish the work?",
+"Do they finished the work?",
+"They did finish the work?",
+"Did they finished the work?"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ your parents travel last summer?",
+options:[
+"Did",
+"Do",
+"Have",
+"Were"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct interrogative sentence.",
+options:[
+"Did he see the accident?",
+"Did he saw the accident?",
+"He did see the accident?",
+"Does he saw the accident?"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 REGULAR AND IRREGULAR VERBS
+========================================================= */
+
+{
+question:"Choose the correct past form of PLAY.",
+options:[
+"played",
+"playd",
+"plaid",
+"plays"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct past form of GO.",
+options:[
+"goed",
+"went",
+"gone",
+"goes"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct past form of SEE.",
+options:[
+"saw",
+"seed",
+"seen",
+"seeed"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which verb is irregular?",
+options:[
+"work",
+"play",
+"go",
+"watch"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct past form of HAVE.",
+options:[
+"haved",
+"had",
+"has",
+"having"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"Last week, my father ___ a new car.",
+options:[
+"buy",
+"bought",
+"buys",
+"buying"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We ___ TV yesterday evening.",
+options:[
+"watch",
+"watched",
+"watches",
+"watching"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She visited London.",
+"They played football.",
+"He didn't went home.",
+"We saw the teacher."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"I ___ my homework before dinner.",
+options:[
+"finish",
+"finished",
+"finishes",
+"finishing"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"___ you happy yesterday?",
+options:[
+"Was",
+"Were",
+"Did",
+"Have"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She ___ very tired after work.",
+options:[
+"is",
+"was",
+"were",
+"has"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence with a finished past action.",
+options:[
+"I am studying now.",
+"I have finished my work.",
+"I watched a movie yesterday.",
+"I will travel tomorrow."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"The children ___ in the park yesterday.",
+options:[
+"play",
+"played",
+"playing",
+"plays"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Simple past is often used with :",
+options:[
+"already",
+"yet",
+"last year",
+"now"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Simple past describes completed past actions.",
+"Simple past describes actions happening now.",
+"Simple past is only for future plans.",
+"Simple past is identical to present perfect."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter9={
+
+title:"Lesson 9 : Difference Between Present Perfect And Simple Past",
+
+qcm:[
+
+/* =========================================================
+   🔵 BASIC DIFFERENCE
+========================================================= */
+
+{
+question:"Present perfect is generally used for :",
+options:[
+"actions linked to the present",
+"future predictions",
+"actions with a finished past time",
+"habits only"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Simple past is generally used for :",
+options:[
+"unfinished actions",
+"actions with a precise past time",
+"future actions",
+"actions happening now"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I visited Paris last year.",
+"I have visited Paris last year.",
+"I have visit Paris last year.",
+"I am visiting Paris last year."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have visited Paris.",
+"I visited Paris today now.",
+"I have visited Paris yesterday.",
+"I visiting Paris."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which tense often uses 'yesterday'?",
+options:[
+"present perfect",
+"simple past",
+"future",
+"present progressive"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Which tense often uses 'already'?",
+options:[
+"simple past",
+"future",
+"present perfect",
+"past progressive"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 CHOOSE THE CORRECT TENSE
+========================================================= */
+
+{
+question:"I ___ my homework yesterday.",
+options:[
+"have finished",
+"finished",
+"finish",
+"am finishing"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"I ___ my homework already.",
+options:[
+"finished",
+"have finished",
+"finish",
+"finishing"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ to London in 2022.",
+options:[
+"has gone",
+"went",
+"goes",
+"is going"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ to London several times.",
+options:[
+"went",
+"goes",
+"has gone",
+"going"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ this movie last week.",
+options:[
+"have seen",
+"saw",
+"see",
+"seeing"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ this movie before.",
+options:[
+"saw",
+"see",
+"have seen",
+"seeing"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"My father ___ a new car last month.",
+options:[
+"has bought",
+"bought",
+"buy",
+"buys"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"My father ___ a new car recently.",
+options:[
+"bought",
+"buy",
+"has bought",
+"buying"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 SIGNAL WORDS
+========================================================= */
+
+{
+question:"Which signal word is usually used with simple past?",
+options:[
+"already",
+"just",
+"last year",
+"yet"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which signal word is usually used with present perfect?",
+options:[
+"yesterday",
+"ago",
+"already",
+"last week"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"I saw him yesterday.",
+"She has already eaten.",
+"They visited Paris last summer.",
+"We have visited London last year."
+],
+answer:3,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have lost my keys.",
+"I lost my keys yesterday morning.",
+"Both can be correct depending on context.",
+"Neither sentence is correct."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Present perfect usually does NOT mention :",
+options:[
+"a connection to the present",
+"a precise finished past time",
+"an experience",
+"a recent action"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXPERIENCES VS FINISHED TIME
+========================================================= */
+
+{
+question:"___ you ever been to Canada?",
+options:[
+"Did",
+"Have",
+"Were",
+"Do"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"I ___ to Canada in 2020.",
+options:[
+"have been",
+"went",
+"go",
+"am going"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She ___ never eaten sushi before.",
+options:[
+"did",
+"has",
+"was",
+"have"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We ___ dinner at 8 PM yesterday.",
+options:[
+"have had",
+"had",
+"has had",
+"having"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence about life experience.",
+options:[
+"I visited Rome in 2019.",
+"I have visited Rome several times.",
+"I was visiting Rome yesterday.",
+"I will visit Rome tomorrow."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She has finished her homework.",
+"They went to school yesterday.",
+"He has seen this film last week.",
+"We visited our teacher."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"I ___ him two days ago.",
+options:[
+"have seen",
+"saw",
+"see",
+"seeing"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"I ___ him before.",
+options:[
+"saw",
+"have seen",
+"seeing",
+"see"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence linked to the present.",
+options:[
+"I lost my phone yesterday.",
+"I have lost my phone.",
+"I found my phone last year.",
+"I was losing my phone."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Simple past commonly answers the question :",
+options:[
+"When did it happen?",
+"What is happening now?",
+"What will happen tomorrow?",
+"What usually happens?"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Present perfect commonly answers the question :",
+options:[
+"When exactly did it happen?",
+"Has it happened before now?",
+"What happened yesterday?",
+"What was happening?"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Simple past = finished past time ; Present perfect = link with present",
+"Both tenses are identical",
+"Present perfect is only for future",
+"Simple past is only for habits"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter10={
+
+title:"Lesson 10 : Present Perfect Progressive",
+
+qcm:[
+
+/* =========================================================
+   🔵 USE AND FORMATION
+========================================================= */
+
+{
+question:"The present perfect progressive is formed with :",
+options:[
+"have/has been + verb-ing",
+"had + verb",
+"am/is/are + verb-ing",
+"will have + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have been studying for two hours.",
+"I have studying for two hours.",
+"I has been studying for two hours.",
+"I am been studying for two hours."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"She ___ working all day.",
+options:[
+"have been",
+"has been",
+"is been",
+"had been"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We ___ waiting for the bus.",
+options:[
+"have been",
+"has been",
+"are been",
+"had"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Present perfect progressive often expresses :",
+options:[
+"an action continuing until now",
+"a finished past action only",
+"a future action",
+"a habit in the past"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"have/has + been + verb-ing",
+"have/has + past participle",
+"did + verb",
+"am/is/are + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"He ___ playing football since morning.",
+options:[
+"have been",
+"has been",
+"is",
+"had"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question:"Choose the correct negative sentence.",
+options:[
+"I haven't been sleeping well.",
+"I don't been sleeping well.",
+"I haven't sleeping well.",
+"I not been sleeping well."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ studying today.",
+options:[
+"hasn't been",
+"haven't been",
+"isn't been",
+"don't been"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ working recently.",
+options:[
+"haven't been",
+"hasn't been",
+"aren't been",
+"didn't been"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He hasn't been feeling well.",
+"He hasn't feeling well.",
+"He doesn't been feeling well.",
+"He not been feeling well."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"They ___ waiting long.",
+options:[
+"haven't been",
+"hasn't been",
+"aren't been",
+"didn't been"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question:"___ you been studying?",
+options:[
+"Do",
+"Did",
+"Have",
+"Has"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ she been crying?",
+options:[
+"Do",
+"Has",
+"Did",
+"Is"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct question.",
+options:[
+"Have they been working?",
+"Did they been working?",
+"They have been working?",
+"Has they been working?"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ your parents been travelling?",
+options:[
+"Has",
+"Have",
+"Did",
+"Are"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct interrogative sentence.",
+options:[
+"Has he been sleeping?",
+"Did he been sleeping?",
+"He has been sleeping?",
+"Have he been sleeping?"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 FOR / SINCE
+========================================================= */
+
+{
+question:"I have been living here ___ 2020.",
+options:[
+"for",
+"since",
+"ago",
+"during"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She has been studying English ___ three years.",
+options:[
+"since",
+"for",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We have been waiting ___ two hours.",
+options:[
+"since",
+"for",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He has been working here ___ Monday.",
+options:[
+"for",
+"since",
+"ago",
+"during"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have been studying since 2022.",
+"I am studying since 2022.",
+"I have studying since 2022.",
+"I studied since 2022."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"My brother ___ video games all afternoon.",
+options:[
+"has been playing",
+"have been playing",
+"is playing",
+"played"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Why are you tired? — I ___ .",
+options:[
+"have been running",
+"ran",
+"run",
+"am run"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She has been reading.",
+"They have been working.",
+"He have been sleeping.",
+"We have been studying."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"It ___ raining all day.",
+options:[
+"has been",
+"have been",
+"is been",
+"had been"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The children ___ outside for hours.",
+options:[
+"have been playing",
+"has been playing",
+"are playing",
+"played"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the sentence expressing duration.",
+options:[
+"I studied yesterday.",
+"I have been studying for three hours.",
+"I will study tomorrow.",
+"I study every day."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"We ___ for the teacher since 8 AM.",
+options:[
+"wait",
+"have been waiting",
+"waited",
+"are waiting"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Present perfect progressive often emphasizes :",
+options:[
+"duration of an action",
+"a finished exact past time",
+"a future plan",
+"a permanent truth"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Present perfect progressive describes actions continuing until now.",
+"Present perfect progressive is only for past finished actions.",
+"Present perfect progressive describes future events only.",
+"Present perfect progressive is identical to simple past."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter11={
+
+title:"Lesson 11 : Difference Between Present Perfect And Present Perfect Progressive",
+
+qcm:[
+
+/* =========================================================
+   🔵 BASIC DIFFERENCE
+========================================================= */
+
+{
+question:"Present perfect mainly emphasizes :",
+options:[
+"the result of an action",
+"the duration of an action",
+"future plans",
+"habits only"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Present perfect progressive mainly emphasizes :",
+options:[
+"a finished result",
+"duration or continuity",
+"future actions",
+"past habits"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence for a RESULT.",
+options:[
+"I have painted the wall.",
+"I have been painting the wall for two hours.",
+"I am painting the wall yesterday.",
+"I painted the wall every day."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence for DURATION.",
+options:[
+"I have cleaned my room.",
+"I have been cleaning my room for three hours.",
+"I cleaned my room yesterday.",
+"I clean my room every day."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Present perfect progressive often uses :",
+options:[
+"for / since",
+"yesterday",
+"last year",
+"ago"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct structure of present perfect progressive.",
+options:[
+"have/has + been + verb-ing",
+"have/has + past participle",
+"did + verb",
+"am/is/are + verb-ing"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 CHOOSE THE CORRECT TENSE
+========================================================= */
+
+{
+question:"I ___ my homework, so I can relax now.",
+options:[
+"have finished",
+"have been finishing",
+"am finishing",
+"finished"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"I ___ my homework for two hours.",
+options:[
+"have finished",
+"have been doing",
+"did",
+"am done"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ the house. It looks beautiful now.",
+options:[
+"has painted",
+"has been painting",
+"painted",
+"is painting"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She ___ the house all day.",
+options:[
+"has painted",
+"has been painting",
+"painted",
+"is paint"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ lunch already.",
+options:[
+"have eaten",
+"have been eating",
+"eat",
+"eating"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We ___ lunch for an hour.",
+options:[
+"have eaten",
+"have been eating",
+"ate",
+"eat"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"He ___ five books this month.",
+options:[
+"has read",
+"has been reading",
+"reads",
+"read"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"He ___ since this morning.",
+options:[
+"has read",
+"has been reading",
+"read",
+"is read"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 RESULT VS DURATION
+========================================================= */
+
+{
+question:"Which sentence emphasizes the RESULT?",
+options:[
+"I have been running for two hours.",
+"I have run five kilometers.",
+"I am running now.",
+"I ran yesterday."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which sentence emphasizes DURATION?",
+options:[
+"I have written three letters.",
+"I have been writing letters all morning.",
+"I wrote letters yesterday.",
+"I write letters every day."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"I have finished my work.",
+"She has been studying for hours.",
+"He have been sleeping.",
+"We have cleaned the room."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Why are you tired? — I ___ .",
+options:[
+"have run",
+"have been running",
+"ran",
+"run"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The floor is wet because she ___ it.",
+options:[
+"has cleaned",
+"has been cleaning",
+"cleaned",
+"cleans"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"I ___ the project, so I can send it now.",
+options:[
+"have completed",
+"have been completing",
+"am completing",
+"completed"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 FOR / SINCE PRACTICE
+========================================================= */
+
+{
+question:"They have been travelling ___ three days.",
+options:[
+"since",
+"for",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She has lived here ___ 2020.",
+options:[
+"for",
+"since",
+"ago",
+"during"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We have been studying ___ morning.",
+options:[
+"for",
+"since",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"I have worked here ___ many years.",
+options:[
+"since",
+"for",
+"ago",
+"last"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question:"Choose the sentence linked to a visible result.",
+options:[
+"I have been cooking all afternoon.",
+"I have cooked dinner.",
+"I cook dinner every day.",
+"I cooked dinner yesterday."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the sentence emphasizing continuity.",
+options:[
+"I have written the report.",
+"I have been writing the report since 8 AM.",
+"I wrote the report yesterday.",
+"I write reports often."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"She ___ three emails today.",
+options:[
+"has sent",
+"has been sending",
+"sent",
+"sends"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She ___ emails all morning.",
+options:[
+"has sent",
+"has been sending",
+"sent",
+"is send"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the best explanation.",
+options:[
+"Present perfect = result ; Present perfect progressive = duration",
+"Both tenses are identical",
+"Present perfect progressive is only for future",
+"Present perfect is only for habits"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapter12 = {
+
+title: "Lesson 12 : Past Perfect",
+
+qcm: [
+
+/* =========================================================
+   🔵 USE AND FORMATION
+========================================================= */
+
+{
+question: "The past perfect is formed with :",
+options: [
+"had + past participle",
+"have + past participle",
+"was/were + verb-ing",
+"will have + past participle"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"I had finished my homework before dinner.",
+"I have finished my homework before dinner.",
+"I finished had my homework.",
+"I had finish my homework before dinner."
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "She ___ already left when I arrived.",
+options: [
+"has",
+"had",
+"have",
+"is"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "We ___ seen that movie before yesterday.",
+options: [
+"have",
+"had",
+"has",
+"are"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "The past perfect is used for :",
+options: [
+"an action happening now",
+"an action completed before another past action",
+"future actions",
+"habits"
+],
+answer: 1,
+difficulty: "facile",
+xp: 12
+},
+
+{
+question: "Choose the correct structure.",
+options: [
+"had + verb-ed / past participle",
+"have + verb",
+"am/is/are + verb-ing",
+"did + verb"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "He ___ finished the work before the teacher came.",
+options: [
+"had",
+"has",
+"have",
+"is"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question: "Choose the correct negative sentence.",
+options: [
+"I hadn't seen him before.",
+"I didn't had seen him.",
+"I haven't saw him.",
+"I had not saw him."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ finished when I called her.",
+options: [
+"hadn't",
+"haven't",
+"didn't",
+"hasn't"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ arrived before the rain started.",
+options: [
+"hadn't",
+"didn't",
+"haven't",
+"hasn't"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"He hadn't eaten before school.",
+"He didn't had eaten before school.",
+"He hasn't eaten before school.",
+"He had not ate before school."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ seen the film before yesterday.",
+options: [
+"hadn't",
+"didn't",
+"haven't",
+"hasn't"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question: "___ you finished before the exam started?",
+options: [
+"Do",
+"Did",
+"Had",
+"Have"
+],
+answer: 2,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ she left when you arrived?",
+options: [
+"Did",
+"Has",
+"Had",
+"Do"
+],
+answer: 2,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct question.",
+options: [
+"Had they arrived before 8 PM?",
+"Did they had arrived before 8 PM?",
+"Have they arrived before 8 PM?",
+"Had they arriveded before 8 PM?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ your parents finished work before you came?",
+options: [
+"Did",
+"Had",
+"Have",
+"Do"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct interrogative sentence.",
+options: [
+"Had he seen her before the party?",
+"Did he had seen her before the party?",
+"Has he seen her before the party?",
+"Have he seen her before the party?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 18
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question: "I ___ never seen such a thing before yesterday.",
+options: [
+"had",
+"have",
+"has",
+"did"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "She was tired because she ___ all night.",
+options: [
+"had worked",
+"has worked",
+"worked",
+"is working"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the incorrect sentence.",
+options: [
+"I had finished before he came.",
+"She had left when I arrived.",
+"He had went home before 8 PM.",
+"We had studied before the test."
+],
+answer: 2,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "They ___ already eaten when I arrived.",
+options: [
+"had",
+"have",
+"has",
+"did"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "The film started after we ___ our dinner.",
+options: [
+"had finished",
+"have finished",
+"finished",
+"finish"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "She couldn't join us because she ___ her homework.",
+options: [
+"had done",
+"has done",
+"did",
+"does"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Before he arrived, I ___ the house.",
+options: [
+"had cleaned",
+"have cleaned",
+"cleaned",
+"clean"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Past perfect is used to show :",
+options: [
+"two future actions",
+"two past actions, one before the other",
+"actions happening now",
+"habits"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the best explanation.",
+options: [
+"Past perfect shows an action before another past action.",
+"Past perfect shows actions happening now.",
+"Past perfect is only for habits.",
+"Past perfect is identical to simple past."
+],
+answer: 0,
+difficulty: "difficile",
+xp: 25
+}
+
+]
+
+};
+  
+  const chapter13 = {
+
+title: "Lesson 13 : Past Progressive",
+
+qcm: [
+
+/* =========================================================
+   🔵 USE AND FORMATION
+========================================================= */
+
+{
+question: "The past progressive is formed with :",
+options: [
+"was/were + verb-ing",
+"have/has + verb-ing",
+"had + verb-ing",
+"will be + verb-ing"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"I was studying when he arrived.",
+"I were studying when he arrived.",
+"I am studying when he arrived.",
+"I had study when he arrived."
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "She ___ watching TV at 8 PM yesterday.",
+options: [
+"was",
+"were",
+"is",
+"had"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "They ___ playing football when it started raining.",
+options: [
+"was",
+"were",
+"are",
+"had"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "The past progressive is used for :",
+options: [
+"a completed action only",
+"an action in progress in the past",
+"a future action",
+"a habit"
+],
+answer: 1,
+difficulty: "facile",
+xp: 12
+},
+
+{
+question: "Choose the correct structure.",
+options: [
+"was/were + verb-ing",
+"have/has + verb-ed",
+"had + verb-ed",
+"do/does + verb"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "He ___ sleeping when the phone rang.",
+options: [
+"was",
+"were",
+"is",
+"had"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question: "Choose the correct negative sentence.",
+options: [
+"I wasn't sleeping at that time.",
+"I didn't was sleeping at that time.",
+"I weren't sleeping at that time.",
+"I not was sleeping at that time."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ studying when I called her.",
+options: [
+"wasn't",
+"weren't",
+"didn't",
+"hasn't"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ working at 6 PM yesterday.",
+options: [
+"wasn't",
+"weren't",
+"didn't",
+"aren't"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"He wasn't playing football.",
+"He didn't was playing football.",
+"He weren't playing football.",
+"He not was playing football."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ watching TV when she arrived.",
+options: [
+"wasn't",
+"weren't",
+"didn't",
+"hasn't"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question: "___ you sleeping when I called?",
+options: [
+"Do",
+"Did",
+"Was",
+"Were"
+],
+answer: 3,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ she cooking when you arrived?",
+options: [
+"Was",
+"Were",
+"Did",
+"Has"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct question.",
+options: [
+"Were they studying at 9 PM?",
+"Was they studying at 9 PM?",
+"Did they were studying at 9 PM?",
+"Are they studying at 9 PM?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ he playing when the teacher came?",
+options: [
+"Was",
+"Were",
+"Did",
+"Do"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct interrogative sentence.",
+options: [
+"Were you listening to music?",
+"Did you were listening to music?",
+"Was you listening to music?",
+"Have you listening to music?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 18
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question: "I ___ my homework when the lights went out.",
+options: [
+"was doing",
+"did",
+"am doing",
+"have done"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "They ___ dinner when I arrived.",
+options: [
+"were having",
+"had",
+"have",
+"are having"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the incorrect sentence.",
+options: [
+"I was reading a book.",
+"She were sleeping.",
+"They were playing football.",
+"He was working."
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "While I ___ home, it started raining.",
+options: [
+"was walking",
+"walked",
+"am walking",
+"have walked"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "The phone rang while she ___ a shower.",
+options: [
+"was taking",
+"took",
+"takes",
+"has taken"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "We ___ TV at 10 PM yesterday.",
+options: [
+"were watching",
+"watched",
+"watch",
+"are watching"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Past progressive is often used to show :",
+options: [
+"a completed action",
+"an action in progress in the past",
+"a future action",
+"a habit only"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the sentence showing background action.",
+options: [
+"I broke the glass.",
+"I was sleeping when he arrived.",
+"I will sleep later.",
+"I sleep every day."
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the best explanation.",
+options: [
+"Past progressive shows actions happening at a specific time in the past.",
+"Past progressive shows completed actions only.",
+"Past progressive is the same as simple past.",
+"Past progressive is only for habits."
+],
+answer: 0,
+difficulty: "difficile",
+xp: 25
+}
+
+]
+
+};
+  
+  
+  const chapter14 = {
+
+title: "Lesson 14 : Difference Between Simple Past And Past Progressive",
+
+qcm: [
+
+/* =========================================================
+   🔵 BASIC DIFFERENCE
+========================================================= */
+
+{
+question: "Simple past is used for :",
+options: [
+"actions in progress in the past",
+"completed actions in the past",
+"future actions",
+"habits in the present"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Past progressive is used for :",
+options: [
+"completed actions",
+"actions in progress in the past",
+"future plans",
+"general truths"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence (simple past).",
+options: [
+"I was studying yesterday at 5 PM.",
+"I studied yesterday at 5 PM.",
+"I am studying yesterday.",
+"I have studied yesterday at 5 PM."
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence (past progressive).",
+options: [
+"I studied when he arrived.",
+"I was studying when he arrived.",
+"I study when he arrived.",
+"I have studied when he arrived."
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Simple past often uses :",
+options: [
+"now",
+"yesterday",
+"at the moment",
+"while"
+],
+answer: 1,
+difficulty: "facile",
+xp: 12
+},
+
+{
+question: "Past progressive often uses :",
+options: [
+"yesterday",
+"last year",
+"while / when",
+"ago"
+],
+answer: 2,
+difficulty: "facile",
+xp: 12
+},
+
+/* =========================================================
+   🟡 CHOOSE THE CORRECT TENSE
+========================================================= */
+
+{
+question: "I ___ when the phone rang.",
+options: [
+"was sleeping",
+"slept",
+"sleep",
+"have slept"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "I ___ when the phone rang.",
+options: [
+"slept",
+"was sleeping",
+"sleep",
+"have slept"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ TV when I arrived.",
+options: [
+"watched",
+"was watching",
+"watch",
+"has watched"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ TV yesterday evening.",
+options: [
+"watched",
+"was watching",
+"watching",
+"is watching"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ football when it started raining.",
+options: [
+"played",
+"were playing",
+"play",
+"have played"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ football last Sunday.",
+options: [
+"were playing",
+"played",
+"play",
+"are playing"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ dinner when she called.",
+options: [
+"ate",
+"were eating",
+"eat",
+"have eaten"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ dinner at 8 PM yesterday.",
+options: [
+"were eating",
+"ate",
+"eat",
+"eating"
+],
+answer: 1,
+difficulty: "moyen",
+xp: 15
+},
+
+/* =========================================================
+   🔴 IDENTIFY THE TENSE
+========================================================= */
+
+{
+question: "'He broke the window' is :",
+options: [
+"simple past",
+"past progressive",
+"present perfect",
+"future"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "'He was breaking the window' is :",
+options: [
+"simple past",
+"past progressive",
+"present perfect",
+"future"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the correct explanation.",
+options: [
+"Simple past = background action",
+"Past progressive = completed action",
+"Simple past = completed action",
+"Both are identical"
+],
+answer: 2,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Which sentence shows an INTERRUPTED action?",
+options: [
+"I slept at 10 PM.",
+"I was sleeping when he arrived.",
+"I sleep every day.",
+"I will sleep later."
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Which sentence shows a completed action?",
+options: [
+"I was watching TV.",
+"I watched TV.",
+"I am watching TV.",
+"I have been watching TV."
+],
+answer: 1,
+difficulty: "difficile",
+xp: 20
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question: "While I ___ home, I met John.",
+options: [
+"walked",
+"was walking",
+"am walking",
+"have walked"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "I ___ John yesterday.",
+options: [
+"met",
+"was meeting",
+"meet",
+"am meeting"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the incorrect sentence.",
+options: [
+"I was studying when he came.",
+"I studied yesterday.",
+"He were playing football.",
+"We watched a movie."
+],
+answer: 2,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "She ___ when the accident happened.",
+options: [
+"drove",
+"was driving",
+"drives",
+"is driving"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "The accident ___ yesterday.",
+options: [
+"happened",
+"was happening",
+"happen",
+"has happened"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Past progressive is used for :",
+options: [
+"actions happening at a moment in the past",
+"finished past actions only",
+"future actions",
+"habits only"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Simple past is used for :",
+options: [
+"background actions",
+"completed actions in the past",
+"actions in progress",
+"future plans"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the best explanation.",
+options: [
+"Simple past = finished actions ; Past progressive = actions in progress",
+"Both are the same",
+"Simple past = future ; Past progressive = present",
+"Past progressive = habits"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 25
+}
+
+]
+
+};
+  
+  const chapter15 = {
+
+title: "Lesson 15 : Simple Future (Will)",
+
+qcm: [
+
+/* =========================================================
+   🔵 USE AND FORMATION
+========================================================= */
+
+{
+question: "The simple future is mainly formed with :",
+options: [
+"will + base verb",
+"have + past participle",
+"was/were + verb-ing",
+"had + past participle"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"I will go to school tomorrow.",
+"I go will to school tomorrow.",
+"I will going to school tomorrow.",
+"I will went to school tomorrow."
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "She ___ call you later.",
+options: [
+"will",
+"will be",
+"has",
+"had"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "We ___ travel next week.",
+options: [
+"will",
+"are",
+"was",
+"have"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Simple future is used for :",
+options: [
+"past actions",
+"future actions",
+"actions in progress",
+"completed actions"
+],
+answer: 1,
+difficulty: "facile",
+xp: 12
+},
+
+{
+question: "Choose the correct structure.",
+options: [
+"subject + will + base verb",
+"subject + have + verb",
+"subject + was + verb-ing",
+"subject + did + verb"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "He ___ finish his homework tomorrow.",
+options: [
+"will",
+"has",
+"had",
+"is"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question: "Choose the correct negative sentence.",
+options: [
+"I will not go to school.",
+"I do not will go to school.",
+"I will no go to school.",
+"I not will go to school."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ come to the party.",
+options: [
+"will not",
+"does not will",
+"not will",
+"did not will"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ see him tomorrow.",
+options: [
+"will not",
+"did not",
+"has not",
+"was not"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"He will not play football.",
+"He does not will play football.",
+"He not will play football.",
+"He will no play football."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ arrive on time.",
+options: [
+"will not",
+"did not",
+"have not",
+"are not"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question: "___ you help me tomorrow?",
+options: [
+"Do",
+"Did",
+"Will",
+"Are"
+],
+answer: 2,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ she come later?",
+options: [
+"Will",
+"Did",
+"Has",
+"Is"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct question.",
+options: [
+"Will they travel next week?",
+"Do they will travel next week?",
+"Did they will travel next week?",
+"Are they will travel next week?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ he pass the exam?",
+options: [
+"Will",
+"Did",
+"Has",
+"Is"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct interrogative sentence.",
+options: [
+"Will you come with us?",
+"Do you will come with us?",
+"Did you will come with us?",
+"Are you will come with us?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 18
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question: "I ___ call you tonight.",
+options: [
+"will",
+"am",
+"have",
+"was"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "They ___ be late.",
+options: [
+"will",
+"did",
+"have",
+"are"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the incorrect sentence.",
+options: [
+"I will go tomorrow.",
+"She will study later.",
+"He will goes home.",
+"We will meet them."
+],
+answer: 2,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "We ___ visit Paris next year.",
+options: [
+"will",
+"did",
+"have",
+"are"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "It ___ rain tomorrow.",
+options: [
+"will",
+"did",
+"has",
+"is"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "She ___ become a doctor one day.",
+options: [
+"will",
+"did",
+"has",
+"was"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Simple future expresses :",
+options: [
+"a completed past action",
+"a prediction or future intention",
+"an action in progress",
+"a habit in the past"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the correct explanation.",
+options: [
+"Simple future = will + base verb",
+"Simple future = had + verb",
+"Simple future = was + verb-ing",
+"Simple future = have + verb-ed"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 25
+}
+
+]
+
+};
+  
+  const chapter16 = {
+
+title: "Lesson 16 : Near Future (Going to)",
+
+qcm: [
+
+/* =========================================================
+   🔵 USE AND FORMATION
+========================================================= */
+
+{
+question: "The near future is formed with :",
+options: [
+"be (am/is/are) + going to + base verb",
+"will + verb",
+"have + past participle",
+"was/were + verb-ing"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"I am going to study tonight.",
+"I going to am study tonight.",
+"I will going to study tonight.",
+"I am go to study tonight."
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "She ___ going to travel tomorrow.",
+options: [
+"is",
+"are",
+"am",
+"be"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "They ___ going to play football.",
+options: [
+"is",
+"are",
+"am",
+"be"
+],
+answer: 1,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "Near future is used for :",
+options: [
+"past actions",
+"planned future actions or intentions",
+"actions in progress in the past",
+"completed actions"
+],
+answer: 1,
+difficulty: "facile",
+xp: 12
+},
+
+{
+question: "Choose the correct structure.",
+options: [
+"am/is/are + going to + base verb",
+"will + past participle",
+"had + verb",
+"was + verb"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+{
+question: "He ___ going to buy a car.",
+options: [
+"is",
+"are",
+"am",
+"be"
+],
+answer: 0,
+difficulty: "facile",
+xp: 10
+},
+
+/* =========================================================
+   🟡 NEGATIVE FORM
+========================================================= */
+
+{
+question: "Choose the correct negative sentence.",
+options: [
+"I am not going to travel.",
+"I don't going to travel.",
+"I am no going to travel.",
+"I not going to travel."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "She ___ going to come.",
+options: [
+"is not",
+"are not",
+"am not",
+"does not"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "We ___ going to watch TV.",
+options: [
+"are not",
+"is not",
+"am not",
+"did not"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct sentence.",
+options: [
+"He is not going to study.",
+"He not is going to study.",
+"He does not going to study.",
+"He is no going to study."
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "They ___ going to arrive late.",
+options: [
+"are not",
+"is not",
+"am not",
+"did not"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+/* =========================================================
+   🟡 INTERROGATIVE FORM
+========================================================= */
+
+{
+question: "___ you going to travel?",
+options: [
+"Do",
+"Did",
+"Are",
+"Will"
+],
+answer: 2,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ she going to study?",
+options: [
+"Is",
+"Are",
+"Am",
+"Will"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct question.",
+options: [
+"Are they going to play football?",
+"Do they going to play football?",
+"Will they going to play football?",
+"Did they going to play football?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "___ he going to help us?",
+options: [
+"Is",
+"Are",
+"Am",
+"Will"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 15
+},
+
+{
+question: "Choose the correct interrogative sentence.",
+options: [
+"Are you going to come?",
+"Do you going to come?",
+"Will you going to come?",
+"Did you going to come?"
+],
+answer: 0,
+difficulty: "moyen",
+xp: 18
+},
+
+/* =========================================================
+   🔴 MIXED PRACTICE
+========================================================= */
+
+{
+question: "I ___ going to visit my friend tomorrow.",
+options: [
+"am",
+"is",
+"are",
+"be"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "They ___ going to move next month.",
+options: [
+"are",
+"is",
+"am",
+"be"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Choose the incorrect sentence.",
+options: [
+"I am going to study.",
+"She is going to travel.",
+"He are going to sleep.",
+"We are going to work."
+],
+answer: 2,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "It ___ going to rain.",
+options: [
+"is",
+"are",
+"am",
+"be"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "We ___ going to start the exam.",
+options: [
+"are",
+"is",
+"am",
+"be"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 20
+},
+
+{
+question: "Near future expresses :",
+options: [
+"fixed past actions",
+"planned or decided future actions",
+"completed actions",
+"past habits"
+],
+answer: 1,
+difficulty: "difficile",
+xp: 22
+},
+
+{
+question: "Choose the correct explanation.",
+options: [
+"Going to = planned future or intention",
+"Going to = past tense",
+"Going to = present perfect",
+"Going to = past progressive"
+],
+answer: 0,
+difficulty: "difficile",
+xp: 25
+}
+
+]
+
+};
+  
+  
+/* ================= CHAPTERS ================= */
+
+const chapters = {
+
+  "Lesson 1 : Conditionals": chapter1,
+  "Lesson 2 : If clauses": chapter2,
+  "Lesson 3 : Modals": chapter3,
+  "Lesson 4 : Tag questions": chapter4,
+"Lesson 5 : Simple Present": chapter5,
+"Lesson 6 : Present Progressive": chapter6,
+"Lesson 7 : Simple Present vs Present Progressive": chapter7,
+  "Lesson 8 : Simple Past": chapter12,
+  "Lesson 9 : Diff Past Perfect vs Simple Past": chapter11,
+  "Lesson 10 : Present Perfect Progressive": chapter10,
+  "Lesson 11 : PP vs PPP": chapter11,
+
+  "Lesson 12 : Past Perfect": chapter12,
+  "Lesson 13 : Past Progressive": chapter13,
+  "Lesson 14 : SP vs Past Prog": chapter14,
+
+  "Lesson 15 : Simple Future": chapter15,
+  "Lesson 16 : Near Future": chapter16
+
+};
+
+
+/* ================= HOME ================= */
+updateXPBar();
+
+function home(){
+  app.innerHTML = `
+  <div class="card">
+    <h2>🇬🇧 English commando</h2>
+
+    <button class="mission-btn" onclick="startMission()">
+      ⚡ MODE MISSION COMMANDO
+    </button>
+
+    <br><br>
+
+    ${Object.keys(chapters).map(chapter=>`
+      <button onclick="openChapter('${chapter}')">
+        ${chapter}
+      </button>
+    `).join("")}
+
+    <br><br>
+    <p>XP: ${state.xp} | Niveau: ${state.level}</p>
+  </div>`;
+}
+
+  /*qcm*/
+function openChapter(chapter){
+  state.currentChapter = chapter;
+  app.innerHTML = `
+  <div class="card">
+    <h2>${chapter}</h2>
+    <button onclick="startQCM()">🎯 Start QCM</button>
+    <button onclick="notify('Pas encore de devoirs')">English test</button>
+    <br><br>
+    <button class="quit-btn" onclick="home()">Quitter</button>
+  </div>`;
+}
+
+function startQCM(){
+  state.qIndex = 0;
+  showQCM();
+}
+
+function showQCM(){
+  const qcm = chapters[state.currentChapter].qcm;
+  const q = qcm[state.qIndex];
+
+  const shuffled = shuffle(
+    q.options.map((text, index) => ({ text, index }))
+  );
+
+  state.currentCorrect = shuffled.findIndex(o => o.index === q.answer);
+
+  app.innerHTML = `
+  <div class="card">
+    <h3>Q${state.qIndex + 1}: ${q.question}</h3>
+    <p id="qcmTimer">⏳ 30s</p>
+    ${shuffled.map((o,i)=>`
+      <div class="option" onclick="answer(${i})">${o.text}</div>
+    `).join("")}
+    <p>XP: +${q.xp}</p>
+    <button class="quit-btn" onclick="quitQCM()">Quitter</button>
+  </div>`;
+
+  clearInterval(state.qcmTimer);
+  state.qcmTimeLeft = 30;
+
+  state.qcmTimer = setInterval(()=>{
+    state.qcmTimeLeft--;
+    const t = document.getElementById("qcmTimer");
+    if(t) t.innerHTML = `⏳ ${state.qcmTimeLeft}s`;
+    if(state.qcmTimeLeft <= 0){
+      clearInterval(state.qcmTimer);
+      state.qIndex++;
+      if(state.qIndex >= qcm.length){ home(); }
+      else { showQCM(); }
+    }
+  }, 1000);
+}
+
+function quitQCM(){
+  clearInterval(state.qcmTimer);
+  state.qIndex = 0;
+  notify("QCM quitté");
+  openChapter(state.currentChapter);
+}
+
+function answer(choice){
+  const qcm = chapters[state.currentChapter].qcm;
+  const q = qcm[state.qIndex];
+  const options = document.querySelectorAll(".option");
+
+  clearInterval(state.qcmTimer);
+
+  if(choice === state.currentCorrect){
+    options[choice].classList.add("good");
+    addXP(q.xp);
+    notify("✅ Bonne réponse !", "success");
+  } else {
+    options[choice].classList.add("bad");
+    options[state.currentCorrect].classList.add("good");
+    notify("❌ Mauvaise réponse", "error");
+  }
+
+  setTimeout(()=>{
+    state.qIndex++;
+    if(state.qIndex >= qcm.length){
+      notify("Chapitre terminé 🎉", "success");
+      home();
+    } else {
+      showQCM();
+    }
+  }, 800);
+}
+
+  
+  
+/* ================= XP SYSTEM ================= */
+
+function addXP(points){
+  state.xp += points;
+  if(state.xp >= state.level * 100){
+    state.level++;
+    notify("🔥 LEVEL UP !", "success");
+  }
+  localStorage.setItem("xp", state.xp);
+  localStorage.setItem("level", state.level);
+  updateXPBar();
+}
+
+function updateXPBar(){
+  const fill = document.getElementById("xpFill");
+  const xpLabel = document.getElementById("xpLabel");
+  const levelLabel = document.getElementById("levelLabel");
+  const percent = Math.min((state.xp % (state.level * 100)) / (state.level * 100) * 100, 100);
+  if(fill) fill.style.width = percent + "%";
+  if(xpLabel) xpLabel.innerHTML = "XP: " + state.xp;
+  if(levelLabel) levelLabel.innerHTML = "Niveau " + state.level;
+}
+  
+/* ================= ESSAYS ================= */
+
+function getEssayProgress(){
+  return JSON.parse(localStorage.getItem("essayProgress")) || {};
+}
+
+function saveEssayProgress(title, content){
+
+  const progress = getEssayProgress();
+
+  progress[title] = {
+    content: content,
+    done: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+}
+
+function essayMenu(){
+
+  const essays = chapters["Chapitre 1"].essays;
+  const progress = getEssayProgress();
+
+  app.innerHTML = `
+  <div class="card">
+
+    <h2>✍️ Devoirs</h2>
+
+    ${essays.map((e,i)=>{
+
+      const done = progress[e.title];
+
+      return `
+      <button
+        onclick="startEssay(${i})"
+        style="
+          background:${done ? '#22c55e' : '#3b82f6'};
+        "
+      >
+        ${done ? '✅' : '📝'}
+        ${e.title}
+      </button>
+      `;
+    }).join("")}
+
+  <br>
+  
+  <br>
+  <button onclick="home()">
+      ⬅️ Retour
+    </button>
+
+  </div>`;
+}
+
+function startEssay(i){
+
+  const essay = chapters["Chapitre 1"].essays[i];
+
+  state.essay = essay;
+  state.timer = essay.time;
+
+  clearInterval(state.interval);
+
+  state.interval = setInterval(()=>{
+
+    state.timer--;
+
+    if(state.timer <= 0){
+
+      clearInterval(state.interval);
+
+      autoSaveEssay();
+
+      notify("⏰ Temps écoulé !");
+    }
+
+    updateTimer();
+
+  },1000);
+
+  renderEssay();
+}
+
+function autoSaveEssay(){
+
+  const textarea = document.getElementById("essayText");
+
+  if(!textarea) return;
+
+  saveEssayProgress(
+    state.essay.title,
+    textarea.value
+  );
+}
+
+function liveSaveEssay(){
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+}
+
+function finishEssay(){
+
+  clearInterval(state.interval);
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+
+  addXP(state.essay.xp);
+
+  notify("Devoir enregistré !");
+
+  essayMenu();
+}
+
+function resetEssay(){
+
+  const progress = getEssayProgress();
+
+  delete progress[state.essay.title];
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+
+  renderEssay();
+}
+
+function updateTimer(){
+
+  const timer = document.getElementById("timer");
+  const fill = document.getElementById("fill");
+
+  const minutes =
+    Math.floor(state.timer / 60);
+
+  const seconds =
+    state.timer % 60;
+
+  const formatted =
+    `${minutes}:${seconds
+      .toString()
+      .padStart(2,"0")}`;
+
+  if(timer){
+    timer.innerHTML = `⏱️ ${formatted}`;
+  }
+
+  if(fill){
+    fill.style.width =
+      `${(state.timer/state.essay.time)*100}%`;
+  }
+}
+/* ================= ESSAY UI ================= */
+
+function renderEssay(){
+
+  const progress = getEssayProgress();
+
+  const oldAnswer =
+    progress[state.essay.title]?.content || "";
+
+  app.innerHTML = `
+  
+  
+  <div class="card">
+
+    <h3>${state.essay.title}</h3>
+
+    <div class="bar">
+      <div
+        class="fill"
+        id="fill"
+        style="
+          width:${(state.timer/state.essay.time)*100}%
+        ">
+      </div>
+    </div>
+
+    <p id="timer"></p>
+
+    <p>
+      ${state.essay.question}
+    </p>
+
+    <textarea
+      id="essayText"
+      placeholder="Rédige ta réponse..."
+      oninput="liveSaveEssay()"
+    >${oldAnswer}</textarea>
+
+  <button onclick="sendEssay()">
+    🤖 Corriger avec IA
+  </button>
+  
+    <button onclick="finishEssay()">
+      Enregister le devoir
+    </button>
+
+    <button onclick="resetEssay()">
+       Refaire le devoir 
+    </button>
+  
+  <br>
+  
+  <br>
+  
+  <br>
+    <button onclick="essayMenu()">
+      ⬅️ Retour
+    </button>
+
+  </div>`;
+}
+
+
+
+/* ================= SEND IA ================= */
+
+function sendEssay(){
+
+  const text = document.getElementById("essayText").value;
+
+  if(!text.trim()){
+    alert("Écris quelque chose !");
+    return;
+  }
+
+  const prompt = `
+Corrige ce devoir :
+
+QUESTION:
+${state.essay.question}
+
+REPONSE:
+${text}
+
+Donne:
+- note /20
+- erreurs
+- correction
+`;
+
+  window.open("https://chatgpt.com/?q=" + encodeURIComponent(prompt));
+}
+
+  /* ================= MISSION COMMANDO ================= */
+
+function startMission(){
+  // Collecter tous les QCM de tous les chapitres
+  let allQCM = [];
+  Object.keys(chapters).forEach(ch => {
+    chapters[ch].qcm.forEach(q => {
+      allQCM.push({...q, chapter: ch});
+    });
+  });
+
+  // Mélanger et prendre 10
+  const picked = shuffle(allQCM).slice(0, 10);
+
+  state.mission = {
+    questions: picked,
+    index: 0,
+    score: 0,
+    timeLeft: 240, // 4 minutes
+    answered: 0
+  };
+
+  showMissionQCM();
+}
+
+function showMissionQCM(){
+  const m = state.mission;
+
+  // Timer global
+  clearInterval(state.missionTimer);
+  state.missionTimer = setInterval(()=>{
+    m.timeLeft--;
+    const t = document.getElementById("missionClock");
+    if(t){
+      const min = Math.floor(m.timeLeft / 60);
+      const sec = m.timeLeft % 60;
+      t.innerHTML = `⏱ ${min}:${sec.toString().padStart(2,"0")}`;
+      if(m.timeLeft <= 30) t.style.color = "#ef4444";
+    }
+    if(m.timeLeft <= 0){
+      clearInterval(state.missionTimer);
+      showMissionResult();
+    }
+  }, 1000);
+
+  renderMissionQuestion();
+}
+
+function renderMissionQuestion(){
+  const m = state.mission;
+  const q = m.questions[m.index];
+  const shuffled = shuffle(q.options.map((text, index) => ({ text, index })));
+  m.currentCorrect = shuffled.findIndex(o => o.index === q.answer);
+
+  const min = Math.floor(m.timeLeft / 60);
+  const sec = m.timeLeft % 60;
+
+  app.innerHTML = `
+  <div class="card">
+    <div class="mission-timer" id="missionClock">⏱ ${min}:${sec.toString().padStart(2,"0")}</div>
+    <div class="mission-progress">Question ${m.index + 1} / 10 &nbsp;|&nbsp; ✅ ${m.score} bonne(s)</div>
+    <p><strong>Q${m.index + 1} :</strong> ${q.question}</p>
+    ${shuffled.map((o,i)=>`
+      <div class="option" id="mopt${i}" onclick="answerMission(${i})">${o.text}</div>
+    `).join("")}
+    <button class="quit-btn" onclick="quitMission()" style="margin-top:15px">🚪 Abandonner</button>
+  </div>`;
+}
+
+function answerMission(choice){
+  const m = state.mission;
+  const options = document.querySelectorAll(".option");
+
+  // Désactiver les clics
+  options.forEach(o => o.onclick = null);
+
+  m.answered++;
+
+  if(choice === m.currentCorrect){
+    options[choice].classList.add("good");
+    m.score++;
+  } else {
+    options[choice].classList.add("bad");
+    options[m.currentCorrect].classList.add("good");
+  }
+
+  setTimeout(()=>{
+    m.index++;
+    if(m.index >= 10){
+      clearInterval(state.missionTimer);
+      showMissionResult();
+    } else {
+      renderMissionQuestion();
+    }
+  }, 1000);
+}
+
+function showMissionResult(){
+  clearInterval(state.missionTimer);
+  const m = state.mission;
+  const note = m.answered === 0 ? 0 : Math.round((m.score / m.answered) * 10);
+  const noteClass = note >= 7 ? "score-good" : note >= 5 ? "score-mid" : "score-bad";
+  const emoji = note >= 7 ? "🏆" : note >= 5 ? "😅" : "💀";
+
+  addXP(note * 10);
+
+  app.innerHTML = `
+  <div class="card score-card">
+    <h2>⚡ Mission Commando</h2>
+    <div class="score-note ${noteClass}">${emoji} ${note}/10</div>
+    <p>${m.score} bonne(s) réponse(s) sur ${m.answered} question(s) répondues</p>
+    <p style="color:#94a3b8;font-size:13px">+${note * 10} XP gagnés</p>
+    <button onclick="startMission()">Rejouer</button>
+    <button class="quit-btn" onclick="home()"> Accueil</button>
+  </div>`;
+}
+
+function quitMission(){
+  clearInterval(state.missionTimer);
+  notify("Mission abandonnée", "error");
+  home();
+}
+  
+/* ================= INIT ================= */
+
+home();
+  
+  function notify(message, type="info", duration=3500){
+
+  const container = document.getElementById("notif-container");
+
+  const div = document.createElement("div");
+  div.className = `notif ${type}`;
+  div.innerText = message;
+
+  container.appendChild(div);
+
+  setTimeout(()=>{
+    div.remove();
+  }, duration);
+}
+
+  
+  
+  
+</script>
+
+</body>
+</html>

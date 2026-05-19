@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science de la vie et de la terre </title>
+
+<style>
+
+#notif-container{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:9999;
+  pointer-events:none;
+}
+
+.notif{
+  min-width:250px;
+  max-width:360px;
+  padding:12px 15px;
+  border-radius:14px;
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  animation:slideDown 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+}
+.notif.success{ background:#22c55e; }
+.notif.error{ background:#ef4444; }
+.notif.info{ background:#3b82f6; }
+
+@keyframes slideDown{
+  from{transform:translateY(-20px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+@keyframes fadeOut{
+  to{opacity:0;transform:translateY(-10px);}
+}
+
+:root{
+  --bg:#020617;
+  --card:#0f172a;
+  --accent:#16a34a;
+  --good:#22c55e;
+  --bad:#ef4444;
+  --glass:rgba(15,23,42,0.6);
+}
+
+*{box-sizing:border-box;font-family:Arial;}
+
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#052e16,#020617);
+  color:white;
+}
+
+.topbar{
+  position:fixed;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:420px;
+  padding:10px 15px;
+  border-radius:20px;
+  background:var(--glass);
+  backdrop-filter:blur(10px);
+  z-index:999;
+}
+.topbar-title{
+  text-align:center;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:6px;
+}
+.xp-bar-bg{
+  height:12px;
+  background:#1e293b;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
+.xp-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,#16a34a,#22c55e);
+  border-radius:10px;
+  transition:width 0.5s ease;
+  box-shadow:0 0 8px #16a34a;
+}
+.xp-bar-info{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:3px;
+}
+
+.container{padding:90px 15px 110px;}
+
+.card{
+  background:var(--card);
+  padding:15px;
+  border-radius:18px;
+  margin-top:15px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:white;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+.quit-btn{ background:#1e293b; }
+
+textarea{
+  width:100%;
+  height:180px;
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:#1e293b;
+  color:white;
+  border:none;
+}
+
+.option{
+  padding:12px;
+  margin:8px 0;
+  background:#1e293b;
+  border-radius:12px;
+  cursor:pointer;
+}
+.option.good{background:var(--good)!important;}
+.option.bad{background:var(--bad)!important;}
+
+.bar{height:10px;background:#1e293b;border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.fill{height:100%;background:var(--accent);}
+
+.mission-btn{
+  background:linear-gradient(135deg,#dc2626,#7c3aed);
+  font-size:16px;
+  letter-spacing:1px;
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}
+  50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}
+}
+.mission-timer{font-size:32px;font-weight:bold;text-align:center;color:#f87171;margin:10px 0;}
+.mission-progress{text-align:center;color:#94a3b8;font-size:13px;margin-bottom:10px;}
+.score-card{text-align:center;padding:20px;}
+.score-note{font-size:64px;font-weight:bold;margin:10px 0;}
+.score-good{color:#22c55e;}
+.score-mid{color:#f59e0b;}
+.score-bad{color:#ef4444;}
+
+.trimestre-tag{
+  display:inline-block;
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:20px;
+  background:#1e3a5f;
+  color:#93c5fd;
+  margin-bottom:4px;
+}
+
+</style>
+</head>
+<body>
+
+<div id="notif-container"></div>
+
+<div class="topbar" id="topbar">
+  <div class="topbar-title">Science de la vie et de la terre TLe D</div>
+  <div class="xp-bar-bg">
+    <div class="xp-bar-fill" id="xpFill" style="width:0%"></div>
+  </div>
+  <div class="xp-bar-info">
+    <span id="xpLabel">XP: 0</span>
+    <span id="levelLabel">Niveau 1</span>
+  </div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+
+function shuffle(array){
+  let arr=[...array];
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ================= STATE ================= */
+
+let state={
+  xp:parseInt(localStorage.getItem("xp_svt"))||0,
+  level:parseInt(localStorage.getItem("level_svt"))||1,
+  essay:null,timer:0,interval:null,
+  qIndex:0,currentChapter:"",currentCorrect:0,
+  qcmScore:0,qcmTotal:0,
+  qcmTimer:null,qcmTimeLeft:30,
+  missionTimer:null,mission:null
+};
+
+/* ===============================================================
+   CHAPITRES SVT — TERMINALE D
+=============================================================== */
+
+/* ── PARTIE 1 : LA CELLULE ── */
+
+const chapterCelluleIntro={
+  title:"Partie 1 — Chapitre Intro : La cellule",
+  trimestre:"PARTIE 1",
+  cours:{
+    texte:`La théorie cellulaire affirme que tout être vivant est composé de cellules, unité structurale et fonctionnelle du vivant. On distingue cellules procaryotes et eucaryotes.`,
+    exemples:[
+      "✅ Théorie cellulaire : tout être vivant est composé de cellules",
+      "✅ Procaryote : cellule sans noyau",
+      "✅ Eucaryote : cellule avec noyau",
+      "✅ Microscopie : étude des cellules",
+      "⚠️ La cellule est l'unité structurale et fonctionnelle du vivant"
+    ]
+  },
+
+  qcm:[
+
+/* =========================
+20 QUESTIONS FACILES
+========================= */
+
+{question:"La cellule est :",options:["Une molécule","Un organe","L’unité du vivant","Un tissu"],answer:2,difficulty:"facile",xp:10},
+
+{question:"Tout être vivant est constitué de :",options:["Cellules","Atomes","Gaz","Organes"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Une cellule procaryote possède :",options:["Un noyau","Un nucléole","Aucun noyau","Des chloroplastes"],answer:2,difficulty:"facile",xp:10},
+
+{question:"Une cellule eucaryote possède :",options:["Un noyau","Aucun ADN","Aucune membrane","Aucun cytoplasme"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les bactéries sont des cellules :",options:["Eucaryotes","Procaryotes","Animales","Végétales"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le noyau contient principalement :",options:["Des lipides","De l’ADN","De l’eau","Du glucose"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le microscope sert à :",options:["Peser les cellules","Observer les cellules","Colorer les cellules","Couper les cellules"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le cytoplasme est :",options:["Le liquide cellulaire","Le noyau","La membrane","Un organite"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La membrane plasmique sert à :",options:["Respirer","Contrôler les échanges","Fabriquer l’ADN","Produire du sang"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Une cellule animale possède :",options:["Une membrane","Aucune membrane","Aucun cytoplasme","Aucun ADN"],answer:0,difficulty:"facile",xp:10},
+
+{question:"L’unité fonctionnelle du vivant est :",options:["Le tissu","La cellule","L’organe","Le système"],answer:1,difficulty:"facile",xp:10},
+
+{question:"La cellule végétale possède souvent :",options:["Des chloroplastes","Aucun noyau","Aucune membrane","Des os"],answer:0,difficulty:"facile",xp:10},
+
+{question:"L’ADN est localisé principalement dans :",options:["Le cytoplasme","Le noyau","La membrane","Les vacuoles"],answer:1,difficulty:"facile",xp:10},
+
+{question:"La théorie cellulaire affirme que :",options:["Les cellules sont mortes","Les êtres vivants sont cellulaires","Les organes créent les cellules","Les tissus remplacent les cellules"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le microscope électronique permet :",options:["Un faible grossissement","Un très fort grossissement","De chauffer les cellules","De produire des cellules"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Une cellule possède généralement :",options:["Une membrane","Des os","Des dents","Des muscles"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le noyau est entouré par :",options:["Une membrane nucléaire","Du cartilage","Une paroi bactérienne","Un os"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les cellules sont visibles grâce :",options:["Au microscope","Au thermomètre","À la balance","Au stéthoscope"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les êtres unicellulaires sont composés :",options:["D’une seule cellule","De plusieurs organes","D’un seul tissu","De plusieurs noyaux"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le cytoplasme se trouve :",options:["Autour de la cellule","Entre membrane et noyau","Dans le noyau","À l’extérieur"],answer:1,difficulty:"facile",xp:10},
+
+/* =========================
+20 QUESTIONS MOYENNES
+========================= */
+
+{question:"La centrifugation permet :",options:["D’observer les cellules","De séparer les organites","De colorer l’ADN","De produire des protéines"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Les cellules procaryotes sont généralement :",options:["Plus grandes","Plus complexes","Plus petites","Sans membrane"],answer:2,difficulty:"moyen",xp:15},
+
+{question:"Le microscope optique grossit environ jusqu’à :",options:["×10","×100","×1500","×500000"],answer:2,difficulty:"moyen",xp:15},
+
+{question:"Les organites sont :",options:["Des tissus","Des structures spécialisées","Des molécules","Des bactéries"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Une cellule sans noyau visible est :",options:["Eucaryote","Procaryote","Animale","Végétale"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"La fixation en microscopie sert à :",options:["Conserver les structures","Augmenter l’ADN","Créer une cellule","Multiplier les tissus"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La coloration permet :",options:["De tuer les cellules","De mieux voir certaines structures","De produire des protéines","De créer un noyau"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Les cellules eucaryotes possèdent :",options:["Des organites membranaires","Aucun ADN","Aucun cytoplasme","Aucune membrane"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le matériel génétique d’une cellule est :",options:["Le glucose","L’ADN","Le calcium","L’eau"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Une cellule végétale se distingue souvent par :",options:["Une paroi","L’absence de membrane","L’absence d’ADN","L’absence de cytoplasme"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le microscope électronique utilise :",options:["Des électrons","De l’eau","Des colorants","Des bactéries"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les cellules animales ne possèdent pas :",options:["De membrane","De noyau","De chloroplastes","De cytoplasme"],answer:2,difficulty:"moyen",xp:15},
+
+{question:"La membrane plasmique est :",options:["Rigide","Semi-perméable","Invisible","Solide"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Le noyau contrôle :",options:["Les activités cellulaires","La météo","Le sang","Les os"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La cellule est dite structurale car :",options:["Elle forme les êtres vivants","Elle produit du soleil","Elle crée les organes artificiels","Elle détruit les tissus"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les procaryotes appartiennent surtout au groupe des :",options:["Champignons","Bactéries","Animaux","Plantes"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"La préparation microscopique nécessite souvent :",options:["Une coloration","Une cuisson","Une congélation","Une dessiccation"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les eucaryotes sont généralement :",options:["Plus complexes","Sans membrane","Sans ADN","Sans cytoplasme"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Une cellule est vivante car elle :",options:["Réalise des fonctions biologiques","Contient des os","Produit du métal","Crée des montagnes"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les organites sont localisés dans :",options:["Le cytoplasme","La membrane","Le vide","La paroi externe"],answer:0,difficulty:"moyen",xp:15},
+
+/* =========================
+10 QUESTIONS DIFFICILES / CONCOURS
+========================= */
+
+{question:"La théorie cellulaire moderne affirme aussi que :",options:["Les cellules naissent spontanément","Toute cellule provient d’une autre cellule","Les cellules sont immortelles","Les organes créent les cellules"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"La différence fondamentale entre procaryote et eucaryote est :",options:["La taille","La présence d’un noyau organisé","La présence d’eau","La membrane plasmique"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"La microscopie électronique permet d’observer :",options:["Des détails ultrastructuraux","Uniquement les tissus","Les organes entiers","Le sang à l’œil nu"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Les virus ne sont pas considérés comme des cellules car :",options:["Ils n’ont pas d’ADN","Ils ne possèdent pas d’organisation cellulaire complète","Ils sont visibles à l’œil nu","Ils sont des bactéries"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"Une cellule peut être considérée comme fonctionnelle car elle :",options:["Assure les fonctions vitales","Possède uniquement un noyau","Est toujours visible","Est toujours végétale"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le pouvoir de résolution d’un microscope correspond :",options:["À sa capacité à grossir","À distinguer deux points très proches","À produire des cellules","À colorer les tissus"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"L’ultrastructure cellulaire est étudiée grâce :",options:["Au microscope électronique","Au microscope simple","À la balance","Au thermomètre"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Les cellules procaryotes possèdent quand même :",options:["Un noyau","Du cytoplasme et une membrane","Des mitochondries","Des chloroplastes"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"Une préparation mal fixée en microscopie peut entraîner :",options:["Une bonne conservation","Une déformation cellulaire","Une augmentation du grossissement","Une division cellulaire"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"Le principal avantage du microscope électronique sur l’optique est :",options:["Le coût","Le très fort pouvoir séparateur","La simplicité","La coloration automatique"],answer:1,difficulty:"difficile",xp:25}
+
+  ],
+
+  essays:[
+    {
+      title:"Théorie cellulaire",
+      question:"Présente la théorie cellulaire et ses fondements historiques.",
+      time:400,
+      xp:40
+    },
+
+    {
+      title:"Méthodes d'étude de la cellule",
+      question:"Décris les principales méthodes d'étude de la cellule et leurs limites.",
+      time:450,
+      xp:50
+    }
+  ]
+};
+
+
+const chapterOrganisationCellule={
+  title:"Partie 1 — Ch.I : Organisation de la cellule",
+  trimestre:"PARTIE 2",
+
+  cours:{
+    texte:`La cellule eucaryote possède une organisation complexe avec plusieurs organites spécialisés. Chaque organite assure une fonction précise indispensable à la vie cellulaire.`,
+
+    exemples:[
+      "✅ Noyau : contient l’ADN et contrôle les activités cellulaires",
+      "✅ Mitochondrie : siège de la respiration cellulaire et production d’ATP",
+      "✅ Chloroplaste : siège de la photosynthèse",
+      "✅ Ribosomes : synthèse des protéines",
+      "✅ Appareil de Golgi : maturation et exportation des protéines",
+      "✅ Lysosomes : digestion intracellulaire",
+      "⚠️ Les cellules végétales possèdent chloroplastes et paroi"
+    ]
+  },
+
+  qcm:[
+
+/* =====================================
+20 QUESTIONS FACILES
+===================================== */
+
+{question:"Le noyau contient principalement :",options:["Des lipides","De l’ADN","Du calcium","De l’eau"],answer:1,difficulty:"facile",xp:10},
+
+{question:"L’organite responsable de la respiration cellulaire est :",options:["Le ribosome","La mitochondrie","Le chloroplaste","Le lysosome"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le chloroplaste est présent surtout dans :",options:["Les cellules animales","Les cellules végétales","Les bactéries","Les virus"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Les ribosomes servent à :",options:["Produire de l’énergie","Synthétiser les protéines","Digérer les déchets","Stocker l’eau"],answer:1,difficulty:"facile",xp:10},
+
+{question:"L’appareil de Golgi intervient dans :",options:["La digestion","La respiration","Le transport des protéines","La photosynthèse"],answer:2,difficulty:"facile",xp:10},
+
+{question:"Les lysosomes assurent :",options:["La digestion intracellulaire","La respiration","La photosynthèse","La reproduction"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La membrane plasmique contrôle :",options:["Les échanges","Le climat","Les os","Les muscles"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le cytoplasme est :",options:["Le noyau","Le milieu contenant les organites","La membrane","Le matériel génétique"],answer:1,difficulty:"facile",xp:10},
+
+{question:"La cellule végétale possède souvent :",options:["Des chloroplastes","Des os","Des dents","Des neurones"],answer:0,difficulty:"facile",xp:10},
+
+{question:"L’ATP représente :",options:["Une protéine","Une source d’énergie","Un lipide","Une vitamine"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le siège de la photosynthèse est :",options:["Le noyau","Le chloroplaste","La mitochondrie","Le lysosome"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Le noyau est entouré :",options:["D’une membrane nucléaire","D’un cartilage","D’une paroi osseuse","D’un chloroplaste"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les cellules animales ne possèdent pas :",options:["De membrane","De noyau","De chloroplastes","De cytoplasme"],answer:2,difficulty:"facile",xp:10},
+
+{question:"La cellule végétale possède une :",options:["Paroi","Aucune membrane","Aucune vacuole","Aucune réserve"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les organites sont localisés dans :",options:["Le cytoplasme","Le noyau","La membrane","La paroi"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La respiration cellulaire produit :",options:["De l’ATP","Du bois","Des os","Du sang"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le chloroplaste contient :",options:["La chlorophylle","L’hémoglobine","La myéline","Le calcium"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le ribosome est impliqué dans :",options:["La digestion","La synthèse des protéines","La circulation","La défense immunitaire"],answer:1,difficulty:"facile",xp:10},
+
+{question:"L’ADN est principalement localisé dans :",options:["Le noyau","Le lysosome","Le Golgi","Le chloroplaste uniquement"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les cellules eucaryotes possèdent :",options:["Des organites","Aucun noyau","Aucune membrane","Aucun cytoplasme"],answer:0,difficulty:"facile",xp:10},
+
+/* =====================================
+20 QUESTIONS MOYENNES
+===================================== */
+
+{question:"La membrane plasmique est dite :",options:["Imperméable","Semi-perméable","Rigide","Minérale"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Le réticulum endoplasmique rugueux porte :",options:["Des lysosomes","Des ribosomes","Des vacuoles","Des chloroplastes"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"La vacuole végétale contient principalement :",options:["De l’air","Du suc vacuolaire","De l’ADN","Des mitochondries"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Les mitochondries sont nombreuses dans les cellules :",options:["Très actives","Mortes","Sans énergie","Sans noyau"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le nucléole intervient dans :",options:["La synthèse des ribosomes","La digestion","La photosynthèse","Le stockage du glucose"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La paroi végétale est principalement constituée de :",options:["Cellulose","ADN","ATP","Lipides"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les lysosomes contiennent :",options:["Des pigments","Des enzymes digestives","De la chlorophylle","Du calcium"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"Le REL participe surtout :",options:["À la synthèse lipidique","À la photosynthèse","À la digestion","À la division cellulaire"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le noyau contrôle les activités cellulaires grâce :",options:["À l’ADN","À la membrane","À l’eau","Aux vitamines"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les chloroplastes réalisent :",options:["La respiration","La photosynthèse","La digestion","La mitose"],answer:1,difficulty:"moyen",xp:15},
+
+{question:"La membrane nucléaire possède :",options:["Des pores","Des os","Des vacuoles","Des pigments"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le cytosquelette sert principalement :",options:["Au soutien et aux mouvements cellulaires","À la digestion","À la photosynthèse","À la respiration"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les cellules végétales possèdent généralement :",options:["Une grande vacuole","Aucune membrane","Aucun noyau","Aucun cytoplasme"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le REG intervient surtout dans :",options:["La synthèse protéique","La digestion","La photosynthèse","La réplication virale"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les mitochondries possèdent :",options:["Une double membrane","Aucune membrane","Une paroi","Des chloroplastes"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les organites permettent :",options:["La spécialisation des fonctions","La mort cellulaire","La disparition du cytoplasme","La destruction du noyau"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La chlorophylle absorbe surtout :",options:["L’énergie lumineuse","Le calcium","Le sodium","L’ATP"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le transport intracellulaire est facilité par :",options:["Le réticulum endoplasmique","Les os","Le cartilage","Les neurones"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les cellules animales stockent moins d’eau car :",options:["Elles ont de petites vacuoles","Elles n’ont pas d’ADN","Elles n’ont pas de membrane","Elles sont mortes"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les protéines exportées passent souvent par :",options:["Golgi","Noyau","Vacuole uniquement","Membrane nucléaire"],answer:0,difficulty:"moyen",xp:15},
+
+/* =====================================
+10 QUESTIONS DIFFICILES / CONCOURS
+===================================== */
+
+{question:"La théorie endosymbiotique explique l’origine :",options:["Des ribosomes","Des mitochondries et chloroplastes","Du noyau","De la membrane plasmique"],answer:1,difficulty:"difficile",xp:25},
+
+{question:"Les mitochondries possèdent leur propre :",options:["ADN","Paroi osseuse","Cartilage","Noyau indépendant"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La double membrane mitochondriale favorise :",options:["La production d’ATP","La photosynthèse","La digestion","La réplication bactérienne"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le pouvoir énergétique élevé d’une cellule musculaire s’explique par :",options:["De nombreuses mitochondries","Peu de cytoplasme","L’absence de membrane","La disparition du noyau"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Les ribosomes peuvent être :",options:["Libres ou fixés","Uniquement nucléaires","Toujours membranaires","Toujours chloroplastiques"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le transport vésiculaire implique surtout :",options:["Golgi et RE","Le cartilage","Les neurones","Les os"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Une cellule sécrétrice possède généralement :",options:["Un Golgi développé","Peu de ribosomes","Aucune membrane","Peu d’énergie"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Les lysosomes participent au phénomène :",options:["D’autophagie","De photosynthèse","De méiose","De fermentation"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La membrane plasmique suit le modèle :",options:["De la mosaïque fluide","Du cristal rigide","Du noyau liquide","Du tissu compact"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La compartimentation cellulaire permet :",options:["Une meilleure efficacité métabolique","La destruction de l’ADN","La disparition du cytoplasme","La suppression des échanges"],answer:0,difficulty:"difficile",xp:25}
+
+  ],
+
+  essays:[
+
+    {
+      title:"Organisation de la cellule eucaryote",
+      question:"Décris l’organisation d’une cellule eucaryote en mettant en évidence les différents organites et leurs rôles.",
+      time:500,
+      xp:60
+    },
+
+    {
+      title:"Comparaison cellule animale et végétale",
+      question:"Compare la cellule animale et la cellule végétale en précisant leurs ressemblances et différences.",
+      time:450,
+      xp:50
+    }
+
+  ]
+};
+  
+
+const chapterVieCellulaire={
+  title:"Partie 1 — Ch.II : Vie cellulaire",
+  trimestre:"PARTIE 1",
+
+  cours:{
+    texte:`La cellule réalise plusieurs activités vitales : nutrition, respiration, synthèse, division et échanges avec le milieu. Les phénomènes cellulaires assurent la croissance, le renouvellement et le fonctionnement de l’organisme.`,
+
+    exemples:[
+      "✅ La cellule échange de la matière avec son milieu",
+      "✅ La respiration cellulaire produit de l’ATP",
+      "✅ La mitose permet la multiplication cellulaire",
+      "✅ Les enzymes accélèrent les réactions chimiques",
+      "✅ Les échanges peuvent être passifs ou actifs",
+      "⚠️ L’ATP est la principale source d’énergie cellulaire"
+    ]
+  },
+
+  qcm:[
+
+/* =====================================
+20 QUESTIONS FACILES
+===================================== */
+
+{question:"La cellule vivante réalise :",options:["Des fonctions vitales","Uniquement la respiration","Seulement la digestion","Aucune activité"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La respiration cellulaire permet :",options:["La production d’ATP","La production d’os","La digestion des organes","La fabrication du sang"],answer:0,difficulty:"facile",xp:10},
+
+{question:"L’ATP représente :",options:["Une source d’énergie","Une vitamine","Un pigment","Un déchet"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La mitose permet :",options:["La destruction cellulaire","La multiplication cellulaire","La digestion","La photosynthèse"],answer:1,difficulty:"facile",xp:10},
+
+{question:"Les échanges cellulaires se font principalement à travers :",options:["Le noyau","La membrane plasmique","Le ribosome","Le nucléole"],answer:1,difficulty:"facile",xp:10},
+
+{question:"La cellule absorbe du dioxygène pour :",options:["La respiration","La photosynthèse","La digestion","La coloration"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La division cellulaire permet :",options:["La croissance","La disparition des tissus","La mort immédiate","La fossilisation"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le glucose est utilisé lors de :",options:["La respiration cellulaire","La mitose uniquement","La digestion extracellulaire","La coloration"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les déchets cellulaires sont :",options:["Éliminés","Transformés en os","Stockés définitivement","Toujours inutiles"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La cellule échange :",options:["De la matière et de l’énergie","Uniquement de l’eau","Seulement du calcium","Uniquement de l’ATP"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La respiration cellulaire se déroule surtout dans :",options:["La mitochondrie","Le noyau","Le chloroplaste","Le lysosome"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Une cellule morte :",options:["N’assure plus ses fonctions","Produit plus d’ATP","Se divise rapidement","Respire davantage"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les enzymes servent à :",options:["Accélérer les réactions chimiques","Produire des os","Créer des organes","Colorer les tissus"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La nutrition cellulaire fournit :",options:["De l’énergie et des matériaux","Uniquement du calcium","Seulement de l’eau","Des hormones"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le renouvellement des tissus dépend :",options:["De la division cellulaire","De la fossilisation","De la photosynthèse","De l’hibernation"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les cellules utilisent des nutriments pour :",options:["Fonctionner","Se transformer en os","Produire des montagnes","Créer des océans"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Le CO2 produit par la cellule est :",options:["Un déchet","Une vitamine","Une protéine","Une hormone"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Une cellule active consomme :",options:["Plus d’énergie","Moins d’ATP","Aucun nutriment","Uniquement du calcium"],answer:0,difficulty:"facile",xp:10},
+
+{question:"Les activités cellulaires nécessitent :",options:["De l’énergie","Du bois","Des métaux","Des os"],answer:0,difficulty:"facile",xp:10},
+
+{question:"La vie cellulaire dépend :",options:["Des échanges avec le milieu","Uniquement du noyau","Seulement des chloroplastes","Des os"],answer:0,difficulty:"facile",xp:10},
+
+/* =====================================
+20 QUESTIONS MOYENNES
+===================================== */
+
+{question:"La diffusion est un transport :",options:["Passif","Toujours actif","Nucléaire","Impossible"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"L’osmose correspond au déplacement :",options:["De l’eau","Du glucose","Des protéines","De l’ATP"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le transport actif nécessite :",options:["De l’énergie","Aucune membrane","Des chloroplastes","Du cartilage"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Une enzyme agit grâce à :",options:["Son site actif","Sa couleur","Son odeur","Sa taille uniquement"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La respiration cellulaire consomme :",options:["O2 et glucose","CO2 et eau","Uniquement ATP","Acide lactique seulement"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La respiration produit :",options:["ATP, CO2 et eau","Seulement du glucose","Uniquement du calcium","Des hormones"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La membrane plasmique est :",options:["Sélective","Rigide et fermée","Minérale","Toujours perméable"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La mitose donne naissance à :",options:["Deux cellules filles","Quatre gamètes","Un tissu mort","Une seule mitochondrie"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Pendant la mitose, l’ADN est :",options:["Réparti dans les cellules filles","Détruit","Transformé en ATP","Éliminé"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le métabolisme cellulaire désigne :",options:["L’ensemble des réactions chimiques","La forme du noyau","La couleur des cellules","Le nombre d’organes"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Une cellule en milieu hypertonique :",options:["Perd de l’eau","Gagne de l’eau","Explose immédiatement","Se divise"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les cellules végétales réalisent la photosynthèse grâce :",options:["Aux chloroplastes","Aux lysosomes","Aux ribosomes","Au Golgi"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le transport passif suit :",options:["Le gradient de concentration","Un transport d’ATP obligatoire","La digestion","La mitose"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les cellules produisent des protéines grâce :",options:["Aux ribosomes","Aux vacuoles","Aux lysosomes","Aux centrioles"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La fermentation se déroule :",options:["Sans dioxygène","Avec beaucoup d’oxygène","Dans le noyau","Dans la membrane"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Une cellule spécialisée :",options:["Assure une fonction précise","Perd son ADN","N’a plus de membrane","Devient procaryote"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Le renouvellement cellulaire est important pour :",options:["La réparation des tissus","La fossilisation","La photosynthèse","La calcification"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La perméabilité sélective permet :",options:["Le contrôle des échanges","La destruction de l’ATP","La disparition du cytoplasme","Le blocage total"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"La synthèse des protéines dépend :",options:["De l’information génétique","Du calcium uniquement","Du cartilage","Du chlorure"],answer:0,difficulty:"moyen",xp:15},
+
+{question:"Les réactions cellulaires sont facilitées par :",options:["Les enzymes","Les os","Les pigments","Les vacuoles uniquement"],answer:0,difficulty:"moyen",xp:15},
+
+/* =====================================
+10 QUESTIONS DIFFICILES / CONCOURS
+===================================== */
+
+{question:"Le rôle principal de l’ATP est :",options:["Stocker et transférer l’énergie","Former l’ADN","Produire du calcium","Créer les organes"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Une cellule placée dans un milieu hypotonique :",options:["Gagne de l’eau","Perd de l’eau","Perd son noyau","Ne change jamais"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La respiration aérobie produit environ :",options:["38 ATP","2 ATP","1 ATP","500 ATP"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le transport actif contre le gradient nécessite :",options:["Une dépense énergétique","Une diffusion simple","Une osmose","Aucune membrane"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La spécificité enzymatique dépend :",options:["Du site actif","De la taille cellulaire","Du noyau","Des lipides"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Une enzyme dénaturée :",options:["Perd son activité","Devient plus active","Produit plus d’ATP","Devient un organite"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le cycle cellulaire comprend principalement :",options:["Interphase et mitose","Respiration et digestion","Photosynthèse et osmose","ATP et ADN"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"L’interphase correspond surtout :",options:["À la croissance et réplication de l’ADN","À la destruction cellulaire","À la photosynthèse","À la digestion"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"La différenciation cellulaire résulte :",options:["De l’expression différente des gènes","De la perte d’ADN","De la disparition du noyau","Du manque d’énergie"],answer:0,difficulty:"difficile",xp:25},
+
+{question:"Le maintien de la vie cellulaire nécessite :",options:["Des échanges permanents avec le milieu","L’absence de membrane","La suppression des enzymes","L’arrêt du métabolisme"],answer:0,difficulty:"difficile",xp:25}
+
+  ],
+
+  essays:[
+
+    {
+      title:"Vie et activité cellulaire",
+      question:"Explique les principales activités réalisées par une cellule vivante.",
+      time:500,
+      xp:60
+    },
+
+    {
+      title:"Respiration cellulaire",
+      question:"Décris le mécanisme et l’importance de la respiration cellulaire.",
+      time:550,
+      xp:70
+    }
+
+  ]
+};
+
+/* ── PARTIE 2 : LA REPRODUCTION ── */
+
+const chapterAnatomieGenitaux={
+  title: "Partie 2 — Ch.2 : Fonctionnement des appareils sexuels chez l’Homme",
+  trimestre: "PARTIE 2",
+
+  cours: {
+    texte: `Le fonctionnement des appareils sexuels chez l’homme et la femme est contrôlé par le système hormonal et le complexe hypothalamo-hypophysaire. Chez la femme, il est cyclique, tandis que chez l’homme il est continu.`,
+    
+    exemples: [
+      "🔁 Chez la femme : cycles sexuels mensuels (ovaire + utérus + hormones)",
+      "⚖️ Hormones clés : FSH, LH, œstrogènes, progestérone",
+      "📉 Rétrocontrôle : les hormones sexuelles régulent l’hypophyse",
+      "👨 Chez l’homme : production continue des spermatozoïdes",
+      "🧬 Spermatogenèse : formation des spermatozoïdes dans les testicules",
+      "⚠️ LH → testostérone | FSH → spermatogenèse",
+      "💊 La pilule bloque l’ovulation par rétrocontrôle négatif"
+    ]
+  },
+
+  qcm: [
+    // ===================== FACILE (1-15) =====================
+    {question:"Le fonctionnement des appareils sexuels chez la femme est :",options:["continu","cyclique","aléatoire","unique"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les gonades femelles sont :",options:["testicules","ovaires","prostate","vésicules séminales"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les gonades mâles sont :",options:["ovaires","testicules","utérus","trompes"],answer:1,difficulty:"facile",xp:10},
+    {question:"La FSH stimule :",options:["l’ovulation","la maturation des follicules","la digestion","la respiration"],answer:1,difficulty:"facile",xp:10},
+    {question:"La LH déclenche :",options:["la nidation","l’ovulation","la fécondation","la croissance"],answer:1,difficulty:"facile",xp:10},
+    {question:"La testostérone est produite par :",options:["Sertoli","Leydig","FSH","LH"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les spermatozoïdes sont produits dans :",options:["ovaire","testicule","utérus","vagin"],answer:1,difficulty:"facile",xp:10},
+    {question:"L’ovulation correspond à :",options:["mort de l’ovaire","libération de l’ovocyte","grossesse","ménopause"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le cycle sexuel féminin dure environ :",options:["7 jours","14 jours","28 jours","60 jours"],answer:2,difficulty:"facile",xp:10},
+    {question:"Le corps jaune apparaît après :",options:["ovulation","fécondation","menstruation","nidation"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les ovaires produisent :",options:["spermatozoïdes","hormones sexuelles","globules rouges","enzymes digestives"],answer:1,difficulty:"facile",xp:10},
+    {question:"La fonction principale des testicules est :",options:["digestion","reproduction","respiration","excrétion"],answer:1,difficulty:"facile",xp:10},
+    {question:"La FSH chez l’homme agit sur :",options:["ovaires","tubes séminifères","utérus","vagin"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le complexe hypothalamo-hypophysaire est :",options:["digestif","nerveux-hormonal","musculaire","osseux"],answer:1,difficulty:"facile",xp:10},
+    {question:"La pilule agit principalement en :",options:["stimulant l’ovulation","bloquant l’ovulation","augmentant la fécondation","créant des spermatozoïdes"],answer:1,difficulty:"facile",xp:10},
+
+    // ===================== MOYEN (16-35) =====================
+    {question:"Le pic de LH provoque :",options:["la menstruation","l’ovulation","la grossesse","la fécondation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les œstrogènes sont produits :",options:["uniquement après ovulation","tout le cycle","uniquement chez l’homme","dans le foie"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La progestérone agit surtout :",options:["avant ovulation","après ovulation","pendant enfance","jamais"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La spermatogenèse se déroule dans :",options:["épididyme","tubes séminifères","vésicules séminales","prostate"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La LH chez l’homme stimule :",options:["testostérone","ovulation","nidation","FSH"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le rétrocontrôle signifie :",options:["augmentation sans contrôle","régulation hormonale","division cellulaire","mutation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La phase folliculaire correspond à :",options:["dégradation de l’endomètre","croissance folliculaire","grossesse","ménopause"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le rôle de la progestérone est :",options:["déclencher ovulation","préparer l’utérus","produire spermatozoïdes","digestion"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le trajet des spermatozoïdes commence dans :",options:["prostate","testicule","vagin","utérus"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les cellules de Sertoli servent à :",options:["produire testostérone","soutenir spermatogenèse","produire ovules","sécréter LH"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les cellules de Leydig produisent :",options:["FSH","testostérone","œstrogènes","progesterone"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La FSH chez la femme agit sur :",options:["ovaires","foie","utérus","cerveau"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le pic de FSH survient :",options:["après ovulation","avant ovulation","pendant grossesse","jamais"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La contraception hormonale agit par :",options:["stimulation hormonale","rétrocontrôle négatif","mutation","fécondation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le cycle utérin concerne :",options:["ovaire","endomètre","testicule","foie"],answer:1,difficulty:"moyen",xp:15},
+    {question:"L’ovocyte II est libéré lors de :",options:["fécondation","ovulation","nidation","menstruation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La LH est sécrétée par :",options:["hypophyse","ovaire","testicule","utérus"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La FSH est sécrétée par :",options:["ovaire","hypophyse","testicule","utérus"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les hormones sexuelles agissent sur :",options:["cerveau uniquement","hypophyse","foie","rein"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Chez l’homme, les taux de FSH et LH sont :",options:["très variables","constants","nuls","cycliques"],answer:1,difficulty:"moyen",xp:15},
+
+    // ===================== DIFFICILE (36-50) =====================
+    {question:"Le rétrocontrôle négatif des hormones ovariennes agit sur :",options:["utérus","hypothalamus-hypophyse","ovaire uniquement","foie"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le pic de LH est appelé :",options:["décharge ovulante","cycle lutéal","phase folliculaire","endomètre"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La phase lutéinique est caractérisée par :",options:["follicules","corps jaune","spermatozoïdes","ovulation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La pilule contient :",options:["LH naturelle","FSH naturelle","hormones de synthèse","enzymes digestives"],answer:2,difficulty:"difficile",xp:20},
+    {question:"Le blocage de l’ovulation par la pilule est dû à :",options:["stimulation FSH","rétrocontrôle négatif","mutation ADN","division cellulaire"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La spermatogenèse est :",options:["cyclique","continue","interrompue","absente"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le rôle principal de la LH chez l’homme est :",options:["stimuler testostérone","produire ovules","digestion","respiration"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La régulation hormonale est assurée par :",options:["cerveau seul","axe hypothalamo-hypophysaire","foie","cœur"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le corps jaune sécrète :",options:["FSH","LH","progestérone","testostérone"],answer:2,difficulty:"difficile",xp:20},
+    {question:"L’absence de fécondation entraîne :",options:["grossesse","menstruation","nidation","ovulation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La régulation hormonale est :",options:["unidirectionnelle","bidirectionnelle","aléatoire","absente"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le rétrocontrôle chez l’homme concerne :",options:["LH uniquement","FSH uniquement","LH et FSH via testostérone","ovaires"],answer:2,difficulty:"difficile",xp:20},
+    {question:"La fonction endocrine du testicule correspond à :",options:["production spermatozoïdes","sécrétion testostérone","digestion","respiration"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La fonction exocrine du testicule est :",options:["testostérone","spermatozoïdes","LH","FSH"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le cycle sexuel féminin est contrôlé par :",options:["rein","hypothalamo-hypophyse","foie","pancréas"],answer:1,difficulty:"difficile",xp:20}
+  ],
+
+  essays: [
+    {
+      title: "Régulation hormonale",
+      question: "Explique la régulation hormonale des cycles sexuels chez la femme et du fonctionnement des testicules chez l’homme en mettant en évidence le rôle du rétrocontrôle.",
+      time: 400,
+      xp: 50
+    }
+  ]
+};
+
+const chapterPhysiologieReproduction = {
+  title: "Partie 2 — Ch.II : Physiologie de la reproduction",
+  trimestre: "PARTIE 2",
+
+  cours: {
+    texte: `La physiologie de la reproduction repose sur des cycles sexuels chez la femme et un fonctionnement continu chez l’homme. Elle est contrôlée par l’axe hypothalamo-hypophysaire et les hormones sexuelles avec des mécanismes de rétrocontrôle.`,
+
+    exemples: [
+      "🔁 Cycle ovarien : phase folliculaire → ovulation → phase lutéinique",
+      "🏠 Cycle utérin : épaississement et vascularisation de l’endomètre",
+      "⚖️ Œstrogènes : pic juste avant l’ovulation",
+      "🟡 Progestérone : phase post-ovulatoire",
+      "📊 FSH : maturation folliculaire",
+      "⚡ LH : déclenche ovulation (décharge ovulante)",
+      "🔄 Rétrocontrôle : hormones sexuelles régulent l’hypophyse",
+      "💊 Pilule : bloque ovulation par rétrocontrôle négatif",
+      "👨 Homme : testostérone + spermatogenèse continue"
+    ]
+  },
+
+  qcm: [
+    // ================= FACILE (1–15) =================
+    {question:"Les cycles sexuels concernent :",options:["uniquement l’homme","uniquement la femme","les deux sexes","aucun"],answer:2,difficulty:"facile",xp:10},
+    {question:"Le cycle ovarien comporte :",options:["2 phases","3 phases","4 phases","1 phase"],answer:1,difficulty:"facile",xp:10},
+    {question:"L’ovulation correspond à :",options:["mort du follicule","libération de l’ovocyte","grossesse","menstruation"],answer:1,difficulty:"facile",xp:10},
+    {question:"La FSH stimule :",options:["ovulation","maturation folliculaire","nidation","fécondation"],answer:1,difficulty:"facile",xp:10},
+    {question:"La LH déclenche :",options:["ménopause","ovulation","grossesse","menstruation"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le cycle utérin concerne :",options:["ovaire","endomètre","testicule","foie"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les œstrogènes sont produits :",options:["uniquement après ovulation","tout le cycle","jamais","chez l’homme uniquement"],answer:1,difficulty:"facile",xp:10},
+    {question:"La progestérone est produite :",options:["avant ovulation","après ovulation","pendant enfance","jamais"],answer:1,difficulty:"facile",xp:10},
+    {question:"La durée moyenne du cycle est :",options:["7 jours","14 jours","28 jours","60 jours"],answer:2,difficulty:"facile",xp:10},
+    {question:"La LH est sécrétée par :",options:["ovaire","hypophyse","utérus","testicule"],answer:1,difficulty:"facile",xp:10},
+    {question:"La FSH est sécrétée par :",options:["hypophyse","ovaire","utérus","foie"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le corps jaune apparaît :",options:["avant ovulation","après ovulation","avant menstruation","pendant fécondation"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le complexe hypothalamo-hypophysaire est :",options:["digestif","nerveux-endocrinien","respiratoire","osseux"],answer:1,difficulty:"facile",xp:10},
+    {question:"La pilule agit en :",options:["stimulant ovulation","bloquant ovulation","créant ovules","augmentant LH"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les gonades femelles sont :",options:["testicules","ovaires","prostate","vésicules"],answer:1,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"Le pic d’œstrogènes se situe :",options:["après ovulation","avant ovulation","pendant grossesse","jamais"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La progestérone agit surtout sur :",options:["endomètre","testicule","cerveau","foie"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La phase folliculaire correspond à :",options:["dégradation endomètre","croissance folliculaire","grossesse","ménopause"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le cycle utérin implique :",options:["seulement hormones","modifications endomètre","testicules","cerveau"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La LH provoque :",options:["FSH","ovulation","menstruation","fécondation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le rétrocontrôle signifie :",options:["absence régulation","régulation hormonale","mutation","division cellulaire"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les œstrogènes sont produits par :",options:["testicule","ovaire","hypophyse","foie"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La FSH agit sur :",options:["ovaire","foie","rein","utérus"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La LH agit sur :",options:["ovaire","foie","cerveau","rein"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La phase lutéinique suit :",options:["ovulation","menstruation","grossesse","puberté"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La pilule contient :",options:["FSH naturelle","LH naturelle","hormones synthétiques","enzymes"],answer:2,difficulty:"moyen",xp:15},
+    {question:"Le rétrocontrôle négatif bloque :",options:["FSH/LH","ADN","fécondation","mitose"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le cycle ovarien est :",options:["continu","cyclique","absent","irrégulier"],answer:1,difficulty:"moyen",xp:15},
+    {question:"L’endomètre est :",options:["ovaire","muqueuse utérine","testicule","tube"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les hormones hypophysaires contrôlent :",options:["reproduction","digestion","respiration","circulation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le pic de LH provoque :",options:["ovulation","menstruation","fécondation","grossesse"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La régulation hormonale est :",options:["aléatoire","contrôlée","absente","nerveuse seule"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les cycles sexuels sont contrôlés par :",options:["foie","axe HH","rein","cœur"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La contraception vise :",options:["augmenter grossesse","éviter grossesse","stimuler ovulation","produire spermatozoïdes"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les hormones ovariennes agissent sur :",options:["hypophyse","foie","poumons","rein"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Le rétrocontrôle agit sur :",options:["utérus","axe hypothalamo-hypophysaire","ovaire uniquement","testicule"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le pic de LH est appelé :",options:["décharge ovulante","phase lutéale","endomètre","cycle basal"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La progestérone est maximale :",options:["avant ovulation","après ovulation","pendant menstruation","jamais"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La pilule empêche l’ovulation par :",options:["stimulation FSH","rétrocontrôle négatif","mutation","division"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le corps jaune sécrète :",options:["FSH","LH","progestérone","testostérone"],answer:2,difficulty:"difficile",xp:20},
+    {question:"Sans fécondation :",options:["grossesse","menstruation","nidation","ovulation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le cycle sexuel féminin est :",options:["continu","cyclique","absent","aléatoire"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La régulation hormonale est :",options:["unidirectionnelle","bidirectionnelle","absente","nerveuse seule"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les hormones sexuelles exercent :",options:["aucun effet","rétrocontrôle","digestion","respiration"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le complexe HH signifie :",options:["hypophyse-hormone","hypothalamus-hypophyse","hormone-hormone","ovaire-hypophyse"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les œstrogènes influencent :",options:["FSH/LH","digestion","respiration","rein"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La LH est régulée par :",options:["testostérone","œstrogènes et progestérone","insuline","glucagon"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La contraception agit sur :",options:["ADN","axe hormonal","foie","rein"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le cycle utérin dépend :",options:["ovaire","hormones ovariennes","foie","cœur"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La reproduction humaine est contrôlée par :",options:["axe hormonal","système digestif","système respiratoire","muscles"],answer:0,difficulty:"difficile",xp:20}
+  ],
+
+  essays: [
+    {
+      title: "Régulation hormonale",
+      question: "Explique les cycles sexuels chez la femme et leur régulation hormonale par l’axe hypothalamo-hypophysaire en mettant en évidence le rôle du rétrocontrôle et de la contraception hormonale.",
+      time: 400,
+      xp: 50
+    }
+  ]
+};
+
+/* ── PARTIE 3 : HÉRÉDITÉ ── */
+
+
+const chapterVariation={
+  title:"Partie 3 — Ch.I : Etude de la variation",
+  trimestre:"PARTIE 3",
+
+  cours:{
+    texte:`La variation génétique correspond à l’ensemble des différences observées entre individus d’une même espèce. Elle est principalement due aux mutations, au brassage génétique lors de la méiose et à la fécondation.`
+  },
+
+  qcm:[
+    {question:"La principale source initiale de variation génétique est :",options:["la fécondation","la mutation","la mitose","la respiration"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le brassage interchromosomique a lieu pendant :",options:["la mitose","la prophase I de méiose","la fécondation","l’interphase"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le crossing-over contribue à :",options:["la réduction du nombre de chromosomes","la diversité génétique","la duplication de l’ADN","la mort cellulaire"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une mutation est :",options:["une division cellulaire","une modification de l’ADN","une fécondation","une migration cellulaire"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La fécondation contribue à la variation car :",options:["elle supprime des gènes","elle combine deux génomes différents","elle bloque la méiose","elle réduit les chromosomes"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le brassage intrachromosomique est lié à :",options:["séparation des chromosomes homologues","crossing-over","mitose","duplication cellulaire"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les gamètes sont :",options:["identiques génétiquement","tous différents génétiquement","toujours diploïdes","toujours mutants"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La méiose permet :",options:["la conservation du caryotype","la duplication cellulaire","la respiration","la croissance uniquement"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une mutation germinale est transmise :",options:["jamais","uniquement à l’individu","aux descendants","aux cellules somatiques uniquement"],answer:2,difficulty:"difficile",xp:20},
+    {question:"La diversité génétique d’une espèce dépend surtout :",options:["du climat","de la reproduction sexuée","de la nutrition","du hasard uniquement"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le brassage génétique se produit :",options:["uniquement en mitose","pendant méiose et fécondation","uniquement après naissance","dans les cellules somatiques"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Deux individus issus des mêmes parents sont différents à cause :",options:["absence de méiose","brassage génétique","absence d’ADN","division mitotique uniquement"],answer:1,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterMendel={
+  title:"Partie 3 — Ch.II : Lois de Mendel",
+  trimestre:"2ème trimestre",
+
+  cours:{
+    texte:`Les lois de Mendel expliquent la transmission des caractères héréditaires selon des règles de ségrégation des allèles. L’étude des pedigrees permet d’identifier les modes de transmission : dominant, récessif, codominant, autosomique ou lié au sexe.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"La génétique étudie :",options:["les roches","l’hérédité","les virus","la digestion"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un gène est :",options:["une cellule","un fragment d’ADN","une protéine","un organe"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un allèle est :",options:["une version d’un gène","un chromosome entier","une cellule","une maladie"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les lois de Mendel concernent :",options:["la respiration","la transmission des caractères","la digestion","la circulation"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un caractère héréditaire est :",options:["acquis uniquement","transmis génétiquement","toujours malade","non transmissible"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un pedigree est :",options:["une cellule","un arbre généalogique","une protéine","une hormone"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un individu possède :",options:["un seul allèle par gène","deux allèles par gène","trois allèles","aucun ADN"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un caractère dominant s’exprime :",options:["toujours","jamais","seulement chez les filles","seulement chez les garçons"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un caractère récessif s’exprime :",options:["toujours","seulement si homozygote","jamais","chez tous"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un chromosome contient :",options:["des os","de l’ADN","du sang","des hormones"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les chromosomes sont situés dans :",options:["cytoplasme","noyau","membrane","mitochondrie"],answer:1,difficulty:"facile",xp:10},
+    {question:"La transmission des caractères dépend de :",options:["ADN","air","eau","lumière"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un homozygote possède :",options:["deux allèles identiques","deux allèles différents","un seul chromosome","aucun gène"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un hétérozygote possède :",options:["deux allèles identiques","deux allèles différents","aucun ADN","un seul gène"],answer:1,difficulty:"facile",xp:10},
+    {question:"Mendel est connu pour :",options:["lois de l’hérédité","respiration","digestion","circulation"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"La première loi de Mendel concerne :",options:["uniformité des hybrides","mutation","respiration","digestion"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un caractère récessif s’exprime lorsque :",options:["un seul allèle est présent","deux allèles récessifs","dominance complète","mutation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un pedigree sert à :",options:["observer ADN","suivre transmission des caractères","mesurer taille","calculer âge"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une maladie dominante apparaît :",options:["toutes générations","saut de générations","jamais","uniquement hommes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Une maladie récessive apparaît :",options:["toujours","avec saut de générations","uniquement femmes","uniquement hommes"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La codominance signifie :",options:["dominance totale","expression des deux allèles","absence d’allèles","mutation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La drépanocytose est :",options:["dominante","codominante","récessive","non génétique"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un gène est localisé sur :",options:["ribosome","chromosome","membrane","cytoplasme"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les chromosomes homologues contiennent :",options:["mêmes gènes","même ADN identique","aucun gène","protéines"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un caractère lié au sexe est porté par :",options:["autosome","chromosome sexuel","cytoplasme","ribosome"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un homme transmet son chromosome Y :",options:["à ses filles","à ses fils","à tous","à personne"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une femme possède :",options:["XY","XX","YY","XO"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un gène dominant s’exprime chez :",options:["homozygote uniquement","hétérozygote et homozygote","récessif uniquement","aucun"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un croisement génétique permet :",options:["prévoir descendants","digestion","respiration","circulation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le phénotype est :",options:["gènes","expression observable","ADN","chromosome"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le génotype est :",options:["apparence","constitution génétique","organe","cellule"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une mutation est :",options:["modification ADN","division","respiration","fécondation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les caractères héréditaires viennent :",options:["ADN","air","eau","lumière"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La transmission mendélienne repose sur :",options:["hasard total","lois génétiques","climat","nutrition"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un test de croisement sert à :",options:["connaître génotype","calculer âge","mesurer taille","observer sang"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Une maladie liée à X récessive touche surtout :",options:["femmes","hommes","tous pareil","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une femme atteinte d’un caractère récessif lié à X est :",options:["XX saine","XX mutée homozygote","XY","XO"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Un père malade lié à X transmet :",options:["maladie à fils","X à filles","Y à filles","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Un caractère lié au Y est transmis :",options:["père à fils uniquement","mère à fils","tous","aucun"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une maladie dominante liée à X se caractérise par :",options:["saut de générations","toutes filles d’un père malade atteintes","absence transmission","récessivité"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le pedigree permet de déterminer :",options:["type de sang","mode de transmission","âge","taille"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une codominance donne :",options:["phénotype intermédiaire","expression simultanée des deux allèles","absence expression","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La 2e loi de Mendel concerne :",options:["ségrégation des allèles","respiration","mutation","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les allèles se séparent lors de :",options:["mitose","méiose","fécondation","respiration"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les gamètes sont :",options:["diploïdes","haploïdes","mutants","identiques"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Un caractère autosomique est porté par :",options:["chromosome sexuel","autosome","cytoplasme","membrane"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une mutation germinale est :",options:["non transmissible","transmissible","toujours létale","absente"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La diversité génétique dépend de :",options:["mutation + reproduction sexuée","climat","nutrition","respiration"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le génotype Aa correspond à :",options:["homozygote","hétérozygote","mutant","absent"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La génétique mendélienne repose sur :",options:["hasard","règles précises","absence lois","physique"],answer:1,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterMorgan={
+  title:"Partie 3 — Ch.III : Travaux de Morgan",
+  trimestre:"PARTIE 3",
+
+  cours:{
+    texte:`Les travaux de Morgan montrent que certains gènes peuvent être liés lorsqu’ils sont portés par le même chromosome. L’étude du dihybridisme permet de distinguer les gènes indépendants des gènes liés grâce aux proportions phénotypiques et au test-cross.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"Le dihybridisme étudie :",options:["un seul caractère","deux caractères","trois caractères","aucun caractère"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les travaux de Morgan portent sur :",options:["la digestion","la génétique","la respiration","la circulation"],answer:1,difficulty:"facile",xp:10},
+    {question:"Deux gènes indépendants sont situés sur :",options:["même chromosome","chromosomes différents","ADN mitochondrial","cytoplasme"],answer:1,difficulty:"facile",xp:10},
+    {question:"Deux gènes liés sont situés sur :",options:["chromosomes différents","même chromosome","membrane","noyau uniquement"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le test-cross sert à :",options:["mesurer la taille","tester génotype","digestion","respiration"],answer:1,difficulty:"facile",xp:10},
+    {question:"Une descendance homogène signifie :",options:["variabilité","uniformité","mutation","absence gènes"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un gène est :",options:["portion ADN","protéine","cellule","organe"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un chromosome contient :",options:["lipides","ADN","eau","sucres"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les caractères héréditaires sont portés par :",options:["ADN","air","eau","lumière"],answer:0,difficulty:"facile",xp:10},
+    {question:"La génétique étudie :",options:["hérédité","digestion","respiration","vision"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un croisement F1 x F1 donne :",options:["F0","F2","F3","F4"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un caractère est déterminé par :",options:["hormones","gènes","eau","oxygène"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les chromosomes sont dans :",options:["cytoplasme","noyau","membrane","ribosome"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un individu hétérozygote possède :",options:["2 allèles identiques","2 allèles différents","aucun ADN","1 chromosome"],answer:1,difficulty:"facile",xp:10},
+    {question:"Morgan a travaillé sur :",options:["drosophile","humain","chien","bactérie"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"Un gène lié signifie :",options:["sur chromosomes différents","sur même chromosome","absent","muté"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Des gènes indépendants donnent en F2 :",options:["3:1","9:3:3:1","1:1","2:2"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un test-cross d’indépendance donne :",options:["1:1:1:1","9:3:3:1","3:1","2:1"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les gènes liés donnent :",options:["ratios modifiés","toujours 9:3:3:1","aucune descendance","mutation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La liaison génétique concerne :",options:["gènes sur même chromosome","tous chromosomes","mitose","cytoplasme"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le crossing-over permet :",options:["liaison ADN","recombinaison génétique","mort cellulaire","duplication"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les gamètes recombinés apparaissent grâce à :",options:["mitose","méiose","fécondation","respiration"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les gamètes parentaux sont :",options:["nouveaux","identiques aux parents","mutants","absents"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Dans un test-cross, les phénotypes reflètent :",options:["ADN somatique","gamètes","mitose","protéines"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les gènes liés ne suivent pas :",options:["loi Mendel indépendante","respiration","mitose","mutation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le génotype F1 est souvent :",options:["homozygote","hétérozygote","absent","mutant"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le phénotype dépend :",options:["seulement ADN","ADN + environnement","eau","air"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un croisement dihybride implique :",options:["1 gène","2 gènes","3 gènes","aucun"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Morgan a démontré :",options:["hérédité libre toujours","liaison génétique","respiration","digestion"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Les chromosomes homologues portent :",options:["mêmes gènes","différents organes","eau","enzymes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un gène est localisé sur :",options:["chromosome","cytoplasme","eau","air"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les allèles sont :",options:["versions d’un gène","protéines","cellules","organes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La recombinaison génétique augmente :",options:["uniformité","diversité","mort","absence ADN"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un croisement F2 est :",options:["F1xF1","P1xP2","P2xP2","F0xF0"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les chromosomes sont visibles en :",options:["interphase","mitose","eau","air"],answer:1,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Les gènes liés donnent un test-cross :",options:["1:1:1:1","ratio non mendélien","9:3:3:1","aucun ratio"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les gamètes recombinés sont :",options:["majoritaires","minoritaires","absents","identiques"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les gamètes parentaux sont :",options:["minoritaires","majoritaires","absents","mutants"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le crossing-over se produit en :",options:["prophase I","anaphase II","mitose","interphase"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La liaison génétique est rompue par :",options:["mitose","crossing-over","fécondation","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La distance génétique dépend de :",options:["taux de recombinaison","taille","âge","nutrition"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Plus deux gènes sont éloignés :",options:["moins recombinaison","plus recombinaison","aucun effet","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les drosophiles mâles :",options:["font crossing-over","ne font pas crossing-over","mutent","divisent ADN"],answer:1,difficulty:"difficile",xp:20},
+    {question:"La carte factorielle est basée sur :",options:["mutation","distance génétique","taille","poids"],answer:1,difficulty:"difficile",xp:20},
+    {question:"EffO > EffT indique :",options:["cis","trans","mutation","absence gènes"],answer:0,difficulty:"difficile",xp:20},
+    {question:"EffO < EffT indique :",options:["cis","trans","absence ADN","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Les gènes sur même chromosome forment :",options:["groupe lié","groupe libre","mutation","absence"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La ségrégation indépendante concerne :",options:["gènes liés","gènes indépendants","mutations","ADN mitochondrial"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Morgan a travaillé sur :",options:["liaison génétique","respiration","digestion","immunité"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le but du dihybridisme est :",options:["étudier 2 caractères","1 caractère","3 caractères","aucun"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterHerediteHumaine={
+  title:"Partie 3 — Ch.IV : Hérédité humaine",
+  trimestre:"PARTIE 3",
+
+  cours:{
+    texte:`L’hérédité humaine étudie la transmission des caractères génétiques à travers les générations. L’analyse des pedigrees permet d’identifier si un caractère est autosomique ou lié au sexe, dominant, récessif ou codominant.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"L’hérédité humaine étudie :",options:["les maladies uniquement","la transmission des caractères","la digestion","la respiration"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un pedigree est :",options:["une cellule","un arbre généalogique","un chromosome","une protéine"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un caractère héréditaire est :",options:["acquis","transmis génétiquement","temporaire","non biologique"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les chromosomes humains sont :",options:["haploïdes","diploïdes","triploïdes","absents"],answer:1,difficulty:"facile",xp:10},
+    {question:"Une femme possède :",options:["XY","XX","YY","XO"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un homme possède :",options:["XX","XY","YY","XO"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un gène est :",options:["ADN segment","organe","cellule","enzyme"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un allèle est :",options:["version d’un gène","chromosome entier","cellule","organe"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un caractère dominant s’exprime :",options:["toujours","jamais","seulement chez hommes","seulement femmes"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un caractère récessif s’exprime :",options:["toujours","si homozygote","jamais","au hasard"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un individu hétérozygote possède :",options:["allèles identiques","allèles différents","aucun ADN","chromosome absent"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un homozygote possède :",options:["allèles identiques","différents","aucun gène","mutation"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les caractères sont portés par :",options:["ADN","eau","air","lumière"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un chromosome contient :",options:["ADN","eau","air","vitamines"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un pedigree permet de :",options:["calculer âge","suivre transmission","digestion","respiration"],answer:1,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"Une maladie dominante apparaît :",options:["à toutes générations","saut de générations","jamais","uniquement hommes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Une maladie récessive apparaît :",options:["toujours","saut de générations","uniquement femmes","sans transmission"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une maladie autosomique est portée par :",options:["chromosome sexuel","autosome","cytoplasme","membrane"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une maladie liée à X touche plus :",options:["femmes","hommes","tous pareil","aucun"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un père transmet son chromosome X à :",options:["fils","filles","personne","tous"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un père transmet son chromosome Y à :",options:["filles","fils","tous","aucun"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une femme malade récessive liée à X est :",options:["XX saine","XX mutée homozygote","XY","XO"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une mère malade transmet :",options:["X sain","X muté","Y","aucun"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La codominance signifie :",options:["dominance totale","expression des deux allèles","absence expression","mutation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La drépanocytose est :",options:["dominante","récessive","codominante","non génétique"],answer:2,difficulty:"moyen",xp:15},
+    {question:"Un gène est situé sur :",options:["chromosome","eau","air","cytoplasme"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les chromosomes homologues portent :",options:["mêmes gènes","aucun gène","protéines","eau"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un caractère lié au sexe est porté par :",options:["autosome","chromosome sexuel","ADN libre","cytoplasme"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Un homme est :",options:["XX","XY","YY","XO"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une femme est :",options:["XY","XX","YY","XO"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le phénotype est :",options:["gènes","expression visible","ADN","chromosome"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le génotype est :",options:["apparence","constitution génétique","organe","cellule"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une mutation est :",options:["changement ADN","division","respiration","fécondation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un test de croisement sert à :",options:["déterminer génotype","taille","poids","âge"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Une transmission autosomique touche :",options:["hommes uniquement","femmes uniquement","les deux sexes","aucun"],answer:2,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Une maladie récessive liée à X touche surtout :",options:["femmes","hommes","tous","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une femme atteinte récessive liée à X est :",options:["XX saine","XX mutée","XY","XO"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Un père sain transmet :",options:["X muté","X sain","Y muté","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une maladie dominante liée à X se caractérise par :",options:["saut de générations","toutes filles d’un père malade atteintes","absence transmission","récessivité"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une maladie liée au Y est transmise :",options:["mère à fils","père à fils","mère à filles","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le pedigree permet de déterminer :",options:["mode de transmission","âge","taille","poids"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Un caractère autosomique signifie :",options:["lié sexe","non lié sexe","lié mitochondrie","lié cytoplasme"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une codominance produit :",options:["phénotype intermédiaire","expression simultanée","absence expression","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une maladie dominante se reconnaît par :",options:["saut générations","présence chaque génération","absence transmission","mutation"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une maladie récessive se reconnaît par :",options:["toujours visible","saut de générations","absence gènes","dominance"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Un homme transmet :",options:["X aux fils","Y aux fils","X aux filles","aucun"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Une femme transmet :",options:["X à tous enfants","Y aux fils","aucun","chromosome absent"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Un gène est localisé sur :",options:["chromosome","air","eau","cellule"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La diversité génétique vient de :",options:["mutation + reproduction","air","eau","lumière"],answer:0,difficulty:"difficile",xp:20},
+    {question:"L’hérédité humaine repose sur :",options:["lois génétiques","hasard total","climat","nutrition"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+/* ── PARTIE 4 : FONCTION DE RELATION ── */
+
+const chapterTissuNerveux={
+  title:"Partie 4 — Ch.I : Le tissu nerveux",
+  trimestre:"PARTIE 4",
+
+  cours:{
+    texte:`Le tissu nerveux est constitué de neurones et de fibres nerveuses organisées en nerfs. Il assure la transmission de l’influx nerveux grâce aux potentiels de repos, d’action et aux synapses.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"Le neurone est :",options:["cellule musculaire","cellule nerveuse","cellule sanguine","cellule épithéliale"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le neurone est constitué de :",options:["2 parties","3 parties","4 parties","5 parties"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le soma est aussi appelé :",options:["axone","péricaryon","dendrite","synapse"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le nerf est constitué de :",options:["neurones seuls","fibres nerveuses + tissu conjonctif","os","muscle"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le tissu nerveux sert à :",options:["digestion","transmission de l’influx","respiration","circulation"],answer:1,difficulty:"facile",xp:10},
+    {question:"L’axone sert à :",options:["recevoir signal","transmettre signal","produire hormones","digérer"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les dendrites servent à :",options:["transmettre","recevoir","digérer","respirer"],answer:1,difficulty:"facile",xp:10},
+    {question:"Une synapse est :",options:["contact nerveux","organe","enzyme","chromosome"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le potentiel de repos est :",options:["PA","PM","ADN","ATP"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le potentiel d’action est :",options:["variation du PM","ADN","enzyme","hormone"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le nerf est :",options:["cellule unique","ensemble de fibres","organe digestif","os"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le neurone est :",options:["excitabilité + conductibilité","respiration","digestion","circulation"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le PA dépend principalement de :",options:["ions Na+ et K+","glucose","oxygène","ADN"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le PM est une :",options:["différence de potentiel","enzyme","hormone","protéine"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le système nerveux utilise :",options:["influx nerveux","sang","air","lumière"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"Le potentiel de repos est maintenu par :",options:["pompe Na+/K+","ATP digestion","ADN","mitose"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La dépolarisation est due à :",options:["entrée Na+","sortie Na+","entrée K+","entrée Cl-"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La repolarisation est due à :",options:["entrée Na+","sortie K+","entrée glucose","ADN"],answer:1,difficulty:"moyen",xp:15},
+    {question:"L’hyperpolarisation est due à :",options:["sortie excessive K+","entrée Na+","entrée eau","division cellulaire"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Une synapse excitatrice produit :",options:["PPSI","PPSE","ADN","ATP"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Une synapse inhibitrice produit :",options:["PPSE","PPSI","PA","ADN"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le neurotransmetteur agit sur :",options:["récepteurs postsynaptiques","ADN","chromosomes","mitose"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le PA est déclenché si :",options:["seuil atteint","ATP absent","eau présente","ADN muté"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La conduction saltatoire concerne :",options:["fibres myélinisées","muscles","os","sang"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La conduction continue concerne :",options:["fibres amyéliniques","muscles","os","nerfs sensoriels uniquement"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La période réfractaire est :",options:["phase repos","non réponse temporaire","division","mutation"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La loi du tout ou rien concerne :",options:["nerf entier","fibre nerveuse","muscle","os"],answer:1,difficulty:"moyen",xp:15},
+    {question:"La rhéobase est :",options:["intensité seuil","temps","vitesse","potentiel"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La chronaxie est :",options:["temps à 2x rhéobase","intensité","potentiel","distance"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le neurone transmet :",options:["influx nerveux","sang","air","ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La synapse neuro-musculaire est :",options:["nerf-nerf","nerf-muscle","muscle-os","nerf-glande"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le PA est déclenché par :",options:["excitation efficace","repos","ATP","ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le PM correspond à :",options:["repos membranaire","PA","ATP","enzyme"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’oscilloscope sert à :",options:["enregistrer PA","digestion","respiration","division"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le neurotransmetteur est :",options:["molécule chimique","ADN","ATP","chromosome"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Le PA comprend :",options:["dépolarisation + repolarisation + hyperpolarisation","division","respiration","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La pompe Na+/K+ fait :",options:["3 Na+ sortent, 2 K+ entrent","inverse","aucun effet","division"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le PA diphasique est enregistré avec :",options:["PM","potentiel de référence","ADN","ATP"],answer:1,difficulty:"difficile",xp:20},
+    {question:"Le PA monophasique implique :",options:["microélectrode dans tissu","ADN","mitose","enzyme"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Un PPSE est :",options:["dépolarisation","hyperpolarisation","division","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Un PPSI est :",options:["hyperpolarisation","dépolarisation","PA","ADN"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le neurotransmetteur est détruit par :",options:["enzyme spécifique","ADN","ATP","glucose"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La synapse peut être :",options:["excitatrice ou inhibitrice","digestive","respiratoire","osseuse"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le PA se propage grâce à :",options:["canaux ioniques voltage-dépendants","ADN","mitose","enzyme"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les fibres myélinisées permettent :",options:["vitesse rapide","vitesse lente","aucune conduction","division"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les vésicules synaptiques contiennent :",options:["neurotransmetteurs","ADN","ATP","ions"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le Ca2+ déclenche :",options:["libération neurotransmetteur","PA","ADN","mitose"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La transmission synaptique est :",options:["chimique","mécanique","électrique uniquement","atomique"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le nerf est :",options:["ensemble de fibres + tissu conjonctif","neurone seul","muscle","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La conduction de l’influx est :",options:["sens unique","double sens","aléatoire","absente"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterSystemeNerveux={
+  title:"Partie 4 — Ch.II : Système nerveux et comportement moteur",
+  trimestre:"PARTIE 4",
+
+  cours:{
+    texte:`Le système nerveux permet la coordination des activités de l’organisme. Il assure la réception des stimuli, leur traitement par les centres nerveux et l’élaboration de réponses motrices via les arcs réflexes et les réflexes conditionnés.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"L’arc réflexe est :",options:["un organe","le trajet de l’influx nerveux","une hormone","une cellule"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un réflexe est :",options:["volontaire","automatique","appris uniquement","chimique"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les récepteurs sensoriels sont dans :",options:["les muscles","les organes des sens","le sang","les os"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le centre nerveux peut être :",options:["os","moelle épinière","peau","muscle"],answer:1,difficulty:"facile",xp:10},
+    {question:"Les conducteurs sensitifs véhiculent :",options:["influx centripète","centrifuge","hormones","ADN"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les conducteurs moteurs véhiculent :",options:["influx centrifuge","centripète","eau","sang"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les effecteurs sont :",options:["muscles et glandes","os","neurones uniquement","sang"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un réflexe conditionné est :",options:["inné","appris","génétique uniquement","absent"],answer:1,difficulty:"facile",xp:10},
+    {question:"Un stimulus est :",options:["réponse","excitation","organe","enzyme"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le système nerveux sert à :",options:["coordination","digestion","respiration uniquement","nutrition"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un réflexe est rapide car :",options:["traitement court","digestion","absence neurones","absence muscles"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le cerveau est un :",options:["centre nerveux","organe digestif","muscle","os"],answer:0,difficulty:"facile",xp:10},
+    {question:"La moelle épinière est :",options:["centre nerveux","os","muscle","nerf"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les muscles sont des :",options:["effecteurs","récepteurs","neurones","hormones"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un réflexe est :",options:["involontaire","toujours appris","toujours lent","chimique"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"L’influx nerveux sensitif est :",options:["centripète","centrifuge","chimique","absent"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’influx nerveux moteur est :",options:["centripète","centrifuge","chimique","absent"],answer:1,difficulty:"moyen",xp:15},
+    {question:"Le centre nerveux reçoit :",options:["stimulus","ADN","eau","oxygène"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un réflexe conditionné nécessite :",options:["apprentissage","mutation","digestion","absence cerveau"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Pavlov a étudié :",options:["réflexe conditionné","digestion","respiration","mitose"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le réflexe conditionné dépend :",options:["expérience","ADN uniquement","eau","os"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le stimulus neutre devient :",options:["SC","SI","réponse","organe"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le SI est :",options:["stimulus inconditionnel","stimulus appris","réponse","neurone"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le SC déclenche :",options:["réponse conditionnée","aucune réponse","mutation","digestion"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’arc réflexe comprend :",options:["5 éléments","2 éléments","1 élément","aucun"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le réflexe est traité au niveau :",options:["moelle épinière","foie","rein","os"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le réflexe conditionné est :",options:["temporaire","permanent","génétique","chimique"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le renforcement sert à :",options:["entretenir réflexe","l’effacer","le muter","le détruire ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le trajet sensitif est :",options:["récepteur → centre nerveux","centre → muscle","muscle → sang","ADN → cellule"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le trajet moteur est :",options:["centre → effecteur","récepteur → cerveau","ADN → noyau","sang → muscle"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un réflexe implique :",options:["arc réflexe","mutation","division","digestion"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le cerveau intervient dans :",options:["réflexe conditionné","digestion","respiration uniquement","os"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les effecteurs exécutent :",options:["réponse","stimulus","ADN","mutation"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un réflexe est :",options:["rapide","lent","aléatoire","chimique uniquement"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’association SN + SI permet :",options:["conditionnement","mutation","digestion","respiration"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"L’ordre correct de l’arc réflexe est :",options:["récepteur→centre→effecteur","effecteur→récepteur→centre","ADN→muscle→nerf","centre→récepteur→muscle"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le réflexe conditionné implique :",options:["cerveau","moelle seule","muscle seul","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le réflexe conditionné est obtenu par :",options:["association répétée SN+SI","mutation","division","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le SC est :",options:["stimulus appris","stimulus inné","réponse","organe"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le SI est :",options:["stimulus naturel","stimulus appris","réponse","gène"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La réponse conditionnée disparaît sans :",options:["renforcement","ADN","eau","oxygène"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le centre nerveux principal est :",options:["cerveau","rein","foie","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le réflexe conditionné est :",options:["non permanent","permanent","génétique","chimique"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le réflexe est :",options:["adaptatif","inutile","aléatoire","chimique uniquement"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le rôle du système nerveux est :",options:["coordination","respiration","digestion","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Un réflexe nécessite :",options:["stimulus + arc réflexe","ADN seul","muscle seul","eau"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les conducteurs sensitifs vont :",options:["vers centre","vers muscle","vers sang","vers os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les conducteurs moteurs vont :",options:["vers effecteurs","vers cerveau","vers peau","vers ADN"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le comportement moteur dépend :",options:["SN","os","eau","ADN seul"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le conditionnement est :",options:["apprentissage associatif","mutation","division","digestion"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+/* ── PARTIE 5 : UNITÉ PHYSIOLOGIQUE ── */
+
+const chapterActiviteCardiaque={
+  title:"Partie 5 — Ch.I : L'activité cardiaque",
+  trimestre:"PARTIE 5",
+
+  cours:{
+    texte:`L’activité cardiaque est rythmique et automatique grâce au tissu nodal. Le cœur fonctionne comme une pompe coordonnée par des phénomènes électriques (PA, ECG) et modulée par le système nerveux autonome.`
+  },
+
+  qcm:[
+
+    // ================= FACILE (1–15) =================
+    {question:"Le cœur est :",options:["volontaire","automatique","digestif","nerveux"],answer:1,difficulty:"facile",xp:10},
+    {question:"L’automatisme cardiaque signifie :",options:["cœur indépendant","cœur arrêté","cœur volontaire","cœur musculaire uniquement"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le tissu nodal est responsable de :",options:["digestion","rythme cardiaque","respiration","vision"],answer:1,difficulty:"facile",xp:10},
+    {question:"Le pacemaker naturel est :",options:["nœud sinusal","ventricule","oreillette","valve"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le cœur possède :",options:["automatisme","respiration","digestion","vision"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’ECG mesure :",options:["activité électrique","sang","oxygène","hormones"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’onde P correspond à :",options:["oreillettes","ventricules","repos","mort cellulaire"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le QRS correspond à :",options:["ventricules","oreillettes","repos","digestion"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’onde T correspond à :",options:["repolarisation ventriculaire","dépolarisation oreillettes","repos","mutation"],answer:0,difficulty:"facile",xp:10},
+    {question:"La systole est :",options:["contraction","relaxation","mort","division"],answer:0,difficulty:"facile",xp:10},
+    {question:"La diastole est :",options:["relaxation","contraction","digestion","mutation"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le cœur est composé de :",options:["muscle cardiaque","os","nerfs uniquement","cartilage"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le tissu nodal génère :",options:["PA","ADN","ATP","hormones"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le cœur fonctionne grâce à :",options:["influx électrique","eau","air","lumière"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le rythme cardiaque est :",options:["régulier","aléatoire","absent","chimique"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN (16–35) =================
+    {question:"Le nœud sinusal est :",options:["pacemaker","valve","muscle","nerf"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le nœud sinusal impose :",options:["rythme cardiaque","digestion","respiration","vision"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le faisceau de His transmet :",options:["influx cardiaque","sang","oxygène","hormones"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le réseau de Purkinje permet :",options:["contraction ventriculaire","digestion","respiration","vision"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’automatisme est dû à :",options:["dépolarisation spontanée","eau","ADN","muscle seul"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le potentiel du tissu nodal est :",options:["instable","fixe","absent","chimique"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le PA cardiaque implique :",options:["Na+, K+, Ca2+","glucose","eau","oxygène"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La dépolarisation cardiaque est due à :",options:["entrée Na+","sortie Na+","entrée O2","ATP"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La repolarisation implique :",options:["K+","Na+","glucose","ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le système parasympathique :",options:["ralentit cœur","accélère cœur","arrête cerveau","digère"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le système orthosympathique :",options:["accélère cœur","ralentit cœur","arrête cœur","digère"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’acétylcholine est :",options:["cardio-modératrice","accélératrice","digestive","respiratoire"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’adrénaline est :",options:["cardio-accélératrice","ralentissante","digestive","neurale"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le cycle cardiaque comprend :",options:["SA + DA + SV + DG","ADN + ARN","mitose","respiration"],answer:0,difficulty:"moyen",xp:15},
+    {question:"SA signifie :",options:["systole auriculaire","système actif","sang artériel","synapse active"],answer:0,difficulty:"moyen",xp:15},
+    {question:"SV signifie :",options:["systole ventriculaire","sang veineux","synapse variable","somme ventriculaire"],answer:0,difficulty:"moyen",xp:15},
+    {question:"DG signifie :",options:["diastole générale","division génétique","dépolarisation","digestion"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le cœur isolé :",options:["bat encore","meurt instantanément","ne réagit pas","se divise"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’expérience de Loewi montre :",options:["médiateurs chimiques","ADN","mitose","respiration"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Un médiateur chimique est :",options:["neurotransmetteur","ADN","ATP","enzyme digestive"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE (36–50) =================
+    {question:"Le nœud sinusal est :",options:["centre principal rythme","centre secondaire","valve","muscle"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le tissu nodal comprend :",options:["nœud sinusal + His + Purkinje","muscle seul","valves","sang"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le PA cardiaque est initié par :",options:["nœud sinusal","ventricule","valve","sang"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La contraction cardiaque suit :",options:["propagation PA","digestion","respiration","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le PA cardiaque dépend fortement de :",options:["Ca2+","glucose","ADN","lipides"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le système nerveux agit sur :",options:["fréquence cardiaque","ADN","os","peau"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le parasympathique agit via :",options:["acétylcholine","adrénaline","insuline","hémoglobine"],answer:0,difficulty:"difficile",xp:20},
+    {question:"L’orthosympathique agit via :",options:["adrénaline","acétylcholine","glucose","oxygène"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le cœur est myogène car :",options:["automatique","nerveux","digestif","osseux"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La systole ventriculaire correspond à :",options:["éjection sang","repos","remplissage","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La diastole correspond à :",options:["remplissage","contraction","éjection","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le PA se propage grâce à :",options:["tissu nodal","ADN","sang","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le cœur fonctionne grâce à :",options:["automatisme + régulation nerveuse","digestion","respiration","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le rythme cardiaque est contrôlé par :",options:["nœud sinusal","foie","rein","peau"],answer:0,difficulty:"difficile",xp:20},
+    {question:"L’expérience de Loewi prouve :",options:["transmission chimique synapse","ADN","mitose","respiration"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterRelationsHumorales={
+  title:"Partie 5 — Ch.II : Relations humorales (pancréas)",
+
+  trimestre:"PARTIE 5",
+
+  cours:{
+    texte:`Les relations humorales correspondent à la régulation du milieu intérieur par des hormones circulant dans le sang. Le pancréas endocrine joue un rôle central grâce à deux hormones principales : l’insuline et le glucagon, qui régulent la glycémie.`
+  },
+
+  qcm:[
+
+    // ================= FACILE =================
+    {question:"Les relations humorales sont assurées par :",options:["hormones","nerfs","os","muscles"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’organe principal de la régulation de la glycémie est :",options:["pancréas","rein","cœur","foie"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’insuline est une hormone :",options:["hypoglycémiante","hyperglycémiante","digestive","nerveuse"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le glucagon est une hormone :",options:["hyperglycémiante","hypoglycémiante","digestive","respiratoire"],answer:0,difficulty:"facile",xp:10},
+    {question:"La glycémie correspond au taux de :",options:["glucose sanguin","Na+","K+","urée"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le pancréas est un organe :",options:["endocrine et exocrine","nerveux","osseux","musculaire"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’insuline fait :",options:["baisser la glycémie","augmenter la glycémie","détruire le foie","arrêter le sang"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le glucagon agit en cas de :",options:["baisse de glycémie","hausse de glycémie","infection","fatigue"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les hormones sont transportées par :",options:["sang","nerfs","air","os"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le pancréas endocrine agit sur :",options:["sang","muscles uniquement","os","peau"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN =================
+    {question:"L’insuline favorise :",options:["entrée du glucose dans les cellules","libération de glucose","destruction des protéines","respiration"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le glucagon favorise :",options:["libération du glucose hépatique","stockage du glucose","baisse insuline","digestion"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le lieu de stockage du glucose est :",options:["foie","rein","cerveau","sang"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La glycogénèse est :",options:["formation de glycogène","destruction du glucose","formation ADN","respiration"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La glycogénolyse est :",options:["dégradation du glycogène","formation glucose","formation protéines","division cellulaire"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Après un repas riche en sucre :",options:["insuline augmente","glucagon augmente","aucun effet","ADN change"],answer:0,difficulty:"moyen",xp:15},
+    {question:"En jeûne prolongé :",options:["glucagon augmente","insuline augmente","glucose disparaît","os se modifie"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le pancréas contient :",options:["îlots de Langerhans","neurones","alvéoles","néphrons"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les hormones agissent :",options:["à distance","localement uniquement","dans os","dans nerfs"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La régulation de la glycémie est :",options:["homéostasie","mutation","digestion","respiration"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE =================
+    {question:"Le rôle principal de l’insuline est :",options:["hypoglycémiant","hyperglycémiant","digestif","nerveux"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le glucagon est sécrété quand :",options:["glycémie basse","glycémie haute","infection","repos"],answer:0,difficulty:"difficile",xp:20},
+    {question:"L’insuline agit principalement sur :",options:["foie et cellules","cerveau uniquement","os","peau"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le pancréas endocrine libère :",options:["hormones dans le sang","enzymes digestives","ADN","globules"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La glycémie normale est maintenue par :",options:["insuline + glucagon","nerfs seuls","os","poumon"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une hyperglycémie est :",options:["excès de glucose sanguin","manque glucose","absence sang","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une hypoglycémie est :",options:["baisse du glucose sanguin","excès glucose","infection","fatigue"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le foie stocke le glucose sous forme de :",options:["glycogène","ADN","lipides uniquement","urée"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La régulation hormonale est :",options:["lente mais durable","rapide et brève","absente","nerveuse"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les îlots de Langerhans contiennent :",options:["cellules endocrines","neurones","muscles","os"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+
+const chapterMilieuInterieur={
+  title:"Partie 5 — Ch.III : Le milieu intérieur",
+  trimestre:"PARTIE 5",
+
+  cours:{
+    texte:`Le milieu intérieur correspond à l’ensemble des liquides extracellulaires (plasma, liquide interstitiel). Sa constance est assurée par les reins grâce au néphron qui régule l’eau, les ions et les déchets. Ce maintien permanent est appelé homéostasie.`
+  },
+
+  qcm:[
+
+    // ================= FACILE =================
+    {question:"Le milieu intérieur comprend :",options:["plasma + liquide interstitiel","ADN","os","nerfs"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’homéostasie est :",options:["équilibre du milieu intérieur","division cellulaire","digestion","respiration"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’organe principal de régulation est :",options:["rein","cœur","cerveau","poumon"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’unité fonctionnelle du rein est :",options:["néphron","neurone","alvéole","globule"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le rein produit :",options:["urine","sang","ADN","hormones sexuelles"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’urine primitive est formée par :",options:["filtration","digestion","respiration","mitose"],answer:0,difficulty:"facile",xp:10},
+    {question:"La filtration a lieu dans :",options:["glomérule","tube digestif","cœur","cerveau"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le plasma est :",options:["liquide sanguin","os","nerf","urine"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les reins régulent :",options:["eau et ions","vision","respiration","os"],answer:0,difficulty:"facile",xp:10},
+    {question:"L’urine définitive est :",options:["urine finale","sang","plasma","ADN"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN =================
+    {question:"La filtration glomérulaire dépend :",options:["pression sanguine","ADN","muscle","air"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La réabsorption tubulaire concerne :",options:["retour substances vers sang","formation ADN","digestion","respiration"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La créatinine est :",options:["non réabsorbée","réabsorbée","hormone","glucose"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La réabsorption d’eau peut être :",options:["active et passive","chimique","nerveuse","digestive"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’ADH agit sur :",options:["tube collecteur","cœur","cerveau","os"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Quand ADH augmente :",options:["réabsorption eau augmente","diminue eau","glycémie augmente","ADN change"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La rénine est produite par :",options:["rein","foie","cerveau","os"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’angiotensine II stimule :",options:["aldostérone","insuline","adrénaline","glucagon"],answer:0,difficulty:"moyen",xp:15},
+    {question:"L’aldostérone augmente :",options:["réabsorption Na+","vision","digestion","ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La natrémie correspond à :",options:["Na+ sanguin","K+ os","glucose","urée"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le rein a un rôle :",options:["filtration","digestion","respiration","vision"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les substances communes urine/plasma sont :",options:["urée, eau","glucose uniquement","lipides","ADN"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les protéines sont :",options:["absentes urine","présentes urine","produites rein","hormones"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le seuil rénal correspond à :",options:["limite élimination","début digestion","mutation","division"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La glycosurie est :",options:["glucose dans urine","absence glucose","sang normal","ADN urine"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE =================
+    {question:"L’homéostasie est :",options:["équilibre dynamique","état fixe","mort cellulaire","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La filtration glomérulaire est :",options:["dialyse sanguine","digestion","respiration","mitose"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La réabsorption active concerne :",options:["glucose et ions","eau seule","ADN","lipides"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La réabsorption passive est due à :",options:["osmose","mutation","digestion","ATP uniquement"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La sécrétion tubulaire produit :",options:["acide hippurique","glucose","ADN","lipides"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une hausse de volémie entraîne :",options:["baisse ADH","augmentation ADH","mutation","digestion"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Une baisse de volémie entraîne :",options:["augmentation ADH","baisse ADH","aucun effet","division"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le rein régule :",options:["eau + ions + déchets","ADN","vision","respiration"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le glucose est normalement :",options:["totalement réabsorbé","éliminé","produit urine","absent sang"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le système rénine-angiotensine agit sur :",options:["pression artérielle","vision","respiration","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"L’ADH agit au niveau :",options:["néphron","cerveau","foie","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le néphron permet :",options:["formation urine","digestion","vision","respiration"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le milieu intérieur comprend :",options:["plasma + interstitiel","ADN seul","os","nerfs"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La constance du milieu intérieur est :",options:["homéostasie","mutation","digestion","division"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le seuil rénal sert à :",options:["éliminer excès","créer ADN","digérer aliments","respirer"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+const chapterImmunologie={
+  title:"Partie 5 — Ch.IV : L'immunologie",
+  trimestre:"PARTIE 5",
+
+  cours:{
+    texte:`Le système immunitaire assure la défense de l’organisme contre les antigènes (Ag). Il repose sur une défense non spécifique (innée) et une défense spécifique (acquise). Les lymphocytes T4 sont les principales cibles du VIH, entraînant une destruction progressive du système immunitaire.`
+  },
+
+  qcm:[
+
+    // ================= FACILE =================
+    {question:"Le système immunitaire sert à :",options:["défendre l’organisme","digérer","respirer","produire du sang"],answer:0,difficulty:"facile",xp:10},
+    {question:"Un antigène est :",options:["une substance étrangère","une hormone","un nerf","une enzyme digestive"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le VIH attaque principalement :",options:["LT4","globules rouges","neurones","plaquettes"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les LT4 possèdent le récepteur :",options:["CD4","CD8","ABO","Rh"],answer:0,difficulty:"facile",xp:10},
+    {question:"La défense non spécifique est :",options:["innée","acquise","apprise","vaccinale"],answer:0,difficulty:"facile",xp:10},
+    {question:"La réaction inflammatoire provoque :",options:["rougeur et douleur","vision","respiration","digestion"],answer:0,difficulty:"facile",xp:10},
+    {question:"La phagocytose est réalisée par :",options:["macrophages","neurones","muscles","LT8"],answer:0,difficulty:"facile",xp:10},
+    {question:"La défense spécifique est :",options:["acquise","innée","automatique","digestive"],answer:0,difficulty:"facile",xp:10},
+    {question:"Les anticorps sont produits par :",options:["plasmocytes","LT8","GR","neurones"],answer:0,difficulty:"facile",xp:10},
+    {question:"Le soi est reconnu grâce :",options:["marqueurs cellulaires","ADN libre","glucose","urée"],answer:0,difficulty:"facile",xp:10},
+
+    // ================= MOYEN =================
+    {question:"Le VIH agit en priorité sur :",options:["LT4","LT8","globules rouges","neurones"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La réponse primaire est :",options:["lente et faible","rapide","instantanée","absente"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La réponse secondaire est :",options:["rapide et intense","faible","absente","lente"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les LT8 deviennent :",options:["LT cytotoxiques","LB","GR","plasmocytes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les LB deviennent :",options:["plasmocytes","LT4","neurones","macrophages"],answer:0,difficulty:"moyen",xp:15},
+    {question:"La phagocytose comprend :",options:["4 étapes","1 étape","2 étapes","10 étapes"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le CMH sert à :",options:["identifier le soi","digérer","respirer","transporter oxygène"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les organes lymphoïdes primaires sont :",options:["moelle + thymus","rate seule","foie","rein"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Les anticorps forment :",options:["complexes immuns","neurones","ADN","hormones"],answer:0,difficulty:"moyen",xp:15},
+    {question:"Le VIH est un :",options:["virus","bactérie","parasite","champignon"],answer:0,difficulty:"moyen",xp:15},
+
+    // ================= DIFFICILE =================
+    {question:"Le VIH se réplique grâce à :",options:["transcriptase inverse","ADN polymérase humaine","ATP synthase","ribosome seul"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le LT4 est détruit car :",options:["infection virale","mutation os","digestion","oxygénation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La RIMH repose sur :",options:["anticorps","LT cytotoxiques seuls","globules rouges","neurones"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La RIMC repose sur :",options:["LTc","anticorps","plasma","glucose"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les macrophages présentent :",options:["antigènes","ADN","oxygène","urée"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le complexe immun est :",options:["Ag + Ac","ADN + ARN","glucose + lipides","nerf + muscle"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les LT4 activent :",options:["LB et LT8","GR","neurones","os"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le SIDA correspond à :",options:["phase avancée VIH","vaccination","guérison","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le VIH intègre son ADN dans :",options:["ADN du LT4","ARN viral","plasma","mitochondrie"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le CD4 est :",options:["récepteur","hormone","enzyme digestive","anticorps"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La mémoire immunitaire explique :",options:["réponse secondaire rapide","infection lente","absence défense","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Les LTc détruisent par :",options:["perforines","insuline","ADN","oxygène"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le soi est défini par :",options:["CMH/HLA","glucose","ADN libre","virus"],answer:0,difficulty:"difficile",xp:20},
+    {question:"La séropositivité signifie :",options:["présence anticorps VIH","guérison","absence virus","mutation"],answer:0,difficulty:"difficile",xp:20},
+    {question:"Le VIH détruit progressivement :",options:["système immunitaire","système digestif","os","peau"],answer:0,difficulty:"difficile",xp:20}
+  ]
+};
+
+/* ================= CHAPTERS MAP ================= */
+
+const chapters={
+  "P1 — Intro : La cellule": chapterCelluleIntro,
+  "P1 — Ch.I : Organisation cellulaire": chapterOrganisationCellule,
+  "P1 — Ch.II : Vie cellulaire": chapterVieCellulaire,
+  "P2 — Ch.I : Anatomie génitale": chapterAnatomieGenitaux,
+  "P2 — Ch.II : Physiologie reproduction": chapterPhysiologieReproduction,
+  "P3 — Ch.I : Variation": chapterVariation,
+  "P3 — Ch.II : Lois de Mendel": chapterMendel,
+  "P3 — Ch.III : Travaux de Morgan": chapterMorgan,
+  "P3 — Ch.IV : Hérédité humaine": chapterHerediteHumaine,
+  "P4 — Ch.I : Tissu nerveux": chapterTissuNerveux,
+  "P4 — Ch.II : Système nerveux": chapterSystemeNerveux,
+  "P5 — Ch.I : Activité cardiaque": chapterActiviteCardiaque,
+  "P5 — Ch.II : Relations humorales": chapterRelationsHumorales,
+  "P5 — Ch.III : Milieu intérieur": chapterMilieuInterieur,
+  "P5 — Ch.IV : Immunologie": chapterImmunologie
+};
+
+/* ================= HOME ================= */
+
+function home(){
+  const trimestres={
+    "1er trimestre":["P1 — Intro : La cellule","P1 — Ch.I : Organisation cellulaire","P1 — Ch.II : Vie cellulaire","P2 — Ch.I : Anatomie génitale","P2 — Ch.II : Physiologie reproduction","P3 — Ch.I : Variation"],
+    "2ème trimestre":["P3 — Ch.II : Lois de Mendel","P3 — Ch.III : Travaux de Morgan","P3 — Ch.IV : Hérédité humaine","P4 — Ch.I : Tissu nerveux"],
+    "3ème trimestre":["P4 — Ch.II : Système nerveux","P5 — Ch.I : Activité cardiaque","P5 — Ch.II : Relations humorales","P5 — Ch.III : Milieu intérieur","P5 — Ch.IV : Immunologie"]
+  };
+
+  let html=`<div class="card"><h2>🌿 SVT — Terminale D</h2>
+  <button class="mission-btn" onclick="startMission()">⚡ MODE MISSION COMMANDO</button><br><br>`;
+
+  Object.keys(trimestres).forEach(tri=>{
+    html+=`<p style="color:#86efac;font-weight:bold;margin-top:15px;"> ${tri}</p>`;
+    trimestres[tri].forEach(ch=>{
+      html+=`<button onclick="openChapter('${ch}')" style="text-align:left;font-size:13px;">${ch}</button>`;
+    });
+  });
+
+  html+=`<button onclick="essayMenu()" style="margin-top:20px;">✍️ Devoirs écrits</button>
+  <p style="color:#94a3b8;font-size:13px;text-align:center;margin-top:10px;">XP: ${state.xp} | Niveau: ${state.level}</p>
+  </div>`;
+
+  app.innerHTML=html;
+}
+
+/* ================= OPEN CHAPTER ================= */
+
+function openChapter(chapter){
+  state.currentChapter=chapter;
+  const data=chapters[chapter];
+
+  app.innerHTML=`
+  <div class="card">
+    <span class="trimestre-tag">${data.trimestre}</span>
+    <h2 style="font-size:16px;">${chapter}</h2>
+    <button onclick="showCours('${chapter}')">📖 Voir le cours</button>
+    <button onclick="startQCM()">🎯 Start QCM</button>
+    <button class="quit-btn" onclick="home()"> Quitter</button>
+  </div>`;
+}
+
+/* ================= COURS ================= */
+
+function showCours(chapter){
+  const cours=chapters[chapter].cours;
+  if(!cours){notify("Cours bientôt disponible !","info");return;}
+
+  app.innerHTML=`
+  <div class="card">
+    <h2>📖 ${chapter}</h2>
+    <p style="line-height:1.7;color:#cbd5e1;">${cours.texte}</p>
+    <div style="margin-top:15px;">
+      ${cours.exemples.map(ex=>`
+        <div style="background:#1e293b;border-left:3px solid #16a34a;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:14px;color:#e2e8f0;line-height:1.5;">${ex}</div>
+      `).join("")}
+    </div>
+    <button onclick="startQCM()" style="margin-top:20px;">🎯 Démarrer le QCM</button>
+    <button class="quit-btn" onclick="openChapter('${chapter}')">← Retour</button>
+  </div>`;
+}
+
+/* ================= QCM ================= */
+
+function startQCM(){
+  state.qIndex=0;
+  state.qcmScore=0;
+  state.qcmTotal=0;
+  showQCM();
+}
+
+function showQCM(){
+  const qcm=chapters[state.currentChapter].qcm;
+  const q=qcm[state.qIndex];
+  const shuffled=shuffle(q.options.map((text,index)=>({text,index})));
+  state.currentCorrect=shuffled.findIndex(o=>o.index===q.answer);
+
+  app.innerHTML=`
+  <div class="card">
+    <h3 style="font-size:15px;">Q${state.qIndex+1}/${qcm.length} : ${q.question}</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <p id="qcmTimer" style="color:#f87171;font-weight:bold;margin:0;">⏳ 30s</p>
+      <span style="font-size:12px;color:#86efac;">✅ ${state.qcmScore}/${state.qcmTotal}</span>
+    </div>
+    ${shuffled.map((o,i)=>`<div class="option" onclick="answer(${i})">${o.text}</div>`).join("")}
+    <p style="color:#94a3b8;font-size:12px;">XP: +${q.xp}</p>
+    <button class="quit-btn" onclick="quitQCM()"> Quitter</button>
+  </div>`;
+
+  clearInterval(state.qcmTimer);
+  state.qcmTimeLeft=30;
+  state.qcmTimer=setInterval(()=>{
+    state.qcmTimeLeft--;
+    const t=document.getElementById("qcmTimer");
+    if(t) t.innerHTML=`⏳ ${state.qcmTimeLeft}s`;
+    if(state.qcmTimeLeft<=0){
+      clearInterval(state.qcmTimer);
+      state.qcmTotal++;
+      state.qIndex++;
+      if(state.qIndex>=qcm.length){showQCMResult();}else{showQCM();}
+    }
+  },1000);
+}
+
+function answer(choice){
+  const qcm=chapters[state.currentChapter].qcm;
+  const q=qcm[state.qIndex];
+  const options=document.querySelectorAll(".option");
+  clearInterval(state.qcmTimer);
+  options.forEach(o=>o.onclick=null);
+
+  state.qcmTotal++;
+  if(choice===state.currentCorrect){
+    state.qcmScore++;
+    options[choice].classList.add("good");
+    addXP(q.xp);
+    notify("✅ Bonne réponse !","success");
+  }else{
+    options[choice].classList.add("bad");
+    options[state.currentCorrect].classList.add("good");
+    notify("❌ Mauvaise réponse","error");
+  }
+
+  setTimeout(()=>{
+    state.qIndex++;
+    if(state.qIndex>=qcm.length){showQCMResult();}
+    else{showQCM();}
+  },800);
+}
+
+function showQCMResult(){
+  clearInterval(state.qcmTimer);
+  const total=state.qcmTotal;
+  const score=state.qcmScore;
+  const note=total===0?0:Math.round((score/total)*20);
+  const noteClass=note>=14?"score-good":note>=10?"score-mid":"score-bad";
+  let emoji,appreciation;
+  if(note>=18){emoji="🏆";appreciation="Excellent ! Félicitations, tu maîtrises parfaitement ce chapitre !";}
+  else if(note>=16){emoji="🌟";appreciation="Très bien ! Tu as de solides connaissances.";}
+  else if(note>=14){emoji="😊";appreciation="Bien ! Continue comme ça, tu es sur la bonne voie.";}
+  else if(note>=12){emoji="👍";appreciation="Assez bien. Quelques révisions s'imposent sur les points manqués.";}
+  else if(note>=10){emoji="😐";appreciation="Passable. Il faut revoir certaines notions importantes.";}
+  else if(note>=8){emoji="😟";appreciation="Insuffisant. Reprends le cours et refais le QCM.";}
+  else if(note>=5){emoji="😢";appreciation="Faible. Revois attentivement l'ensemble du chapitre.";}
+  else{emoji="💀";appreciation="Très faible. Il faut tout revoir depuis le début !";}
+
+  addXP(note*5);
+  app.innerHTML=`
+  <div class="card score-card">
+    <h2>📊 Résultats du QCM</h2>
+    <p style="color:#94a3b8;font-size:13px;">${chapters[state.currentChapter].title}</p>
+    <div class="score-note ${noteClass}">${emoji} ${note}/20</div>
+    <p style="font-size:16px;margin:6px 0;">
+      ✅ <strong>${score}</strong> bonne${score>1?"s":""} réponse${score>1?"s":""} sur <strong>${total}</strong>
+    </p>
+    <div style="background:#1e293b;border-radius:12px;padding:12px 15px;margin:10px 0;font-size:14px;color:#e2e8f0;line-height:1.5;">
+      ${appreciation}
+    </div>
+    <p style="color:#94a3b8;font-size:12px;">+${note*5} XP gagnés</p>
+    <button onclick="startQCM('${state.currentChapter}')">🔄 Rejouer</button>
+    <button class="quit-btn" onclick="home()">🏠 Accueil</button>
+  </div>`;
+}
+
+function quitQCM(){
+  clearInterval(state.qcmTimer);
+  state.qIndex=0;
+  notify("QCM quitté");
+  home();
+}
+
+/* ================= MISSION COMMANDO ================= */
+
+function startMission(){
+  let allQCM=[];
+  Object.keys(chapters).forEach(ch=>{
+    chapters[ch].qcm.forEach(q=>{allQCM.push({...q,chapter:ch});});
+  });
+  const picked=shuffle(allQCM).slice(0,10);
+  state.mission={questions:picked,index:0,score:0,timeLeft:240,answered:0};
+  showMissionQCM();
+}
+
+function showMissionQCM(){
+  const m=state.mission;
+  clearInterval(state.missionTimer);
+  state.missionTimer=setInterval(()=>{
+    m.timeLeft--;
+    const t=document.getElementById("missionClock");
+    if(t){
+      const min=Math.floor(m.timeLeft/60);
+      const sec=m.timeLeft%60;
+      t.innerHTML=`⏱ ${min}:${sec.toString().padStart(2,"0")}`;
+      if(m.timeLeft<=30) t.style.color="#ef4444";
+    }
+    if(m.timeLeft<=0){clearInterval(state.missionTimer);showMissionResult();}
+  },1000);
+  renderMissionQuestion();
+}
+
+function renderMissionQuestion(){
+  const m=state.mission;
+  const q=m.questions[m.index];
+  const shuffled=shuffle(q.options.map((text,index)=>({text,index})));
+  m.currentCorrect=shuffled.findIndex(o=>o.index===q.answer);
+  const min=Math.floor(m.timeLeft/60);
+  const sec=m.timeLeft%60;
+
+  app.innerHTML=`
+  <div class="card">
+    <div class="mission-timer" id="missionClock">⏱ ${min}:${sec.toString().padStart(2,"0")}</div>
+    <div class="mission-progress">Question ${m.index+1} / 10 &nbsp;|&nbsp; ✅ ${m.score} bonne(s)</div>
+    <p style="font-size:13px;color:#94a3b8;">📚 ${q.chapter}</p>
+    <p><strong>${q.question}</strong></p>
+    ${shuffled.map((o,i)=>`<div class="option" onclick="answerMission(${i})">${o.text}</div>`).join("")}
+    <button class="quit-btn" onclick="quitMission()" style="margin-top:15px">🚪 Abandonner</button>
+  </div>`;
+}
+
+function answerMission(choice){
+  const m=state.mission;
+  const options=document.querySelectorAll(".option");
+  options.forEach(o=>o.onclick=null);
+  m.answered++;
+  if(choice===m.currentCorrect){options[choice].classList.add("good");m.score++;}
+  else{options[choice].classList.add("bad");options[m.currentCorrect].classList.add("good");}
+  setTimeout(()=>{
+    m.index++;
+    if(m.index>=10){clearInterval(state.missionTimer);showMissionResult();}
+    else{renderMissionQuestion();}
+  },1000);
+}
+
+function showMissionResult(){
+  clearInterval(state.missionTimer);
+  const m=state.mission;
+  const note=m.answered===0?0:Math.round((m.score/m.answered)*10);
+  const noteClass=note>=7?"score-good":note>=5?"score-mid":"score-bad";
+  const emoji=note>=7?"🏆":note>=5?"😅":"💀";
+  addXP(note*10);
+  app.innerHTML=`
+  <div class="card score-card">
+    <h2>⚡ Mission Commando</h2>
+    <div class="score-note ${noteClass}">${emoji} ${note}/10</div>
+    <p>${m.score} bonne(s) réponse(s) sur ${m.answered} répondues</p>
+    <p style="color:#94a3b8;font-size:13px">+${note*10} XP gagnés</p>
+    <button onclick="startMission()">🔄 Rejouer</button>
+    <button class="quit-btn" onclick="home()">🏠 Accueil</button>
+  </div>`;
+}
+
+function quitMission(){
+  clearInterval(state.missionTimer);
+  notify("Mission abandonnée","error");
+  home();
+}
+
+/* ================= XP SYSTEM ================= */
+
+function addXP(points){
+  state.xp+=points;
+  if(state.xp>=state.level*100){state.level++;notify("🔥 LEVEL UP !","success");}
+  localStorage.setItem("xp_svt",state.xp);
+  localStorage.setItem("level_svt",state.level);
+  updateXPBar();
+}
+
+function updateXPBar(){
+  const fill=document.getElementById("xpFill");
+  const xpLabel=document.getElementById("xpLabel");
+  const levelLabel=document.getElementById("levelLabel");
+  const percent=Math.min((state.xp%(state.level*100))/(state.level*100)*100,100);
+  if(fill) fill.style.width=percent+"%";
+  if(xpLabel) xpLabel.innerHTML="XP: "+state.xp;
+  if(levelLabel) levelLabel.innerHTML="Niveau "+state.level;
+}
+
+/* ================= ESSAYS ================= */
+
+function getAllEssays(){
+  let all=[];
+  Object.keys(chapters).forEach(ch=>{
+    if(chapters[ch].essays){
+      chapters[ch].essays.forEach((e,i)=>{
+        all.push({...e,chapterKey:ch,index:i});
+      });
+    }
+  });
+  return all;
+}
+
+function getEssayProgress(){
+  return JSON.parse(localStorage.getItem("essayProgress_svt"))||{};
+}
+
+function saveEssayProgress(title,content){
+  const progress=getEssayProgress();
+  progress[title]={content,done:true,updatedAt:new Date().toISOString()};
+  localStorage.setItem("essayProgress_svt",JSON.stringify(progress));
+}
+
+function essayMenu(){
+  const progress=getEssayProgress();
+
+  let html=`<div class="card"><h2>✍️ Devoirs écrits</h2>`;
+
+  Object.keys(chapters).forEach(ch=>{
+    const essays=chapters[ch].essays;
+    if(!essays) return;
+    html+=`<p style="color:#86efac;font-size:12px;margin-top:12px;font-weight:bold;">${ch}</p>`;
+    essays.forEach((e,i)=>{
+      const done=progress[e.title];
+      html+=`<button onclick="startEssayByKey('${ch}',${i})" style="background:${done?'#22c55e':'#16a34a'};font-size:13px;">
+        ${done?'✅':'📝'} ${e.title}
+      </button>`;
+    });
+  });
+
+  html+=`<br><br><button class="quit-btn" onclick="home()">⬅️ Retour</button></div>`;
+  app.innerHTML=html;
+}
+
+function startEssayByKey(chKey,i){
+  const essay=chapters[chKey].essays[i];
+  state.essay=essay;
+  state.timer=essay.time;
+  clearInterval(state.interval);
+  state.interval=setInterval(()=>{
+    state.timer--;
+    if(state.timer<=0){clearInterval(state.interval);autoSaveEssay();notify("⏰ Temps écoulé !");}
+    updateTimer();
+  },1000);
+  renderEssay();
+}
+
+function autoSaveEssay(){
+  const textarea=document.getElementById("essayText");
+  if(!textarea) return;
+  saveEssayProgress(state.essay.title,textarea.value);
+}
+
+function liveSaveEssay(){
+  const text=document.getElementById("essayText").value;
+  saveEssayProgress(state.essay.title,text);
+}
+
+function finishEssay(){
+  clearInterval(state.interval);
+  const text=document.getElementById("essayText").value;
+  saveEssayProgress(state.essay.title,text);
+  addXP(state.essay.xp);
+  notify("Devoir enregistré !");
+  essayMenu();
+}
+
+function resetEssay(){
+  const progress=getEssayProgress();
+  delete progress[state.essay.title];
+  localStorage.setItem("essayProgress_svt",JSON.stringify(progress));
+  renderEssay();
+}
+
+function updateTimer(){
+  const timer=document.getElementById("timer");
+  const fill=document.getElementById("fill");
+  const minutes=Math.floor(state.timer/60);
+  const seconds=state.timer%60;
+  if(timer) timer.innerHTML=`⏱️ ${minutes}:${seconds.toString().padStart(2,"0")}`;
+  if(fill) fill.style.width=`${(state.timer/state.essay.time)*100}%`;
+}
+
+function renderEssay(){
+  const progress=getEssayProgress();
+  const oldAnswer=progress[state.essay.title]?.content||"";
+  app.innerHTML=`
+  <div class="card">
+    <h3>${state.essay.title}</h3>
+    <div class="bar"><div class="fill" id="fill" style="width:${(state.timer/state.essay.time)*100}%"></div></div>
+    <p id="timer"></p>
+    <p>${state.essay.question}</p>
+    <textarea id="essayText" placeholder="Rédige ta réponse..." oninput="liveSaveEssay()">${oldAnswer}</textarea>
+    <button onclick="sendEssay()">🤖 Corriger avec IA</button>
+    <button onclick="finishEssay()">Enregistrer</button>
+    <button onclick="resetEssay()"> Recommencer</button>
+    <br><br>
+    <button class="quit-btn" onclick="essayMenu()">Retour</button>
+  </div>`;
+}
+
+function sendEssay(){
+  const text=document.getElementById("essayText").value;
+  if(!text.trim()){alert("Écris quelque chose !");return;}
+  const prompt=`Corrige ce devoir de SVT :\n\nQUESTION:\n${state.essay.question}\n\nREPONSE:\n${text}\n\nDonne:\n- note /20\n- erreurs\n- correction`;
+  window.open("https://chatgpt.com/?q="+encodeURIComponent(prompt));
+}
+
+/* ================= NOTIFY ================= */
+
+function notify(message,type="info",duration=3500){
+  const container=document.getElementById("notif-container");
+  const div=document.createElement("div");
+  div.className=`notif ${type}`;
+  div.innerText=message;
+  container.appendChild(div);
+  setTimeout(()=>{div.remove();},duration);
+}
+
+/* ================= INIT ================= */
+
+updateXPBar();
+home();
+
+</script>
+</body>
+</html>

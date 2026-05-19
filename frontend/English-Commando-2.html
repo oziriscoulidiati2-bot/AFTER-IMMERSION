@@ -1,0 +1,7469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> english commando </title>
+
+<style>
+
+.quit-btn{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:bold;
+  margin-bottom:15px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.quit-btn:hover{
+  transform:scale(1.05);
+  opacity:0.9;
+}
+
+#notif-container{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:9999;
+  pointer-events:none;
+}
+
+.notif{
+  min-width:250px;
+  max-width:360px;
+  padding:12px 15px;
+  border-radius:14px;
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  animation:slideDown 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+}
+
+.notif.success{ background:#22c55e; }
+.notif.error{ background:#ef4444; }
+.notif.info{ background:#3b82f6; }
+
+@keyframes slideDown{
+  from{transform:translateY(-20px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+
+@keyframes fadeOut{
+  to{opacity:0;transform:translateY(-10px);}
+}
+
+:root{
+--bg:#020617;
+--card:#0f172a;
+--accent:#3b82f6;
+--good:#22c55e;
+--bad:#ef4444;
+--glass:rgba(15,23,42,0.6);
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#1e293b,#020617);
+  color:white;
+}
+
+.topbar{
+  position:fixed;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:420px;
+  padding:10px 15px;
+  border-radius:20px;
+  background:var(--glass);
+  backdrop-filter:blur(10px);
+  z-index:999;
+}
+
+.topbar-title{
+  text-align:center;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.xp-bar-bg{
+  height:12px;
+  background:#1e293b;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
+
+.xp-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  border-radius:10px;
+  transition:width 0.5s ease;
+  box-shadow:0 0 8px #3b82f6;
+}
+
+.xp-bar-info{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:3px;
+}
+
+.container{
+  padding:80px 15px 110px;
+}
+
+.card{
+  background:var(--card);
+  padding:15px;
+  border-radius:18px;
+  margin-top:15px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:white;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+textarea{
+  width:100%;
+  height:180px;
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:#1e293b;
+  color:white;
+  border:none;
+}
+
+.bar{
+  height:10px;
+  background:#1e293b;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.fill{
+  height:100%;
+  background:var(--accent);
+}
+
+  .option{
+  padding:12px;
+  margin:8px 0;
+  background:#1e293b;
+  border-radius:12px;
+  cursor:pointer;
+}
+.option.good{background:var(--good)!important;}
+.option.bad{background:var(--bad)!important;}
+  
+  .mission-btn{
+  background:linear-gradient(135deg,#dc2626,#7c3aed);
+  font-size:16px;
+  letter-spacing:1px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}
+  50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}
+}
+
+.mission-timer{
+  font-size:32px;
+  font-weight:bold;
+  text-align:center;
+  color:#f87171;
+  margin:10px 0;
+}
+
+.mission-progress{
+  text-align:center;
+  color:#94a3b8;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.score-card{
+  text-align:center;
+  padding:20px;
+}
+
+.score-note{
+  font-size:64px;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+.score-good{color:#22c55e;}
+.score-mid{color:#f59e0b;}
+.score-bad{color:#ef4444;}
+</style>
+</head>
+
+<body>
+
+<div id="notif-container"></div>
+  
+<div class="topbar" id="topbar">
+  <div class="topbar-title">🧠 English commando</div>
+  <div class="xp-bar-bg">
+    <div class="xp-bar-fill" id="xpFill" style="width:0%"></div>
+  </div>
+  <div class="xp-bar-info">
+    <span id="xpLabel">XP: 0</span>
+    <span id="levelLabel">Niveau 1</span>
+  </div>
+</div>
+
+<div class="container" id="app"></div>
+
+<p classs=evelopper par educative sofware></p>
+
+<script>
+
+/* ================= STATE ================= */
+
+function shuffle(array){
+  let arr = [...array];
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+let state = {
+  xp: parseInt(localStorage.getItem("xp")) || 0,
+  level: parseInt(localStorage.getItem("level")) || 1,
+  essay: null,
+  timer: 0,
+  interval: null,
+  qIndex: 0,
+  currentChapter: "Lesson 1 : Plural Nouns",
+  qcmTimer: null,
+  qcmTimeLeft: 30
+};
+
+  const chapterPluralNouns={
+
+title:"Lesson : Plural Nouns",
+cours: {
+  texte: `En anglais, on forme le pluriel des noms en suivant quelques règles simples selon la terminaison du mot.`,
+  exemples: [
+    "✅ Règle générale → ajouter -s : cat → cats, dog → dogs",
+    "✅ Terminaison en -s, -sh, -ch, -x, -z → ajouter -es : box → boxes, watch → watches",
+    "✅ Terminaison en consonne + -y → changer -y en -ies : baby → babies",
+    "✅ Terminaison en -f ou -fe → changer en -ves : leaf → leaves, knife → knives",
+    "⚠️ Pluriels irréguliers : man → men, child → children, mouse → mice, tooth → teeth",
+    "⚠️ Invariables : sheep → sheep, fish → fish, deer → deer"
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is a plural noun ?",
+options:[
+"A noun that means more than one",
+"A verb",
+"An adjective",
+"A singular noun"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is plural ?",
+options:[
+"dog",
+"cat",
+"books",
+"student"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have two cats.",
+"I have two cat.",
+"I has two cats.",
+"I have cat two."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 GENERAL RULE (+S)
+========================================================= */
+
+{
+question:"How do we generally form plural nouns in English ?",
+options:[
+"Add S",
+"Add ING",
+"Add ED",
+"Remove a letter"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The plural of 'book' is :",
+options:[
+"books",
+"bookes",
+"books'",
+"bokks"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The plural of 'car' is :",
+options:[
+"cars",
+"cares",
+"car's",
+"carrs"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct plural form.",
+options:[
+"pens",
+"penes",
+"pen's",
+"penses"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"They have three dogs.",
+"They have three dog.",
+"They has three dogs.",
+"They have dogs three."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 WORDS ENDING IN S / SH / CH / X / Z
+========================================================= */
+
+{
+question:"The plural of 'box' is :",
+options:[
+"boxs",
+"boxes",
+"boxies",
+"box"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'church' is :",
+options:[
+"churchs",
+"churches",
+"churchies",
+"church"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'dish' is :",
+options:[
+"dishs",
+"dishes",
+"dishies",
+"dish"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct plural of 'bus'.",
+options:[
+"buses",
+"bus",
+"buss",
+"busies"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'quiz' is :",
+options:[
+"quizes",
+"quizzes",
+"quizs",
+"quizies"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"There are many boxes.",
+"There are many boxs.",
+"There are many box.",
+"There is many boxes."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 CONSONANT + Y
+========================================================= */
+
+{
+question:"The plural of 'baby' is :",
+options:[
+"babys",
+"babies",
+"babyes",
+"babyses"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The plural of 'city' is :",
+options:[
+"citys",
+"cities",
+"cityes",
+"citis"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct plural form.",
+options:[
+"familys",
+"families",
+"familyes",
+"familys'"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The plural of 'country' is :",
+options:[
+"countries",
+"countrys",
+"countryes",
+"country"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Many babies are sleeping.",
+"Many babys are sleeping.",
+"Many baby are sleeping.",
+"Many babyes are sleeping."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔵 VOWEL + Y
+========================================================= */
+
+{
+question:"The plural of 'boy' is :",
+options:[
+"boys",
+"boies",
+"boyes",
+"boyses"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The plural of 'toy' is :",
+options:[
+"toies",
+"toys",
+"toyes",
+"toy"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The plural of 'key' is :",
+options:[
+"keies",
+"keys",
+"keyes",
+"keeys"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The boys are playing.",
+"The boies are playing.",
+"The boyes are playing.",
+"The boys is playing."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 IRREGULAR PLURALS
+========================================================= */
+
+{
+question:"The plural of 'man' is :",
+options:[
+"mans",
+"men",
+"manes",
+"mens"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'woman' is :",
+options:[
+"womanes",
+"womans",
+"women",
+"womens"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'child' is :",
+options:[
+"childs",
+"children",
+"childes",
+"childrens"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The plural of 'tooth' is :",
+options:[
+"tooths",
+"teeth",
+"teeths",
+"toothes"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"The plural of 'foot' is :",
+options:[
+"foots",
+"feet",
+"feets",
+"footes"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"The plural of 'mouse' is :",
+options:[
+"mouses",
+"mice",
+"mousees",
+"mices"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The men are working.",
+"The mans are working.",
+"The mens are working.",
+"The man are working."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 F / FE → VES
+========================================================= */
+
+{
+question:"The plural of 'knife' is :",
+options:[
+"knifes",
+"knives",
+"knifees",
+"knivs"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The plural of 'leaf' is :",
+options:[
+"leafs",
+"leaves",
+"leafes",
+"leavs"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct plural form.",
+options:[
+"wives",
+"wifes",
+"wifees",
+"wivs"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The leaves are green.",
+"The leafs are green.",
+"The leaves is green.",
+"The leaf are green."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 SAME FORM
+========================================================= */
+
+{
+question:"The plural of 'sheep' is :",
+options:[
+"sheeps",
+"sheep",
+"sheepen",
+"sheepes"
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"There are many sheep.",
+"There are many sheeps.",
+"There is many sheep.",
+"There are sheeps."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect plural.",
+options:[
+"children",
+"mice",
+"informations",
+"teeth"
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Which noun is already plural ?",
+options:[
+"child",
+"man",
+"people",
+"woman"
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"There are many childs here.",
+"There are many children here.",
+"There is many children here.",
+"There are many childrens here."
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The women are happy.",
+"The womans are happy.",
+"The womens are happy.",
+"The woman are happy."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterActivePassive={
+
+title:"Lesson : Active And Passive Voice",
+cours: {
+  texte: `La voix active met l'accent sur celui qui fait l'action. La voix passive met l'accent sur celui qui subit l'action. On forme le passif avec : sujet + be (conjugué) + participe passé.`,
+  exemples: [
+    "🔵 Active : The teacher corrects the homework.",
+    "🟠 Passive : The homework is corrected by the teacher.",
+    "🔵 Active : She wrote the letter.",
+    "🟠 Passive : The letter was written by her.",
+    "🔵 Active : They will build a school.",
+    "🟠 Passive : A school will be built (by them).",
+    "💡 Le complément d'agent (by + auteur) est souvent omis si non essentiel."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"In the active voice, who performs the action ?",
+options:[
+"The subject",
+"The object",
+"The verb",
+"The adjective"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the active sentence.",
+options:[
+"The ball was kicked by John.",
+"John kicked the ball.",
+"The homework was done by Sarah.",
+"The cake was eaten by Tom."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the passive sentence.",
+options:[
+"Mary writes a letter.",
+"The letter is written by Mary.",
+"Paul eats rice.",
+"They watch TV."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"What happens in the passive voice ?",
+options:[
+"The object becomes the subject.",
+"The subject disappears.",
+"The verb is removed.",
+"The sentence becomes a question."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct active sentence.",
+options:[
+"The food was cooked by my mother.",
+"My mother cooked the food.",
+"The house was painted by John.",
+"The car was repaired by the mechanic."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 PRESENT SIMPLE
+========================================================= */
+
+{
+question:"Passive form of : 'John eats an apple.'",
+options:[
+"An apple is eaten by John.",
+"An apple was eaten by John.",
+"An apple eats John.",
+"John is eaten by an apple."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Passive form of : 'She cleans the room.'",
+options:[
+"The room cleaned by her.",
+"The room is cleaned by her.",
+"The room was cleaned by her.",
+"The room is clean by her."
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct passive structure in present simple.",
+options:[
+"is/am/are + past participle",
+"was/were + verb",
+"has + verb",
+"will + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Active form of : 'The book is read by Tom.'",
+options:[
+"Tom reads the book.",
+"Tom read the book.",
+"Tom is reading the book.",
+"Tom was reading the book."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 PAST SIMPLE
+========================================================= */
+
+{
+question:"Passive form of : 'They built a bridge.'",
+options:[
+"A bridge is built.",
+"A bridge was built.",
+"A bridge built.",
+"A bridge has built."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Passive form of : 'She wrote a letter.'",
+options:[
+"A letter is written by her.",
+"A letter was written by her.",
+"A letter wrote by her.",
+"A letter has written by her."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct passive structure in past simple.",
+options:[
+"is + past participle",
+"was/were + past participle",
+"has been + verb",
+"will be + verb"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Active form of : 'The car was repaired by the mechanic.'",
+options:[
+"The mechanic repaired the car.",
+"The mechanic repairs the car.",
+"The mechanic is repairing the car.",
+"The mechanic has repaired the car."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 FUTURE SIMPLE
+========================================================= */
+
+{
+question:"Passive form of : 'They will finish the work.'",
+options:[
+"The work will finished.",
+"The work will be finished.",
+"The work is finished.",
+"The work was finished."
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct passive structure in future simple.",
+options:[
+"will + verb",
+"will be + past participle",
+"is + past participle",
+"has been + past participle"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Active form of : 'The project will be completed by the team.'",
+options:[
+"The team will complete the project.",
+"The team completes the project.",
+"The team completed the project.",
+"The team is completing the project."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 PRESENT CONTINUOUS
+========================================================= */
+
+{
+question:"Passive form of : 'They are cleaning the house.'",
+options:[
+"The house is being cleaned.",
+"The house was being cleaned.",
+"The house is cleaned.",
+"The house has been cleaned."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct passive structure in present continuous.",
+options:[
+"is/am/are being + past participle",
+"was/were being + verb",
+"is + verb",
+"has been + verb"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Active form of : 'The food is being prepared by the chef.'",
+options:[
+"The chef prepares the food.",
+"The chef is preparing the food.",
+"The chef prepared the food.",
+"The chef has prepared the food."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 PRESENT PERFECT
+========================================================= */
+
+{
+question:"Passive form of : 'They have completed the task.'",
+options:[
+"The task has completed.",
+"The task has been completed.",
+"The task is completed.",
+"The task was completed."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct passive structure in present perfect.",
+options:[
+"has/have been + past participle",
+"is being + past participle",
+"was + past participle",
+"will be + past participle"
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Active form of : 'The lesson has been explained by the teacher.'",
+options:[
+"The teacher explains the lesson.",
+"The teacher explained the lesson.",
+"The teacher has explained the lesson.",
+"The teacher is explaining the lesson."
+],
+answer:2,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 BY + AGENT
+========================================================= */
+
+{
+question:"In passive voice, who performs the action ?",
+options:[
+"The object",
+"The agent after BY",
+"The adjective",
+"The auxiliary"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct passive sentence.",
+options:[
+"The song was sung by Sarah.",
+"The song sung Sarah.",
+"The song is sing by Sarah.",
+"The song was sang by Sarah."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the correct passive form of : 'People speak English all over the world.'",
+options:[
+"English is spoken all over the world.",
+"English was spoken all over the world.",
+"English speaks all over the world.",
+"English has spoken all over the world."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect passive sentence.",
+options:[
+"The homework was done by Alex.",
+"The room is cleaned every day.",
+"The car was repair by the mechanic.",
+"The food has been prepared."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Passive form of : 'Someone stole my phone.'",
+options:[
+"My phone was stolen.",
+"My phone stole.",
+"My phone is stolen.",
+"My phone has stolen."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct active sentence.",
+options:[
+"The students answered the questions.",
+"The questions were answered by the students.",
+"The questions answered the students.",
+"The students were answered by the questions."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct passive form.",
+options:[
+"The cake was eaten by Tom.",
+"The cake eaten by Tom.",
+"The cake was ate by Tom.",
+"The cake has eat by Tom."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterTranslationOn={
+
+title:"Lesson : Translation Of 'On'",
+cours: {
+  texte: `Le pronom français 'on' n'a pas d'équivalent direct en anglais. Selon le contexte, on le traduit de différentes façons.`,
+  exemples: [
+    "✅ On → We (quand 'on' = nous) : On part demain → We are leaving tomorrow.",
+    "✅ On → You (conseil général) : On ne doit pas tricher → You must not cheat.",
+    "✅ On → People (les gens en général) : On dit que... → People say that...",
+    "✅ On → They (une autorité) : On a annoncé que... → They announced that...",
+    "✅ On → Passive voice : On a volé ma voiture → My car was stolen.",
+    "✅ On → One (registre formel) : On devrait respecter les règles → One should respect the rules."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"In French, the word 'on' can often mean :",
+options:[
+"We",
+"A color",
+"An adjective",
+"A place"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct translation : 'On mange.'",
+options:[
+"We eat.",
+"They eats.",
+"On eat.",
+"We eating."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct translation : 'On va à l'école.'",
+options:[
+"We go to school.",
+"We goes to school.",
+"They going to school.",
+"On go to school."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The French word 'on' can replace :",
+options:[
+"A group of people",
+"Only one object",
+"A color",
+"A number"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"We are studying.",
+"We studying.",
+"We studies.",
+"We studyings."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 ON = WE
+========================================================= */
+
+{
+question:"Translate : 'On regarde la télévision.'",
+options:[
+"We watch TV.",
+"We watches TV.",
+"They watching TV.",
+"On watch TV."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Translate : 'On joue au football.'",
+options:[
+"We play football.",
+"We plays football.",
+"They playings football.",
+"We playing football."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Translate : 'On travaille beaucoup.'",
+options:[
+"We work a lot.",
+"We works a lot.",
+"They working a lot.",
+"On works a lot."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct translation : 'On est fatigué.'",
+options:[
+"We are tired.",
+"We is tired.",
+"We tired.",
+"They are tiring."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 ON = PEOPLE / THEY
+========================================================= */
+
+{
+question:"Translate : 'On parle anglais ici.'",
+options:[
+"People speak English here.",
+"People speaks English here.",
+"We speaks English here.",
+"English speak here."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Translate : 'On vend des fruits ici.'",
+options:[
+"People sell fruits here.",
+"People sells fruits here.",
+"We selling fruits here.",
+"Fruits sell here."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the best translation : 'On dit que...'",
+options:[
+"People say that...",
+"People says that...",
+"We saying that...",
+"People saids that..."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Translate : 'On utilise beaucoup Internet aujourd'hui.'",
+options:[
+"People use the Internet a lot today.",
+"People uses the Internet a lot today.",
+"We using Internet today.",
+"Internet use people today."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 ON = SOMEONE
+========================================================= */
+
+{
+question:"Translate : 'On a volé mon téléphone.'",
+options:[
+"Someone stole my phone.",
+"Someone steals my phone.",
+"We stole my phone.",
+"My phone stole."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Translate : 'On a cassé la fenêtre.'",
+options:[
+"Someone broke the window.",
+"Someone breaks the window.",
+"We broken the window.",
+"The window broke someone."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct translation : 'On frappe à la porte.'",
+options:[
+"Someone is knocking at the door.",
+"Someone knock at the door.",
+"We knocks at the door.",
+"The door knocks someone."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 PASSIVE VOICE
+========================================================= */
+
+{
+question:"Choose the best translation : 'On parle anglais ici.'",
+options:[
+"English is spoken here.",
+"English speaks here.",
+"English spoken here.",
+"English is speak here."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Translate : 'On vend du pain ici.'",
+options:[
+"Bread is sold here.",
+"Bread sells here.",
+"Bread sold here.",
+"Bread is sell here."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Translate : 'On fabrique des voitures en Allemagne.'",
+options:[
+"Cars are made in Germany.",
+"Cars make in Germany.",
+"Cars is made in Germany.",
+"Cars made Germany."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct passive translation.",
+options:[
+"French is spoken in Senegal.",
+"French speaks in Senegal.",
+"French speaking in Senegal.",
+"French is speak in Senegal."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED LEVEL
+========================================================= */
+
+{
+question:"Choose the best translation : 'On mange beaucoup de riz en Afrique.'",
+options:[
+"People eat a lot of rice in Africa.",
+"People eats a lot of rice in Africa.",
+"We eating rice in Africa.",
+"Rice eats in Africa."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct translation : 'On apprend l'anglais à l'école.'",
+options:[
+"English is learned at school.",
+"English learn at school.",
+"English learns at school.",
+"English learning at school."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Translate : 'On regarde souvent ce film.'",
+options:[
+"We often watch this movie.",
+"We often watches this movie.",
+"This movie watches often.",
+"We watching often this movie."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect translation.",
+options:[
+"We are ready.",
+"People speak French here.",
+"Someone stole my bag.",
+"We is happy."
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the best translation : 'On construit beaucoup de maisons ici.'",
+options:[
+"Many houses are built here.",
+"Many houses build here.",
+"Many houses is built here.",
+"Many houses builted here."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Translate : 'On dit que le temps est précieux.'",
+options:[
+"People say that time is precious.",
+"People says that time is precious.",
+"Time says precious.",
+"We saying time is precious."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"We play football every Sunday.",
+"We plays football every Sunday.",
+"We playing football every Sunday.",
+"Football play every Sunday."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterGerundIng={
+
+title:"Lesson : Gerund Or The -ING Form",
+cours: {
+  texte: `Le gérondif (-ing) est la forme verbale qui fonctionne comme un nom. Il s'utilise dans des contextes précis qu'il faut connaître.`,
+  exemples: [
+    "✅ Sujet de la phrase : Swimming is good for health.",
+    "✅ Après une préposition : She is good at dancing. / He left without saying goodbye.",
+    "✅ Après certains verbes : enjoy, avoid, finish, mind, suggest, keep, consider...",
+    "   → I enjoy reading. / She avoided answering.",
+    "✅ Après les expressions : it's worth, it's no use, can't help, be used to, look forward to...",
+    "   → It's worth trying. / I'm used to waking up early.",
+    "⚠️ Ne pas confondre avec le présent progressif : She is singing (action en cours)."
+  ]
+},
+
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is a gerund ?",
+options:[
+"A verb ending in ING used as a noun",
+"A past tense verb",
+"An adjective",
+"A plural noun"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is a gerund ?",
+options:[
+"play",
+"playing",
+"played",
+"plays"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Swimming is good for health.",
+"Swim is good for health.",
+"Swam is good for health.",
+"Swims is good for health."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"A gerund usually ends with :",
+options:[
+"ED",
+"S",
+"ING",
+"LY"
+],
+answer:2,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the gerund.",
+options:[
+"eat",
+"eating",
+"ate",
+"eats"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 GERUND AS SUBJECT
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Reading helps you learn.",
+"Read helps you learn.",
+"Reads helps you learn.",
+"Reader helps you learn."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"___ is important for success.",
+options:[
+"Study",
+"Studying",
+"Studied",
+"Studies"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Running is good exercise.",
+"Run is good exercise.",
+"Runs is good exercise.",
+"Ran is good exercise."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"___ English every day improves your level.",
+options:[
+"Speak",
+"Speaking",
+"Spoke",
+"Speaks"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 AFTER PREPOSITIONS
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I am interested in learn English.",
+"I am interested in learning English.",
+"I am interested to learn English.",
+"I interested in learning English."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"After a preposition, we generally use :",
+options:[
+"Infinitive",
+"Gerund",
+"Past tense",
+"Adjective"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She is good at dance.",
+"She is good at dancing.",
+"She is good to dance.",
+"She good at dancing."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He left without say goodbye.",
+"He left without saying goodbye.",
+"He left without to say goodbye.",
+"He leaving without goodbye."
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"They talked about travel abroad.",
+"They talked about traveling abroad.",
+"They talked about to travel abroad.",
+"They talked traveling abroad."
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🟡 VERBS FOLLOWED BY GERUND
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I enjoy to read books.",
+"I enjoy reading books.",
+"I enjoy read books.",
+"I enjoying books."
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She likes dancing.",
+"She likes dance.",
+"She like dancing.",
+"She liking dancing."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"They hate waking up early.",
+"They hate wake up early.",
+"They hate to waking up early.",
+"They hates waking up early."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He finished doing his homework.",
+"He finished do his homework.",
+"He finished to do his homework.",
+"He finishing homework."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 SPELLING RULES
+========================================================= */
+
+{
+question:"Choose the correct ING form of 'run'.",
+options:[
+"runing",
+"running",
+"runinng",
+"runing"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct ING form of 'write'.",
+options:[
+"writeing",
+"writing",
+"writting",
+"writtinge"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct ING form of 'swim'.",
+options:[
+"swiming",
+"swimming",
+"swimmimg",
+"swimning"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct ING form of 'make'.",
+options:[
+"makeing",
+"making",
+"makking",
+"makingg"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 GERUND VS INFINITIVE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I enjoy to swim.",
+"I enjoy swimming.",
+"I enjoying swim.",
+"I enjoy swim."
+],
+answer:1,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She avoids talking loudly.",
+"She avoids to talk loudly.",
+"She avoids talk loudly.",
+"She avoiding loudly."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"They suggested going home.",
+"They suggested to go home.",
+"They suggested go home.",
+"They suggesting home."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He admitted cheating.",
+"He admitted to cheat.",
+"He admitted cheat.",
+"He admitting cheating."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"Reading is important.",
+"She enjoys dancing.",
+"He is interested in learn English.",
+"They finished eating."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Traveling teaches many things.",
+"Travel teaches many things.",
+"Traveled teaches many things.",
+"Traveler teaches many things."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I am afraid of speaking in public.",
+"I am afraid of speak in public.",
+"I am afraid to speaking in public.",
+"I afraid of speaking in public."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the best sentence.",
+options:[
+"Learning English requires practice.",
+"Learn English requires practice.",
+"Learned English requires practice.",
+"Learns English requires practice."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+ const chapterInfinitives={
+
+title:"Lesson : Infinitives",
+cours: {
+  texte: `L'infinitif en anglais peut être utilisé avec ou sans 'to'. Il s'emploie après certains verbes, adjectifs ou noms.`,
+  exemples: [
+    "✅ Infinitif avec 'to' après des verbes : want, hope, decide, plan, agree, refuse, learn...",
+    "   → I want to go. / She decided to stay.",
+    "✅ Infinitif avec 'to' pour exprimer un but : I study hard to pass the exam.",
+    "✅ Infinitif sans 'to' (bare infinitive) après les modaux : can, must, should, will...",
+    "   → You must study. / She can swim.",
+    "✅ Infinitif sans 'to' après : let, make, hear, see, feel + objet",
+    "   → Let him speak. / I heard her sing.",
+    "⚠️ Certains verbes acceptent les deux : begin to rain / begin raining (même sens)."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is an infinitive in English ?",
+options:[
+"The base form of a verb (to + verb)",
+"A past tense verb",
+"A plural noun",
+"A gerund only"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is an infinitive ?",
+options:[
+"to eat",
+"eating",
+"ate",
+"eats"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I want to learn English.",
+"I want learn English.",
+"I want learning English.",
+"I wants to learn English."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"An infinitive is formed with :",
+options:[
+"to + base verb",
+"verb + ing",
+"verb + ed",
+"verb + s"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct infinitive.",
+options:[
+"to go",
+"going",
+"goes",
+"went"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 INFINITIVE AFTER VERBS
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She wants to study medicine.",
+"She wants studying medicine.",
+"She want to study medicine.",
+"She wants study medicine."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"He decided ___ home.",
+options:[
+"to go",
+"going",
+"goes",
+"gone"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"They need ___ early.",
+options:[
+"to wake up",
+"waking up",
+"wake up",
+"wakes up"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I like to read books.",
+"I like reading books.",
+"I like read books.",
+"I likes to read books."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 INFINITIVE OF PURPOSE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I study to pass the exam.",
+"I study for passing the exam.",
+"I study passing the exam.",
+"I study to passed the exam."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Why do we use infinitive of purpose ?",
+options:[
+"To show reason or goal",
+"To show past action",
+"To show plural",
+"To show possession"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"He went to the shop ___ milk.",
+options:[
+"to buy",
+"buying",
+"bought",
+"buys"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She studies hard ___ succeed.",
+options:[
+"to",
+"for",
+"at",
+"with"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I wake up early to go to school.",
+"I wake up early going to school.",
+"I wake up early for go to school.",
+"I waking up early to school."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🟡 VERBS FOLLOWED BY INFINITIVE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He promised to help me.",
+"He promised helping me.",
+"He promise to help me.",
+"He promising to help me."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"She agreed ___ the project.",
+options:[
+"to start",
+"starting",
+"starts",
+"start"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"They refused ___ the offer.",
+options:[
+"to accept",
+"accepting",
+"accepts",
+"accepted"
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"We hope to succeed.",
+"We hope succeeding.",
+"We hopes to succeed.",
+"We hoping succeed."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 INFINITIVE WITHOUT "TO" (BARE INFINITIVE)
+========================================================= */
+
+{
+question:"After modal verbs, we use :",
+options:[
+"to + verb",
+"bare infinitive (verb)",
+"verb + ing",
+"verb + ed"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"You must go now.",
+"You must to go now.",
+"You must going now.",
+"You must went now."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He can ___ English.",
+options:[
+"speak",
+"to speak",
+"speaking",
+"spoke"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"We should ___ hard.",
+options:[
+"work",
+"to work",
+"working",
+"worked"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 VERBS + OBJECT + INFINITIVE
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I want you to help me.",
+"I want you help me.",
+"I want that you help me.",
+"I want you helping me."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"She told him ___ quiet.",
+options:[
+"to be",
+"being",
+"be",
+"been"
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"They advised us ___ early.",
+options:[
+"to leave",
+"leaving",
+"leave",
+"left"
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He asked me to come.",
+"He asked me come.",
+"He asked me coming.",
+"He asking me to come."
+],
+answer:0,
+difficulty:"difficile",
+xp:22
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"I need to study.",
+"She wants to go.",
+"He must to leave now.",
+"They decided to stay."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"To succeed requires hard work.",
+"Succeed to requires hard work.",
+"Succeed requires to hard work.",
+"To success requires hard work."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the best sentence.",
+options:[
+"I learned to speak English.",
+"I learned speaking English.",
+"I learned speak English.",
+"I learning to speak English."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He allowed me to enter.",
+"He allowed me enter.",
+"He allowed me entering.",
+"He allowing me to enter."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterReportedSpeech={
+
+title:"Lesson : Reported Speech",
+cours: {
+  texte: `Le discours rapporté (reported speech) permet de rapporter les paroles de quelqu'un sans les citer directement. Les temps reculent d'un cran dans le passé.`,
+  exemples: [
+    "🔵 Direct : She said 'I am tired.'",
+    "🟠 Reported : She said (that) she was tired.",
+    "🔵 Direct : He said 'I will call you.'",
+    "🟠 Reported : He said (that) he would call me.",
+    "🔵 Direct : They said 'We have finished.'",
+    "🟠 Reported : They said (that) they had finished.",
+    "⚠️ Recul des temps : present → past / will → would / can → could / have → had",
+    "⚠️ Les pronoms et expressions de temps changent aussi : tomorrow → the next day, here → there."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is reported speech ?",
+options:[
+"Reporting what someone said",
+"Asking a question",
+"Giving a command",
+"Writing a story"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Direct speech : He said, 'I am happy'. Reported speech ?",
+options:[
+"He said that he is happy.",
+"He said that he was happy.",
+"He says he was happy.",
+"He said I am happy."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She said she was tired.",
+"She said she is tired.",
+"She say she was tired.",
+"She said she tired."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"In reported speech, tense usually :",
+options:[
+"Stays the same",
+"Moves back (backshift)",
+"Becomes future",
+"Disappears"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Direct: 'I like music' → Reported ?",
+options:[
+"He said he likes music.",
+"He said he liked music.",
+"He said he like music.",
+"He said he liking music."
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 TENSE CHANGES
+========================================================= */
+
+{
+question:"Direct: 'I am sad' → Reported speech ?",
+options:[
+"He said he was sad.",
+"He said he is sad.",
+"He said he were sad.",
+"He said he sad."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Direct: 'I have a car' → Reported speech ?",
+options:[
+"He said he has a car.",
+"He said he had a car.",
+"He said he have a car.",
+"He said he having a car."
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Direct: 'I will go' → Reported speech ?",
+options:[
+"He said he will go.",
+"He said he would go.",
+"He said he go.",
+"He said he goes."
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Direct: 'I play football' → Reported speech ?",
+options:[
+"He said he played football.",
+"He said he plays football.",
+"He said he play football.",
+"He said he playing football."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 PRONOUN CHANGES
+========================================================= */
+
+{
+question:"Direct: 'I am happy' → He said ___ was happy.",
+options:[
+"I",
+"he",
+"she",
+"they"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Direct: 'We are ready' → They said ___ were ready.",
+options:[
+"we",
+"they",
+"he",
+"she"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Direct: 'My book is new' → He said his book was new. What changes ?",
+options:[
+"My → his",
+"My → her",
+"My → their",
+"My → our"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Direct: 'I like my teacher' → He said ___ liked his teacher.",
+options:[
+"he",
+"she",
+"I",
+"they"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 TIME EXPRESSIONS
+========================================================= */
+
+{
+question:"'Today' becomes in reported speech :",
+options:[
+"today",
+"that day",
+"tomorrow",
+"yesterday"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"'Now' becomes :",
+options:[
+"then",
+"now",
+"today",
+"yesterday"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"'Tomorrow' becomes :",
+options:[
+"the next day",
+"today",
+"yesterday",
+"now"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"'Yesterday' becomes :",
+options:[
+"the day before",
+"today",
+"tomorrow",
+"now"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 QUESTIONS
+========================================================= */
+
+{
+question:"Direct: 'Where do you live?' → Reported ?",
+options:[
+"He asked where I lived.",
+"He asked where do I live.",
+"He asked where I live.",
+"He asked where I living."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Direct: 'What are you doing?' → Reported ?",
+options:[
+"He asked what I was doing.",
+"He asked what I am doing.",
+"He asked what I do.",
+"He asked what I doing."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"In reported questions, we use :",
+options:[
+"Question word + subject + verb",
+"Verb + subject + question word",
+"Auxiliary first",
+"Same order as direct speech"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Direct: 'Do you like pizza?' → Reported ?",
+options:[
+"He asked if I liked pizza.",
+"He asked if I like pizza.",
+"He asked do I like pizza.",
+"He asked if I liking pizza."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 COMMANDS
+========================================================= */
+
+{
+question:"Direct: 'Sit down!' → Reported ?",
+options:[
+"He told me sit down.",
+"He told me to sit down.",
+"He told me sitting down.",
+"He told me sat down."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Direct: 'Open the door!' → Reported ?",
+options:[
+"He told me open the door.",
+"He told me to open the door.",
+"He told me opening the door.",
+"He told me opened the door."
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Structure of reported commands is :",
+options:[
+"tell + object + to + verb",
+"say + verb",
+"ask + verb + ing",
+"do + verb"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the correct reported speech.",
+options:[
+"He said he was tired.",
+"He said he is tired.",
+"He said he tired.",
+"He said he will tired."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Direct: 'I can swim' → Reported ?",
+options:[
+"He said he could swim.",
+"He said he can swim.",
+"He said he will swim.",
+"He said he swam."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"He said he was happy.",
+"She said she liked music.",
+"They said they will go tomorrow.",
+"He said he had a car."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Direct: 'I must go' → Reported ?",
+options:[
+"He said he must go.",
+"He said he had to go.",
+"He said he must went.",
+"He said he going."
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapterNounsFormation={
+
+title:"Lesson : Nouns Formation (From Verbs)",
+cours: {
+  texte: `En anglais, on peut former des noms à partir de verbes en ajoutant des suffixes. C'est la dérivation nominale.`,
+  exemples: [
+    "✅ Suffixe -tion / -sion : act → action, decide → decision, discuss → discussion",
+    "✅ Suffixe -ment : develop → development, achieve → achievement, govern → government",
+    "✅ Suffixe -ance / -ence : perform → performance, differ → difference, exist → existence",
+    "✅ Suffixe -er / -or : teach → teacher, act → actor, manage → manager",
+    "✅ Suffixe -ing (gérondif nominalisé) : swim → swimming, run → running",
+    "✅ Suffixe -al : arrive → arrival, refuse → refusal, propose → proposal",
+    "💡 Astuce : Ces noms sont souvent utilisés pour remplacer un verbe dans un style formel."
+  ]
+},
+
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is noun formation from verbs ?",
+options:[
+"Creating nouns from verbs",
+"Creating verbs from nouns",
+"Making sentences",
+"Changing tense"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is a noun formed from a verb ?",
+options:[
+"decision",
+"decide",
+"deciding",
+"decided"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The verb 'to act' gives the noun :",
+options:[
+"action",
+"active",
+"actoring",
+"acted"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"His decision was correct.",
+"His decide was correct.",
+"His deciding was correct.",
+"His decided was correct."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The verb 'to teach' gives the noun :",
+options:[
+"teacher",
+"teaching",
+"teached",
+"teachy"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 -TION / -SION FORMATION
+========================================================= */
+
+{
+question:"The noun of 'to decide' is :",
+options:[
+"decision",
+"deciding",
+"decided",
+"decide"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The noun of 'to inform' is :",
+options:[
+"information",
+"informing",
+"informed",
+"inform"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The noun of 'to create' is :",
+options:[
+"creation",
+"creative",
+"creating",
+"created"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The information is useful.",
+"The inform is useful.",
+"The informing is useful.",
+"The informed is useful."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 -MENT FORMATION
+========================================================= */
+
+{
+question:"The noun of 'to develop' is :",
+options:[
+"development",
+"developing",
+"developed",
+"develop"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The noun of 'to improve' is :",
+options:[
+"improvement",
+"improving",
+"improved",
+"improve"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The noun of 'to enjoy' is :",
+options:[
+"enjoyment",
+"enjoying",
+"enjoyed",
+"enjoy"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"His improvement is visible.",
+"His improve is visible.",
+"His improving is visible.",
+"His improved is visible."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 -ER / -OR PERSON FORMATION
+========================================================= */
+
+{
+question:"The noun of 'to teach' is :",
+options:[
+"teacher",
+"teaching",
+"taught",
+"teach"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The noun of 'to act' is :",
+options:[
+"actor",
+"action",
+"active",
+"acting"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The noun of 'to drive' is :",
+options:[
+"driver",
+"driving",
+"drived",
+"drive"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He is a good teacher.",
+"He is a good teaching.",
+"He is a good teach.",
+"He is a good taught."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 IRREGULAR FORMATIONS
+========================================================= */
+
+{
+question:"The noun of 'to choose' is :",
+options:[
+"choice",
+"choosing",
+"chosen",
+"choosed"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The noun of 'to believe' is :",
+options:[
+"belief",
+"believing",
+"believed",
+"believe"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The noun of 'to know' is :",
+options:[
+"knowledge",
+"knowing",
+"known",
+"know"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"His knowledge is great.",
+"His know is great.",
+"His knowing is great.",
+"His known is great."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 MIXED CONVERSION
+========================================================= */
+
+{
+question:"The noun of 'to arrive' is :",
+options:[
+"arrival",
+"arriving",
+"arrived",
+"arrive"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The noun of 'to move' is :",
+options:[
+"movement",
+"moving",
+"moved",
+"move"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The arrival of the train was late.",
+"The arrive of the train was late.",
+"The arriving of the train was late.",
+"The arrived of the train was late."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect noun formation.",
+options:[
+"decision",
+"development",
+"informating",
+"creation"
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Which is a correct noun from a verb ?",
+options:[
+"act",
+"action",
+"active",
+"acting"
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"His improvement is fast.",
+"His improve is fast.",
+"His improving is fast.",
+"His improved is fast."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"The noun of 'to decide' is :",
+options:[
+"decision",
+"deciding",
+"decided",
+"decide"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapterPossessiveCase={
+
+title:"Lesson : Possessive Case",
+cours: {
+  texte: `Le cas possessif ('s) s'utilise pour indiquer qu'une chose appartient à quelqu'un ou quelque chose. Il existe deux formes selon si le nom est singulier ou pluriel.`,
+  exemples: [
+    "✅ Nom singulier → ajouter 's : the boy's bag (le sac du garçon)",
+    "✅ Nom propre → ajouter 's : Mary's book, James's car",
+    "✅ Nom pluriel en -s → ajouter seulement ' : the students' results (les résultats des élèves)",
+    "✅ Nom pluriel irrégulier → ajouter 's : the children's toys, the men's room",
+    "⚠️ Ne pas confondre avec le génitif de groupe : my mother-in-law's house",
+    "💡 Pour les choses inanimées, on préfère souvent 'of' : the leg of the table (pas the table's leg)."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What does the possessive case show ?",
+options:[
+"Ownership",
+"Tense",
+"Plurality",
+"Questioning"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct possessive form of 'John'.",
+options:[
+"Johns",
+"John's",
+"John is",
+"Johns'"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which sentence is correct ?",
+options:[
+"This is Mary's book.",
+"This is Mary book.",
+"This is Marys book.",
+"This is Mary is book."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The possessive of 'the boy' is :",
+options:[
+"the boys",
+"the boy's",
+"the boys'",
+"the boy is"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We use apostrophe (') in :",
+options:[
+"Possessive case",
+"Verb tense",
+"Question forms",
+"Adjectives"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 SINGULAR POSSESSIVE
+========================================================= */
+
+{
+question:"The book of the teacher →",
+options:[
+"The teacher book",
+"The teacher's book",
+"The teachers book",
+"The teacher book's"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The car of Tom →",
+options:[
+"Tom's car",
+"Toms car",
+"Tom car",
+"Tom car's"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is Sarah's bag.",
+"This is Sarah bag.",
+"This is Sarahs bag.",
+"This is Sarah is bag."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The house of my father →",
+options:[
+"My father's house",
+"My fathers house",
+"My father house",
+"My father is house"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 PLURAL POSSESSIVE
+========================================================= */
+
+{
+question:"The books of the students →",
+options:[
+"The student's books",
+"The students books",
+"The students' books",
+"The student books"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The toys of the boys →",
+options:[
+"The boys toys",
+"The boy's toys",
+"The boys' toys",
+"The boys is toys"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The teachers' room is big.",
+"The teacher room is big.",
+"The teachers room is big.",
+"The teacher's room is big."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The dogs of the men →",
+options:[
+"The mens dogs",
+"The men's dogs",
+"The men dogs",
+"The mens' dogs"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 IRREGULAR POSSESSIVE
+========================================================= */
+
+{
+question:"The children of the woman →",
+options:[
+"The women's children",
+"The womans children",
+"The women children",
+"The woman's children"
+],
+answer:3,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The children's toys are new.",
+"The childrens toys are new.",
+"The children toys are new.",
+"The childrens' toys are new."
+],
+answer:0,
+difficulty:"moyen",
+xp:18
+},
+
+{
+question:"The house of the people →",
+options:[
+"The peoples house",
+"The people's house",
+"The people house",
+"The peoples' house"
+],
+answer:1,
+difficulty:"moyen",
+xp:18
+},
+
+/* =========================================================
+   🔴 TIME EXPRESSIONS POSSESSIVE
+========================================================= */
+
+{
+question:"Yesterday meeting →",
+options:[
+"yesterday's meeting",
+"yesterdays meeting",
+"yesterday meeting's",
+"yesterday is meeting"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"A journey of one hour →",
+options:[
+"a one-hour journey",
+"a one hours journey",
+"a one hour's journey",
+"a one hour journey's"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is a day's work.",
+"This is a day work.",
+"This is days work.",
+"This is day's works."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"John's book is new.",
+"The students' class is big.",
+"The boy's are playing.",
+"My mother's car is fast."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Which is correct ?",
+options:[
+"The men's room is here.",
+"The mens room is here.",
+"The men room is here.",
+"The mens' room is here."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Sarah's phone is ringing.",
+"Sarah phone is ringing.",
+"Sarahs phone is ringing.",
+"Sarah is phone ringing."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"The correct plural possessive of 'child' is :",
+options:[
+"childs'",
+"children's",
+"childrens",
+"child's"
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterInfinitivesQuantifiers={
+
+title:"Lesson : Infinitives & Quantifiers",
+cours: {
+  texte: `Les quantifieurs expriment une quantité. Leur choix dépend du type de nom (dénombrable ou indénombrable) et du contexte (affirmatif, négatif, interrogatif).`,
+  exemples: [
+    "✅ Much → indénombrable, négatif/interro : I don't have much time.",
+    "✅ Many → dénombrable, négatif/interro : She doesn't have many friends.",
+    "✅ A lot of / Lots of → tous contextes : He has a lot of money / a lot of books.",
+    "✅ Some → affirmatif : I have some water. / some apples.",
+    "✅ Any → négatif/interro : Is there any milk? / I don't have any money.",
+    "✅ A few → dénombrable, positif : I have a few ideas.",
+    "✅ A little → indénombrable, positif : She has a little patience.",
+    "⚠️ Few / Little (sans 'a') = presque aucun : He has few friends. (sens négatif)"
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INFINITIVES — FACILE
+========================================================= */
+
+{
+question:"What is the infinitive form ?",
+options:[
+"to + verb",
+"verb + ing",
+"verb + ed",
+"verb + s"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct infinitive.",
+options:[
+"to eat",
+"eating",
+"ate",
+"eats"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"She wants ___ English.",
+options:[
+"to learn",
+"learning",
+"learns",
+"learned"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"He decided ___ home.",
+options:[
+"to go",
+"going",
+"goes",
+"gone"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 INFINITIVE OF PURPOSE
+========================================================= */
+
+{
+question:"I study ___ pass the exam.",
+options:[
+"to",
+"for",
+"at",
+"with"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"She went to school ___ learn.",
+options:[
+"to",
+"for",
+"at",
+"by"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I eat to live.",
+"I eat for live.",
+"I eat living.",
+"I eat to living."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 QUANTIFIERS — INTRODUCTION
+========================================================= */
+
+{
+question:"Which word is a quantifier ?",
+options:[
+"many",
+"run",
+"happy",
+"table"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We use 'many' with :",
+options:[
+"countable nouns",
+"uncountable nouns only",
+"verbs",
+"adjectives only"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"We use 'much' with :",
+options:[
+"uncountable nouns",
+"countable nouns",
+"verbs",
+"pronouns"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🟡 QUANTIFIERS — MANY / MUCH / SOME / ANY
+========================================================= */
+
+{
+question:"There are ___ apples on the table.",
+options:[
+"much",
+"many",
+"any",
+"little"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"There isn't ___ water left.",
+options:[
+"many",
+"much",
+"few",
+"some"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"I have ___ friends.",
+options:[
+"much",
+"many",
+"any",
+"little"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Do you have ___ money ?",
+options:[
+"many",
+"much",
+"few",
+"some"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 SOME / ANY
+========================================================= */
+
+{
+question:"I have ___ sugar in my bag.",
+options:[
+"any",
+"some",
+"many",
+"few"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Do you have ___ questions ?",
+options:[
+"some",
+"any",
+"much",
+"little"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"There isn't ___ milk in the fridge.",
+options:[
+"some",
+"any",
+"many",
+"a few"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have some books.",
+"I have any books.",
+"I have much books.",
+"I have few books."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 A LOT OF / LOTS OF
+========================================================= */
+
+{
+question:"We use 'a lot of' with :",
+options:[
+"both countable and uncountable nouns",
+"only verbs",
+"only adjectives",
+"only pronouns"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"She has ___ friends.",
+options:[
+"a lot of",
+"much of",
+"any of",
+"few of"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"There is ___ water in the bottle.",
+options:[
+"a lot of",
+"many",
+"few",
+"little"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 FEW / LITTLE
+========================================================= */
+
+{
+question:"'Few' is used with :",
+options:[
+"countable nouns",
+"uncountable nouns",
+"verbs",
+"adjectives"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"'Little' is used with :",
+options:[
+"uncountable nouns",
+"countable nouns",
+"verbs",
+"pronouns"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"There are ___ students in the class.",
+options:[
+"little",
+"few",
+"much",
+"any"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"There is ___ milk left.",
+options:[
+"few",
+"little",
+"many",
+"a few"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 INFINITIVE + QUANTIFIERS MIX
+========================================================= */
+
+{
+question:"I need ___ time to finish the work.",
+options:[
+"many",
+"much",
+"a few",
+"few"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"She wants ___ books to read.",
+options:[
+"much",
+"many",
+"little",
+"any"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He decided ___ harder.",
+options:[
+"work",
+"to work",
+"working",
+"worked"
+],
+answer:1,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I have to study a lot.",
+"I have study a lot.",
+"I have studying a lot.",
+"I have to studying a lot."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"There are many students.",
+"There is much water.",
+"I have to learn English.",
+"There are much books."
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She has a lot of friends.",
+"She has much friends.",
+"She has many water.",
+"She has few water."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the best sentence.",
+options:[
+"I want to learn English.",
+"I want learning English.",
+"I want learn English.",
+"I wants to learning English."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"There is ___ hope left.",
+options:[
+"many",
+"much",
+"few",
+"little"
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterComparativeAdjectives={
+
+title:"Lesson : Comparative Form Of Adjectives",
+cours: {
+  texte: `Le comparatif permet de comparer deux éléments. La formation dépend du nombre de syllabes de l'adjectif.`,
+  exemples: [
+    "✅ Adjectif court (1 syllabe) → ajouter -er : tall → taller, fast → faster",
+    "✅ Adjectif en -e → ajouter -r : large → larger, nice → nicer",
+    "✅ Consonne finale doublée : big → bigger, hot → hotter",
+    "✅ Adjectif long (2+ syllabes) → more + adjectif : beautiful → more beautiful",
+    "✅ Structure : A + be + comparatif + than + B",
+    "   → She is taller than her brother.",
+    "   → This exercise is more difficult than the last one.",
+    "⚠️ Irréguliers : good → better, bad → worse, far → farther/further"
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is the comparative form used for ?",
+options:[
+"To compare two things",
+"To describe one thing only",
+"To ask questions",
+"To form plural nouns"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The comparative of 'big' is :",
+options:[
+"more big",
+"bigger",
+"biggest",
+"bigly"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"Tom is taller than John.",
+"Tom is more tall than John.",
+"Tom is tallest than John.",
+"Tom tall than John."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Comparative adjectives often end with :",
+options:[
+"-er",
+"-est",
+"-ly",
+"-ing"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The comparative of 'small' is :",
+options:[
+"smaller",
+"more small",
+"smallest",
+"smallly"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 SHORT ADJECTIVES (-ER RULE)
+========================================================= */
+
+{
+question:"The comparative of 'fast' is :",
+options:[
+"fastest",
+"faster",
+"more fast",
+"fastly"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The comparative of 'cold' is :",
+options:[
+"colder",
+"more cold",
+"coldest",
+"coldly"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This car is faster than that one.",
+"This car is more fast than that one.",
+"This car is fastest than that one.",
+"This car fast than that one."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The comparative of 'short' is :",
+options:[
+"shorter",
+"more short",
+"shortest",
+"shortly"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 LONG ADJECTIVES (MORE + ADJECTIVE)
+========================================================= */
+
+{
+question:"The comparative of 'beautiful' is :",
+options:[
+"beautifuller",
+"more beautiful",
+"most beautiful",
+"beautifully"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The comparative of 'important' is :",
+options:[
+"importanter",
+"more important",
+"most important",
+"importantest"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This book is more interesting than that one.",
+"This book is interestinger than that one.",
+"This book is most interesting than that one.",
+"This book is interesting than that one."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The comparative of 'expensive' is :",
+options:[
+"expensiver",
+"more expensive",
+"most expensive",
+"expensively"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 IRREGULAR COMPARATIVES
+========================================================= */
+
+{
+question:"The comparative of 'good' is :",
+options:[
+"gooder",
+"better",
+"best",
+"more good"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The comparative of 'bad' is :",
+options:[
+"worse",
+"badder",
+"worst",
+"more bad"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The comparative of 'far' is :",
+options:[
+"farther",
+"farer",
+"farest",
+"more far"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She is better than her sister.",
+"She is gooder than her sister.",
+"She is best than her sister.",
+"She is more good than her sister."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 COMPARISON WITH THAN
+========================================================= */
+
+{
+question:"Which word is used in comparisons ?",
+options:[
+"than",
+"then",
+"that",
+"this"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"John is taller than Peter.",
+"John is taller that Peter.",
+"John is taller then Peter.",
+"John is tall than Peter."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"She is more intelligent ___ her brother.",
+options:[
+"than",
+"then",
+"that",
+"this"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔴 COMPARATIVE MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"This house is bigger than mine.",
+"She is more beautiful than her friend.",
+"He is gooder than me.",
+"This car is faster than that one."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This exam is more difficult than the last one.",
+"This exam is difficult than the last one.",
+"This exam is difficulter than the last one.",
+"This exam is most difficult than the last one."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The comparative of 'happy' is :",
+options:[
+"happier",
+"more happy",
+"happiest",
+"happily"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"My house is smaller than yours.",
+"My house is more small than yours.",
+"My house is smallest than yours.",
+"My house small than yours."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"This problem is more serious than expected.",
+"This problem is serious than expected.",
+"This problem is serioser than expected.",
+"This problem is most serious than expected."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"The comparative of 'little' is :",
+options:[
+"less",
+"littler",
+"least",
+"more little"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He runs faster than me.",
+"He runs more fast than me.",
+"He run faster than me.",
+"He runs fastest than me."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She is taller than her mother.",
+"This bag is more expensive than that one.",
+"He is better than his brother.",
+"He is badder than his brother."
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterDoubleComparatives={
+
+title:"Lesson : Double Comparatives",
+cours: {
+  texte: `Les comparatifs doubles expriment une progression simultanée ou une cause-effet. On les forme avec deux comparatifs liés.`,
+  exemples: [
+    "✅ Structure : The + comparatif, the + comparatif",
+    "   → The harder you work, the better your results will be.",
+    "   → The more you read, the more you learn.",
+    "   → The older he gets, the wiser he becomes.",
+    "✅ Progression continue → comparatif + and + comparatif :",
+    "   → It is getting colder and colder.",
+    "   → She runs faster and faster.",
+    "   → The situation became more and more complicated.",
+    "💡 Ces structures montrent une évolution ou une relation de proportionnalité."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What do double comparatives express ?",
+options:[
+"A change in two things at the same time",
+"A past action",
+"A question",
+"A command"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"the more... the more...",
+"more... than...",
+"the most... the most...",
+"as... as..."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The correct sentence is :",
+options:[
+"The more you study, the more you learn.",
+"The more you study, more you learn.",
+"More you study, more you learn.",
+"The most you study, the most you learn."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Double comparatives show :",
+options:[
+"relationship between two changes",
+"only one action",
+"past tense",
+"plural nouns"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"the + comparative, the + comparative",
+"more + adjective, more + adjective",
+"most + adjective, most + adjective",
+"as + adjective + as"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 THE MORE... THE MORE...
+========================================================= */
+
+{
+question:"___ you practice, ___ you improve.",
+options:[
+"The more / the more",
+"More / more",
+"The most / the most",
+"As / as"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"___ you eat, ___ you get.",
+options:[
+"The more / the fatter",
+"More / more fat",
+"The most / the fat",
+"As / as fat"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The more you read, the more you know.",
+"More you read, more you know.",
+"The most you read, the most you know.",
+"As you read, as you know."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"___ you work, ___ you succeed.",
+options:[
+"The more / the more",
+"More / more",
+"The most / the most",
+"As / as"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 THE LESS... THE LESS...
+========================================================= */
+
+{
+question:"___ you sleep, ___ you feel tired.",
+options:[
+"The less / the more",
+"The more / the less",
+"Less / less",
+"The most / the least"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The less you study, the worse you perform.",
+"Less you study, less you perform.",
+"The least you study, the worse you perform.",
+"The more you study, the worse you perform."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ money you spend, ___ you save.",
+options:[
+"The less / the more",
+"The more / the less",
+"Less / more",
+"The most / the least"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Double comparatives can express :",
+options:[
+"cause and effect",
+"only past actions",
+"questions",
+"commands"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 MIXED STRUCTURES
+========================================================= */
+
+{
+question:"The correct structure is :",
+options:[
+"The more + subject + verb, the more + subject + verb",
+"More + verb, more + verb",
+"The most + verb, the most + verb",
+"As + verb, as + verb"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The more you study, the better your results.",
+"The more you study, better your results.",
+"More you study, better your results.",
+"The most you study, the better your results."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ you listen, ___ you understand.",
+options:[
+"The more / the more",
+"The less / the more",
+"The more / the less",
+"All answers correct"
+],
+answer:3,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"The more you read, the more you learn.",
+"The less you eat, the thinner you become.",
+"More you study, more you improve.",
+"The more you practice, the better you get."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The more you practice, the more confident you become.",
+"The more you practice more you become confident.",
+"More you practice, more you become confident.",
+"The most you practice, the more confident you become."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"___ you wait, ___ impatient you become.",
+options:[
+"The more / the more",
+"The less / the less",
+"The more / the less",
+"As / as"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"The more you study, the more successful you become.",
+"The more you study, more successful you become.",
+"More you study, more successful you become.",
+"The most you study, the most successful you become."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The less you complain, the happier you are.",
+"Less you complain, less you are happy.",
+"The more you complain, the happier you are.",
+"The least you complain, the happier you are."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Double comparatives mainly show :",
+options:[
+"a relationship of proportional change",
+"past tense",
+"future tense",
+"noun formation"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"The more you work, the more you earn.",
+"The less you sleep, the more tired you feel.",
+"More you work, more you earn.",
+"The more you train, the stronger you become."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapterSuperlatives={
+
+title:"Lesson : Superlative Form Of Adjectives",
+cours: {
+  texte: `Le superlatif exprime le degré maximum d'une qualité parmi un groupe. Il se forme avec 'the' + adjectif modifié.`,
+  exemples: [
+    "✅ Adjectif court → the + adjectif + -est : tall → the tallest, fast → the fastest",
+    "✅ Adjectif en -e → the + adjectif + -st : large → the largest",
+    "✅ Consonne finale doublée : big → the biggest, hot → the hottest",
+    "✅ Adjectif long → the most + adjectif : the most beautiful, the most intelligent",
+    "✅ Structure : sujet + be + the + superlatif + (in/of + groupe)",
+    "   → She is the best student in the class.",
+    "   → This is the most interesting book I have ever read.",
+    "⚠️ Irréguliers : good → the best, bad → the worst, far → the farthest/furthest"
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is the superlative form used for ?",
+options:[
+"To compare one thing with all others",
+"To compare two things",
+"To ask questions",
+"To form verbs"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The superlative of 'big' is :",
+options:[
+"bigger",
+"the biggest",
+"more big",
+"bigly"
+],
+answer:1,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She is the tallest girl in the class.",
+"She is taller girl in the class.",
+"She is most tall girl in class.",
+"She is tall than all girls."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Superlatives are usually preceded by :",
+options:[
+"the",
+"a",
+"an",
+"to"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"The superlative of 'small' is :",
+options:[
+"smallest",
+"smaller",
+"more small",
+"most small"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 SHORT ADJECTIVES (-EST)
+========================================================= */
+
+{
+question:"The superlative of 'fast' is :",
+options:[
+"faster",
+"fastest",
+"most fast",
+"fastly"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The superlative of 'cold' is :",
+options:[
+"coldest",
+"colder",
+"most cold",
+"coldly"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the tallest building.",
+"This is taller building.",
+"This is most tall building.",
+"This is tall building."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The superlative of 'short' is :",
+options:[
+"shortest",
+"shorter",
+"most short",
+"shortly"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 LONG ADJECTIVES (MOST + ADJECTIVE)
+========================================================= */
+
+{
+question:"The superlative of 'beautiful' is :",
+options:[
+"beautifullest",
+"most beautiful",
+"more beautiful",
+"beautifully"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The superlative of 'important' is :",
+options:[
+"importanter",
+"most important",
+"more important",
+"importantest"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the most interesting book.",
+"This is more interesting book.",
+"This is interestinger book.",
+"This is most interest book."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The superlative of 'expensive' is :",
+options:[
+"expensivest",
+"most expensive",
+"more expensive",
+"expensively"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 IRREGULAR SUPERLATIVES
+========================================================= */
+
+{
+question:"The superlative of 'good' is :",
+options:[
+"goodest",
+"best",
+"more good",
+"better"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The superlative of 'bad' is :",
+options:[
+"worst",
+"badest",
+"more bad",
+"worse"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The superlative of 'far' is :",
+options:[
+"farthest",
+"farther",
+"most far",
+"farest"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"She is the best student in class.",
+"She is better student in class.",
+"She is goodest student in class.",
+"She is more good student in class."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 SUPERLATIVE STRUCTURE
+========================================================= */
+
+{
+question:"The correct structure is :",
+options:[
+"the + superlative + noun",
+"more + adjective + noun",
+"most + noun + adjective",
+"as + adjective + as"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the most difficult exam.",
+"This is most difficult exam.",
+"This is more difficult exam.",
+"This is the difficultest exam."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"This is the biggest house.",
+"She is the most intelligent girl.",
+"He is the goodest player.",
+"This is the fastest car."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the most beautiful place.",
+"This is more beautiful place.",
+"This is beautifullest place.",
+"This is beautiful most place."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The superlative of 'happy' is :",
+options:[
+"happiest",
+"most happy",
+"happier",
+"happily"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"He is the tallest boy in the class.",
+"He is taller boy in the class.",
+"He is most tall boy in class.",
+"He is tall than all boys."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"This is the most important lesson.",
+"This is more important lesson.",
+"This is importanter lesson.",
+"This is the importantest lesson."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"The superlative of 'little' is :",
+options:[
+"least",
+"littlest",
+"lesser",
+"more little"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the worst mistake.",
+"This is worse mistake.",
+"This is badest mistake.",
+"This is more bad mistake."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"She is the fastest runner.",
+"He is the most intelligent student.",
+"This is the goodest answer.",
+"This is the tallest tower."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterRelativePronouns={
+
+title:"Lesson : Relative Pronouns",
+cours: {
+  texte: `Les pronoms relatifs introduisent une proposition relative qui donne des informations supplémentaires sur un nom. Le choix du pronom dépend de ce qu'il remplace.`,
+  exemples: [
+    "✅ Who → remplace une personne : The girl who called you is my sister.",
+    "✅ Which → remplace une chose ou un animal : The book which I read was amazing.",
+    "✅ That → remplace une personne ou une chose (proposition déterminative) : The car that I bought is red.",
+    "✅ Whose → indique la possession : The student whose bag was lost came to see me.",
+    "✅ Where → remplace un lieu : The city where I was born is beautiful.",
+    "✅ When → remplace un moment : I remember the day when we met.",
+    "⚠️ Proposition non-déterminative (entre virgules) → who/which uniquement, pas that."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is the role of relative pronouns ?",
+options:[
+"To link a clause to a noun",
+"To change verb tense",
+"To form plurals",
+"To ask questions"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is a relative pronoun ?",
+options:[
+"who",
+"run",
+"big",
+"very"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The boy who is tall is my brother.",
+"The boy which is tall is my brother.",
+"The boy whom is tall is my brother.",
+"The boy what is tall is my brother."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Relative pronouns are used to :",
+options:[
+"add information",
+"ask questions",
+"change verbs",
+"show time"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which relative pronoun refers to people ?",
+options:[
+"who",
+"which",
+"where",
+"when"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 WHO / WHOM / WHOSE
+========================================================= */
+
+{
+question:"The boy ___ is playing is my friend.",
+options:[
+"who",
+"which",
+"where",
+"when"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"The man ___ I saw yesterday is a teacher.",
+options:[
+"who",
+"whom",
+"which",
+"whose"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"This is the girl ___ father is a doctor.",
+options:[
+"who",
+"whom",
+"whose",
+"which"
+],
+answer:2,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The woman who lives here is kind.",
+"The woman which lives here is kind.",
+"The woman whose lives here is kind.",
+"The woman whom lives here is kind."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 WHICH / THAT (THINGS)
+========================================================= */
+
+{
+question:"The book ___ is on the table is mine.",
+options:[
+"who",
+"which",
+"whose",
+"whom"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the car that I bought.",
+"This is the car who I bought.",
+"This is the car whom I bought.",
+"This is the car whose I bought."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"The dog ___ barked is dangerous.",
+options:[
+"who",
+"which",
+"whose",
+"whom"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"We use 'which' for :",
+options:[
+"people",
+"things",
+"places only",
+"verbs"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 WHERE / WHEN
+========================================================= */
+
+{
+question:"This is the house ___ I was born.",
+options:[
+"who",
+"where",
+"when",
+"which"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"I remember the day ___ we met.",
+options:[
+"where",
+"who",
+"when",
+"which"
+],
+answer:2,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the place where I live.",
+"This is the place when I live.",
+"This is the place who I live.",
+"This is the place which I live."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 DEFINING RELATIVE CLAUSES
+========================================================= */
+
+{
+question:"A defining relative clause :",
+options:[
+"gives essential information",
+"can be removed",
+"is always in past tense",
+"is a question"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The student who studies hard passes.",
+"The student, who studies hard, passes.",
+"The student who, studies hard passes.",
+"The student which studies hard passes."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"The man who helped me is kind.",
+"This is the book which I read.",
+"The girl whom is here is my sister.",
+"This is the place where I live."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The teacher who teaches us is strict.",
+"The teacher which teaches us is strict.",
+"The teacher whom teaches us is strict.",
+"The teacher whose teaches us is strict."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The object pronoun in relative clauses is :",
+options:[
+"whom",
+"who",
+"whose",
+"where"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the house that I like.",
+"This is the house who I like.",
+"This is the house whose I like.",
+"This is the house where I like."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"The man who is talking is my uncle.",
+"The man which is talking is my uncle.",
+"The man whom is talking is my uncle.",
+"The man whose is talking is my uncle."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is the moment when everything changed.",
+"This is the moment where everything changed.",
+"This is the moment who everything changed.",
+"This is the moment which everything changed."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"The boy who studies is smart.",
+"The car which is new is expensive.",
+"The girl whom I saw is here.",
+"The house who is big is mine."
+],
+answer:3,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Relative pronouns help to :",
+options:[
+"connect ideas in a sentence",
+"change verb tenses",
+"form plurals",
+"ask questions"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapterPossessivePronouns={
+
+title:"Lesson : Possessive Pronouns",
+cours: {
+  texte: `Les pronoms possessifs remplacent un nom déjà mentionné et indiquent à qui il appartient. Ils s'utilisent seuls, sans nom après eux.`,
+  exemples: [
+    "✅ Mine → à moi : This pen is mine.",
+    "✅ Yours → à toi/vous : Is this bag yours?",
+    "✅ His → à lui : That car is his.",
+    "✅ Hers → à elle : The idea was hers.",
+    "✅ Ours → à nous : The victory is ours.",
+    "✅ Theirs → à eux/elles : That house is theirs.",
+    "⚠️ Ne pas confondre avec les adjectifs possessifs (my, your, his...) qui sont suivis d'un nom :",
+    "   → my book (adjectif) vs this book is mine (pronom)."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What do possessive pronouns show ?",
+options:[
+"Ownership",
+"Tense",
+"Questioning",
+"Comparison"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is a possessive pronoun ?",
+options:[
+"mine",
+"me",
+"myself",
+"my"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This book is mine.",
+"This book is my.",
+"This book is me.",
+"This book is myself."
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Possessive pronouns replace :",
+options:[
+"possessive adjectives + noun",
+"verbs",
+"adjectives only",
+"adverbs"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which is NOT a possessive pronoun ?",
+options:[
+"mine",
+"yours",
+"his",
+"my"
+],
+answer:3,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 BASIC POSSESSIVE PRONOUNS
+========================================================= */
+
+{
+question:"This pen belongs to me → It is ___",
+options:[
+"my",
+"mine",
+"me",
+"myself"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"This book belongs to you → It is ___",
+options:[
+"your",
+"yours",
+"you",
+"yourself"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"That house belongs to him → It is ___",
+options:[
+"his",
+"him",
+"he",
+"himself"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"This car belongs to her → It is ___",
+options:[
+"her",
+"hers",
+"she",
+"herself"
+],
+answer:1,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 PLURAL POSSESSIVE PRONOUNS
+========================================================= */
+
+{
+question:"This classroom belongs to us → It is ___",
+options:[
+"ours",
+"our",
+"us",
+"we"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"This house belongs to them → It is ___",
+options:[
+"their",
+"theirs",
+"they",
+"themselves"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This bag is ours.",
+"This bag is our.",
+"This bag is us.",
+"This bag is we."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"The book is theirs.",
+"The book is their.",
+"The book is they.",
+"The book is them."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 POSSESSIVE ADJECTIVE vs PRONOUN
+========================================================= */
+
+{
+question:"Which is a possessive adjective ?",
+options:[
+"my",
+"mine",
+"yours",
+"hers"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Which is a possessive pronoun ?",
+options:[
+"my",
+"your",
+"his",
+"ours"
+],
+answer:3,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is my book.",
+"This is mine book.",
+"This is me book.",
+"This is myself book."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"This car is mine.",
+"This pen is yours.",
+"This house is my.",
+"This bag is theirs."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This phone is hers.",
+"This phone is her.",
+"This phone is she.",
+"This phone is herself."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"The correct possessive pronoun for 'I' is :",
+options:[
+"me",
+"my",
+"mine",
+"myself"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"These books are ours.",
+"These books are our.",
+"These books are us.",
+"These books are we."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"The choice is yours.",
+"The choice is your.",
+"The choice is you.",
+"The choice is yourself."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"This laptop is mine.",
+"That car is hers.",
+"This house is our.",
+"The book is theirs."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Possessive pronouns are used to :",
+options:[
+"replace noun phrases",
+"ask questions",
+"change verbs",
+"compare things"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"This is not my bag, it is yours.",
+"This is not my bag, it is your.",
+"This is not mine bag, it is yours.",
+"This is not me bag, it is yours."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  
+  const chapterAgreementDisagreement={
+
+title:"Lesson : Agreement & Disagreement",
+cours: {
+  texte: `Pour exprimer l'accord ou le désaccord en anglais, on utilise des expressions courtes appelées 'short responses'. Elles varient selon le verbe auxiliaire utilisé.`,
+  exemples: [
+    "✅ Accord affirmatif : So + auxiliaire + sujet",
+    "   → 'I like English.' → 'So do I.' / 'So does she.'",
+    "✅ Accord négatif : Neither/Nor + auxiliaire + sujet",
+    "   → 'I don't like Maths.' → 'Neither do I.' / 'Nor does he.'",
+    "✅ Désaccord : I do. / I don't. / I am. / I'm not.",
+    "   → 'I hate exams.' → 'I don't.' (je ne les déteste pas)",
+    "💡 L'auxiliaire utilisé doit correspondre au temps de la phrase d'origine :",
+    "   → 'She went home.' → 'So did I.' (not 'So do I')"
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What does 'agreement' express ?",
+options:[
+"To show you have the same opinion",
+"To ask a question",
+"To give a command",
+"To describe a place"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"What does 'disagreement' express ?",
+options:[
+"Different opinion",
+"Same opinion",
+"Past action",
+"Future action"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose an expression of agreement.",
+options:[
+"I agree",
+"I don't think so",
+"I disagree",
+"I don't agree at all"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose an expression of disagreement.",
+options:[
+"I agree",
+"Exactly",
+"I think so too",
+"I don't think so"
+],
+answer:3,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"'Exactly!' is used to express :",
+options:[
+"agreement",
+"disagreement",
+"question",
+"doubt"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 BASIC AGREEMENT EXPRESSIONS
+========================================================= */
+
+{
+question:"A correct way to agree is :",
+options:[
+"I agree with you",
+"I am agree you",
+"I agree to you is",
+"I agreeing you"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"You're right.",
+"You are righting.",
+"You right are.",
+"You is right."
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"'So do I' is used when :",
+options:[
+"You agree with a positive statement",
+"You disagree",
+"You ask a question",
+"You give an order"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct response:",
+options:[
+"I like English → So do I",
+"I like English → So I don't",
+"I like English → Neither I do",
+"I like English → I no too"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 DISAGREEMENT EXPRESSIONS
+========================================================= */
+
+{
+question:"Choose the correct disagreement.",
+options:[
+"I don't think so",
+"I think so too",
+"Exactly",
+"Me too"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"'I don't agree' means :",
+options:[
+"I disagree",
+"I agree",
+"I have no idea",
+"I confirm"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I don't think you're right.",
+"I don't think you are righting.",
+"I don't think you right are.",
+"I don't think you is right."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"'Neither do I' is used when :",
+options:[
+"You agree with a negative statement",
+"You agree with a positive statement",
+"You ask a question",
+"You express doubt only"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"He doesn't like coffee → ___",
+options:[
+"So do I",
+"Neither do I",
+"So I do",
+"Me too"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 NEUTRAL EXPRESSIONS
+========================================================= */
+
+{
+question:"Which expression shows partial agreement ?",
+options:[
+"I see your point, but...",
+"I agree completely",
+"Exactly!",
+"I think so too"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"I agree with you, but I have another idea.",
+"I agree you but I idea another.",
+"I agree to you but I have idea.",
+"I agreeing you but I have idea."
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"I agree with you.",
+"I don't think so.",
+"I am agree with you.",
+"I disagree."
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"You're right.",
+"You are rightly.",
+"You right are.",
+"You is right."
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Which one expresses disagreement ?",
+options:[
+"I don't agree at all",
+"I totally agree",
+"Exactly",
+"Me too"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"He likes football → ___",
+options:[
+"So do I",
+"Neither do I",
+"So am I",
+"I no too"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best response:",
+options:[
+"I think you're right.",
+"I think you're righting.",
+"I think you right are.",
+"I think you is right."
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"She doesn't like maths → ___",
+options:[
+"So do I",
+"Neither do I",
+"So I do",
+"Me too"
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Agreement means :",
+options:[
+"sharing the same opinion",
+"having different opinions",
+"asking questions",
+"giving commands"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"I agree with your idea.",
+"I don't think so.",
+"I am agree with you.",
+"I completely agree."
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+  const chapterExclamation={
+
+title:"Lesson : Exclamation",
+cours: {
+  texte: `Les exclamations servent à exprimer une émotion forte (surprise, admiration, indignation). En anglais, elles se forment avec 'What' ou 'How'.`,
+  exemples: [
+    "✅ What + (a/an) + adjectif + nom + sujet + verbe !",
+    "   → What a beautiful day it is!",
+    "   → What lovely flowers these are!",
+    "   → What an amazing idea you have!",
+    "✅ How + adjectif/adverbe + sujet + verbe !",
+    "   → How tall she is!",
+    "   → How quickly he runs!",
+    "   → How wonderful this place is!",
+    "⚠️ 'What' est suivi d'un nom. 'How' est suivi d'un adjectif ou adverbe seul.",
+    "⚠️ On utilise 'a/an' avec What seulement si le nom est singulier et dénombrable."
+  ]
+},
+qcm:[
+
+/* =========================================================
+   🔵 INTRODUCTION — FACILE
+========================================================= */
+
+{
+question:"What is an exclamation used for ?",
+options:[
+"To express strong feelings",
+"To ask questions",
+"To give commands",
+"To describe actions"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which punctuation mark is used in exclamations ?",
+options:[
+"!",
+".",
+"?",
+","
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Choose the correct exclamatory sentence.",
+options:[
+"What a beautiful day!",
+"What beautiful day.",
+"How beautiful day?",
+"Beautiful day what!"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Exclamations express :",
+options:[
+"surprise or emotion",
+"questioning",
+"negation",
+"time"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+{
+question:"Which word is often used in exclamations ?",
+options:[
+"what",
+"because",
+"since",
+"although"
+],
+answer:0,
+difficulty:"facile",
+xp:10
+},
+
+/* =========================================================
+   🔵 WHAT + NOUN EXCLAMATIONS
+========================================================= */
+
+{
+question:"___ a nice car!",
+options:[
+"What",
+"How",
+"Which",
+"Why"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"What a big house!",
+"How a big house!",
+"What big house!",
+"Which a big house!"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"What a ___ day!",
+options:[
+"beautiful",
+"beauty",
+"beautify",
+"beautifully"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+{
+question:"Exclamation with 'what' follows :",
+options:[
+"What + (a/an) + adjective + noun",
+"What + verb + noun",
+"What + adverb + noun",
+"What + noun + verb"
+],
+answer:0,
+difficulty:"facile",
+xp:12
+},
+
+/* =========================================================
+   🟡 HOW + ADJECTIVE EXCLAMATIONS
+========================================================= */
+
+{
+question:"___ beautiful she is!",
+options:[
+"What",
+"How",
+"Which",
+"Why"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"How intelligent he is!",
+"What intelligent he is!",
+"How an intelligent he is!",
+"What a intelligent he is!"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"How + adjective expresses :",
+options:[
+"strong emotion",
+"question",
+"command",
+"tense"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ fast this car is!",
+options:[
+"What",
+"How",
+"Which",
+"Who"
+],
+answer:1,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🟡 MIXED EXCLAMATIONS
+========================================================= */
+
+{
+question:"Choose the correct sentence.",
+options:[
+"What a surprise!",
+"How a surprise!",
+"What surprise a!",
+"How surprise a!"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"___ an amazing story!",
+options:[
+"What",
+"How",
+"Which",
+"Why"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+{
+question:"Choose the correct structure.",
+options:[
+"What + a/an + adjective + noun",
+"How + noun + adjective",
+"What + verb + adjective",
+"How + noun + verb"
+],
+answer:0,
+difficulty:"moyen",
+xp:15
+},
+
+/* =========================================================
+   🔴 COMMON MISTAKES
+========================================================= */
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"What a nice day!",
+"How beautiful she is!",
+"What beautiful day!",
+"What a big house!"
+],
+answer:2,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"How clever you are!",
+"What clever you are!",
+"How a clever you are!",
+"What you are clever!"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Exclamation expresses :",
+options:[
+"strong emotion",
+"question",
+"order",
+"negation"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+{
+question:"Choose the correct sentence.",
+options:[
+"What a wonderful idea!",
+"How a wonderful idea!",
+"What wonderful idea!",
+"How wonderful idea a!"
+],
+answer:0,
+difficulty:"difficile",
+xp:20
+},
+
+/* =========================================================
+   🔴 EXAM / CONCOURS LEVEL
+========================================================= */
+
+{
+question:"Choose the best sentence.",
+options:[
+"What an incredible performance!",
+"How an incredible performance!",
+"What incredible performance a!",
+"How incredible performance a!"
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"___ intelligent he is!",
+options:[
+"What",
+"How",
+"Which",
+"Who"
+],
+answer:1,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Choose the incorrect sentence.",
+options:[
+"What a nice girl!",
+"How beautiful the view is!",
+"What beautiful she is!",
+"What an interesting book!"
+],
+answer:2,
+difficulty:"difficile",
+xp:25
+},
+
+{
+question:"Exclamation sentences always end with :",
+options:[
+"!",
+".",
+"?",
+","
+],
+answer:0,
+difficulty:"difficile",
+xp:25
+}
+
+]
+
+};
+  
+/* ================= CHAPTERS ================= */
+
+const chapters = {
+
+  "Lesson 1 : Plural Nouns": chapterPluralNouns,
+  "Lesson 2 : Active And Passive Voice": chapterActivePassive,
+  "Lesson 3 : Translation Of 'On'": chapterTranslationOn,
+  "Lesson 4 : Gerund Or The -ING Form": chapterGerundIng,
+  "Lesson 5 : Infinitives": chapterInfinitives,
+  "Lesson 6 : Reported Speech": chapterReportedSpeech,
+  "Lesson 7 : Nouns Formation (From Verbs)": chapterNounsFormation,
+  "Lesson 8 : Possessive Case": chapterPossessiveCase,
+  "Lesson 9 : Infinitives & Quantifiers": chapterInfinitivesQuantifiers,
+  "Lesson 10 : Comparative Form Of Adjectives": chapterComparativeAdjectives,
+  "Lesson 11 : Double Comparatives": chapterDoubleComparatives,
+  "Lesson 12 : Superlative Form Of Adjectives": chapterSuperlatives,
+  "Lesson 13 : Relative Pronouns": chapterRelativePronouns,
+  "Lesson 14 : Possessive Pronouns": chapterPossessivePronouns,
+  "Lesson 15 : Agreement & Disagreement": chapterAgreementDisagreement,
+  "Lesson 16 : Exclamation": chapterExclamation
+
+};
+
+  updateXPBar();
+
+/* ================= HOME ================= */
+
+function home(){
+  app.innerHTML = `
+  <div class="card">
+    <h2>🇬🇧 English commando</h2>
+
+    <button class="mission-btn" onclick="startMission()">
+      ⚡ MODE MISSION COMMANDO
+    </button>
+
+    <br><br>
+
+    ${Object.keys(chapters).map(chapter=>`
+      <button onclick="openChapter('${chapter}')">
+        ${chapter}
+      </button>
+    `).join("")}
+
+    <br><br>
+    <p>XP: ${state.xp} | Niveau: ${state.level}</p>
+  </div>`;
+}
+
+  
+
+
+/* ================= OPEN CHAPTER ================= */
+
+function openChapter(chapter){
+  state.currentChapter = chapter;
+  const data = chapters[chapter];
+
+  app.innerHTML = `
+  <div class="card">
+    <h2>${chapter}</h2>
+
+    <button onclick="showCours('${chapter}')">
+      📖 Voir le cours
+    </button>
+
+    <button onclick="startQCM()">
+      🎯 Start QCM
+    </button>
+
+    <button class="quit-btn" onclick="home()">
+       Quitter
+    </button>
+  </div>`;
+}
+
+function showCours(chapter){
+  const data = chapters[chapter];
+  const cours = data.cours;
+
+  if(!cours){
+    notify("Cours bientôt disponible !", "info");
+    return;
+  }
+
+  app.innerHTML = `
+  <div class="card">
+    <h2>📖 ${chapter}</h2>
+
+    <p style="line-height:1.7;color:#cbd5e1;">${cours.texte}</p>
+
+    <div style="margin-top:15px;">
+      ${cours.exemples.map(ex => `
+        <div style="
+          background:#1e293b;
+          border-left:3px solid #3b82f6;
+          border-radius:8px;
+          padding:10px 12px;
+          margin:8px 0;
+          font-size:14px;
+          color:#e2e8f0;
+          line-height:1.5;
+        ">${ex}</div>
+      `).join("")}
+    </div>
+
+    <button onclick="startQCM()" style="margin-top:20px;">
+      🎯 Démarrer le QCM
+    </button>
+
+    <button class="quit-btn" onclick="openChapter('${chapter}')">
+      ← Retour
+    </button>
+  </div>`;
+}
+  
+
+
+function startQCM(){
+  state.qIndex = 0;
+  showQCM();
+}
+
+function showQCM(){
+  const qcm = chapters[state.currentChapter].qcm;
+  const q = qcm[state.qIndex];
+
+  const shuffled = shuffle(
+    q.options.map((text, index) => ({ text, index }))
+  );
+
+  state.currentCorrect = shuffled.findIndex(o => o.index === q.answer);
+
+  app.innerHTML = `
+  <div class="card">
+    <h3>Q${state.qIndex + 1}: ${q.question}</h3>
+    <p id="qcmTimer">⏳ 30s</p>
+    ${shuffled.map((o,i)=>`
+      <div class="option" onclick="answer(${i})">${o.text}</div>
+    `).join("")}
+    <p>XP: +${q.xp}</p>
+    <button class="quit-btn" onclick="quitQCM()">Quitter</button>
+  </div>`;
+
+  clearInterval(state.qcmTimer);
+  state.qcmTimeLeft = 30;
+
+  state.qcmTimer = setInterval(()=>{
+    state.qcmTimeLeft--;
+    const t = document.getElementById("qcmTimer");
+    if(t) t.innerHTML = `⏳ ${state.qcmTimeLeft}s`;
+    if(state.qcmTimeLeft <= 0){
+      clearInterval(state.qcmTimer);
+      state.qIndex++;
+      if(state.qIndex >= qcm.length){ home(); }
+      else { showQCM(); }
+    }
+  }, 1000);
+}
+
+function quitQCM(){
+  clearInterval(state.qcmTimer);
+  state.qIndex = 0;
+  notify("QCM quitté");
+  openChapter(state.currentChapter);
+}
+
+function answer(choice){
+  const qcm = chapters[state.currentChapter].qcm;
+  const q = qcm[state.qIndex];
+  const options = document.querySelectorAll(".option");
+
+  clearInterval(state.qcmTimer);
+
+  if(choice === state.currentCorrect){
+    options[choice].classList.add("good");
+    addXP(q.xp);
+    notify("✅ Bonne réponse !", "success");
+  } else {
+    options[choice].classList.add("bad");
+    options[state.currentCorrect].classList.add("good");
+    notify("❌ Mauvaise réponse", "error");
+  }
+
+  setTimeout(()=>{
+    state.qIndex++;
+    if(state.qIndex >= qcm.length){
+      notify("Chapitre terminé 🎉", "success");
+      home();
+    } else {
+      showQCM();
+    }
+  }, 800);
+}
+
+/* ================= XP SYSTEM ================= */
+
+function addXP(points){
+  state.xp += points;
+  if(state.xp >= state.level * 100){
+    state.level++;
+    notify("🔥 LEVEL UP !", "success");
+  }
+  localStorage.setItem("xp", state.xp);
+  localStorage.setItem("level", state.level);
+  updateXPBar();
+}
+
+function updateXPBar(){
+  const fill = document.getElementById("xpFill");
+  const xpLabel = document.getElementById("xpLabel");
+  const levelLabel = document.getElementById("levelLabel");
+  const percent = Math.min((state.xp % (state.level * 100)) / (state.level * 100) * 100, 100);
+  if(fill) fill.style.width = percent + "%";
+  if(xpLabel) xpLabel.innerHTML = "XP: " + state.xp;
+  if(levelLabel) levelLabel.innerHTML = "Niveau " + state.level;
+}
+
+/* ================= ESSAYS ================= */
+
+function getEssayProgress(){
+  return JSON.parse(localStorage.getItem("essayProgress")) || {};
+}
+
+function saveEssayProgress(title, content){
+
+  const progress = getEssayProgress();
+
+  progress[title] = {
+    content: content,
+    done: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+}
+
+function essayMenu(){
+
+  const essays = chapters["Chapitre 1"]?.essays || [];
+  const progress = getEssayProgress();
+
+  app.innerHTML = `
+  <div class="card">
+
+    <h2>✍️ Devoirs</h2>
+
+    ${essays.map((e,i)=>{
+
+      const done = progress[e.title];
+
+      return `
+      <button
+        onclick="startEssay(${i})"
+        style="
+          background:${done ? '#22c55e' : '#3b82f6'};
+        "
+      >
+        ${done ? '✅' : '📝'}
+        ${e.title}
+      </button>
+      `;
+    }).join("")}
+
+  <br><br>
+
+  <button onclick="home()">
+      ⬅️ Retour
+  </button>
+
+  </div>`;
+}
+
+function startEssay(i){
+
+  const essay = chapters["Chapitre 1"].essays[i];
+
+  state.essay = essay;
+  state.timer = essay.time;
+
+  clearInterval(state.interval);
+
+  state.interval = setInterval(()=>{
+
+    state.timer--;
+
+    if(state.timer <= 0){
+
+      clearInterval(state.interval);
+
+      autoSaveEssay();
+
+      notify("⏰ Temps écoulé !");
+    }
+
+    updateTimer();
+
+  },1000);
+
+  renderEssay();
+}
+
+function autoSaveEssay(){
+
+  const textarea = document.getElementById("essayText");
+
+  if(!textarea) return;
+
+  saveEssayProgress(
+    state.essay.title,
+    textarea.value
+  );
+}
+
+function liveSaveEssay(){
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+}
+
+function finishEssay(){
+
+  clearInterval(state.interval);
+
+  const text =
+    document.getElementById("essayText").value;
+
+  saveEssayProgress(
+    state.essay.title,
+    text
+  );
+
+  addXP(state.essay.xp);
+
+  notify("Devoir enregistré !");
+
+  essayMenu();
+}
+
+function resetEssay(){
+
+  const progress = getEssayProgress();
+
+  delete progress[state.essay.title];
+
+  localStorage.setItem(
+    "essayProgress",
+    JSON.stringify(progress)
+  );
+
+  renderEssay();
+}
+
+function updateTimer(){
+
+  const timer = document.getElementById("timer");
+  const fill = document.getElementById("fill");
+
+  const minutes =
+    Math.floor(state.timer / 60);
+
+  const seconds =
+    state.timer % 60;
+
+  const formatted =
+    `${minutes}:${seconds
+      .toString()
+      .padStart(2,"0")}`;
+
+  if(timer){
+    timer.innerHTML = `⏱️ ${formatted}`;
+  }
+
+  if(fill){
+    fill.style.width =
+      `${(state.timer/state.essay.time)*100}%`;
+  }
+}
+
+/* ================= ESSAY UI ================= */
+
+function renderEssay(){
+
+  const progress = getEssayProgress();
+
+  const oldAnswer =
+    progress[state.essay.title]?.content || "";
+
+  app.innerHTML = `
+
+  <div class="card">
+
+    <h3>${state.essay.title}</h3>
+
+    <div class="bar">
+      <div
+        class="fill"
+        id="fill"
+        style="
+          width:${(state.timer/state.essay.time)*100}%
+        ">
+      </div>
+    </div>
+
+    <p id="timer"></p>
+
+    <p>
+      ${state.essay.question}
+    </p>
+
+    <textarea
+      id="essayText"
+      placeholder="Rédige ta réponse..."
+      oninput="liveSaveEssay()"
+    >${oldAnswer}</textarea>
+
+    <button onclick="sendEssay()">
+      🤖 Corriger avec IA
+    </button>
+
+    <button onclick="finishEssay()">
+      Enregister le devoir
+    </button>
+
+    <button onclick="resetEssay()">
+       Refaire le devoir
+    </button>
+
+    <br><br><br>
+
+    <button onclick="essayMenu()">
+      ⬅️ Retour
+    </button>
+
+  </div>`;
+}
+
+/* ================= SEND IA ================= */
+
+function sendEssay(){
+
+  const text = document.getElementById("essayText").value;
+
+  if(!text.trim()){
+    alert("Écris quelque chose !");
+    return;
+  }
+
+  const prompt = `
+Corrige ce devoir :
+
+QUESTION:
+${state.essay.question}
+
+REPONSE:
+${text}
+
+Donne:
+- note /20
+- erreurs
+- correction
+`;
+
+  window.open("https://chatgpt.com/?q=" + encodeURIComponent(prompt));
+}
+
+  /* ================= MISSION COMMANDO ================= */
+
+function startMission(){
+  // Collecter tous les QCM de tous les chapitres
+  let allQCM = [];
+  Object.keys(chapters).forEach(ch => {
+    chapters[ch].qcm.forEach(q => {
+      allQCM.push({...q, chapter: ch});
+    });
+  });
+
+  // Mélanger et prendre 10
+  const picked = shuffle(allQCM).slice(0, 10);
+
+  state.mission = {
+    questions: picked,
+    index: 0,
+    score: 0,
+    timeLeft: 240, // 4 minutes
+    answered: 0
+  };
+
+  showMissionQCM();
+}
+
+function showMissionQCM(){
+  const m = state.mission;
+
+  // Timer global
+  clearInterval(state.missionTimer);
+  state.missionTimer = setInterval(()=>{
+    m.timeLeft--;
+    const t = document.getElementById("missionClock");
+    if(t){
+      const min = Math.floor(m.timeLeft / 60);
+      const sec = m.timeLeft % 60;
+      t.innerHTML = `⏱ ${min}:${sec.toString().padStart(2,"0")}`;
+      if(m.timeLeft <= 30) t.style.color = "#ef4444";
+    }
+    if(m.timeLeft <= 0){
+      clearInterval(state.missionTimer);
+      showMissionResult();
+    }
+  }, 1000);
+
+  renderMissionQuestion();
+}
+
+function renderMissionQuestion(){
+  const m = state.mission;
+  const q = m.questions[m.index];
+  const shuffled = shuffle(q.options.map((text, index) => ({ text, index })));
+  m.currentCorrect = shuffled.findIndex(o => o.index === q.answer);
+
+  const min = Math.floor(m.timeLeft / 60);
+  const sec = m.timeLeft % 60;
+
+  app.innerHTML = `
+  <div class="card">
+    <div class="mission-timer" id="missionClock">⏱ ${min}:${sec.toString().padStart(2,"0")}</div>
+    <div class="mission-progress">Question ${m.index + 1} / 10 &nbsp;|&nbsp; ✅ ${m.score} bonne(s)</div>
+    <p><strong>Q${m.index + 1} :</strong> ${q.question}</p>
+    ${shuffled.map((o,i)=>`
+      <div class="option" id="mopt${i}" onclick="answerMission(${i})">${o.text}</div>
+    `).join("")}
+    <button class="quit-btn" onclick="quitMission()" style="margin-top:15px">🚪 Abandonner</button>
+  </div>`;
+}
+
+function answerMission(choice){
+  const m = state.mission;
+  const options = document.querySelectorAll(".option");
+
+  // Désactiver les clics
+  options.forEach(o => o.onclick = null);
+
+  m.answered++;
+
+  if(choice === m.currentCorrect){
+    options[choice].classList.add("good");
+    m.score++;
+  } else {
+    options[choice].classList.add("bad");
+    options[m.currentCorrect].classList.add("good");
+  }
+
+  setTimeout(()=>{
+    m.index++;
+    if(m.index >= 10){
+      clearInterval(state.missionTimer);
+      showMissionResult();
+    } else {
+      renderMissionQuestion();
+    }
+  }, 1000);
+}
+
+function showMissionResult(){
+  clearInterval(state.missionTimer);
+  const m = state.mission;
+  const note = m.answered === 0 ? 0 : Math.round((m.score / m.answered) * 10);
+  const noteClass = note >= 7 ? "score-good" : note >= 5 ? "score-mid" : "score-bad";
+  const emoji = note >= 7 ? "🏆" : note >= 5 ? "😅" : "💀";
+
+  addXP(note * 10);
+
+  app.innerHTML = `
+  <div class="card score-card">
+    <h2>⚡ Mission Commando</h2>
+    <div class="score-note ${noteClass}">${emoji} ${note}/10</div>
+    <p>${m.score} bonne(s) réponse(s) sur ${m.answered} question(s) répondues</p>
+    <p style="color:#94a3b8;font-size:13px">+${note * 10} XP gagnés</p>
+    <button onclick="startMission()">🔄 Rejouer</button>
+    <button class="quit-btn" onclick="home()">🏠 Accueil</button>
+  </div>`;
+}
+
+function quitMission(){
+  clearInterval(state.missionTimer);
+  notify("Mission abandonnée", "error");
+  home();
+}
+  
+/* ================= INIT ================= */
+
+home();
+
+function notify(message, type="info", duration=3500){
+
+  const container = document.getElementById("notif-container");
+
+  const div = document.createElement("div");
+  div.className = `notif ${type}`;
+  div.innerText = message;
+
+  container.appendChild(div);
+
+  setTimeout(()=>{
+    div.remove();
+  }, duration);
+}
+
+</script>
+
+</body>
+</html>

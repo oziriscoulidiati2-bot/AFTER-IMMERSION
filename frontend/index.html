@@ -471,30 +471,34 @@ document.querySelectorAll('.carousel').forEach(c => {
 })();
 
 /* ── Filtre cours ── */
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const f = btn.dataset.filter;
-    const cards = document.querySelectorAll('#cours-grid .cours-card');
-    let visible = 0;
-    cards.forEach(card => {
-      const show = f === 'tous' || card.dataset.cat === f;
-      card.style.display = show ? 'flex' : 'none';
-      if (show) visible++;
+document.addEventListener('DOMContentLoaded', () => {
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      const cards = document.querySelectorAll('#cours-grid .cours-card');
+      let visible = 0;
+      cards.forEach(card => {
+        const show = f === 'tous' || card.dataset.cat === f;
+        card.style.display = show ? 'flex' : 'none';
+        if (show) visible++;
+      });
+      let noRes = document.getElementById('no-result');
+      if (!noRes) {
+        noRes = document.createElement('p');
+        noRes.id = 'no-result';
+        noRes.className = 'no-result';
+        noRes.textContent = 'Aucun cours trouvé.';
+        document.getElementById('cours-grid').appendChild(noRes);
+      }
+      noRes.style.display = visible === 0 ? 'block' : 'none';
     });
-    // show/hide empty state
-    let noRes = document.getElementById('no-result');
-    if (!noRes) {
-      noRes = document.createElement('p');
-      noRes.id = 'no-result';
-      noRes.className = 'no-result';
-      noRes.textContent = 'Aucun cours trouvé.';
-      document.getElementById('cours-grid').appendChild(noRes);
-    }
-    noRes.style.display = visible === 0 ? 'block' : 'none';
   });
+
 });
+
 
 /* ── XP counter ── */
 let xp = 0, target = 1240;
